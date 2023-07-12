@@ -102,7 +102,7 @@ impl App<'_> {
             .set_count(cols * rows)
             .set_rgb(128, 128, 255)            
         ;
-        //self.paint_grid(kw, cols, rows);
+        self.paint_grid(kw, cols, rows);
     }
 
     fn paint_grid(&mut self, kw: KolorWheel, cols: u32, rows: u32) {
