@@ -88,6 +88,7 @@ impl App<'_> {
 
         let kw = KolorWheel::new()
             .set_count(cols * rows)
+            .set_color32(egui::Color32::DARK_BLUE);
         ;
         self.paint_grid(kw, cols, rows);
     }
@@ -99,6 +100,7 @@ impl App<'_> {
         
         let kw = KolorWheel::new()
             .set_count(cols * rows)
+            .set_rgb_u8(128, 128, 255)
         ;
         self.paint_grid(kw, cols, rows);
     }
