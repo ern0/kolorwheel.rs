@@ -1,5 +1,8 @@
-pub fn about() {
-    println!("KolorWheel.rs {}", env!("CARGO_PKG_VERSION"));
+#![allow(unused)]
+use egui::Color32;
+
+struct KolorWheel {
+    base_color: Color32
 }
 
 #[cfg(test)]
@@ -8,7 +11,6 @@ mod tests {
 
     #[test]
     fn does_nothing() {
-        about();
         assert_eq!(2, 2);
     }
 }

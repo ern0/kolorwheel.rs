@@ -1,20 +1,19 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![allow(unused)]
 
 use eframe::egui;
 extern crate kolorwheel;
 
 fn main() -> Result<(), eframe::Error> {
 
-    let size_some_vec2 = Some(egui::vec2(320.0, 256.0));
-    let padding = 0.2;
+    let padding_percent = 30;
 
     let options = eframe::NativeOptions {
-        initial_window_size: size_some_vec2,
-        min_window_size: size_some_vec2,
+        initial_window_size: Some(egui::vec2(480.0, 320.0)),
+        min_window_size: Some(egui::vec2(320.0, 256.0)),
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
+        initial_window_pos: Some(egui::pos2(1800.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
 
@@ -22,7 +21,7 @@ fn main() -> Result<(), eframe::Error> {
 
     eframe::run_simple_native("KolorWheel.rs", options, move |ctx, _frame| {
         egui::CentralPanel::default().show(ctx, |ui| {
-            let mut app = App::new(ui, active_panel.clone(), padding);
+            let mut app = App::new(ui, active_panel.clone(), padding_percent);
             app.show_panel();
             active_panel = app.get_active_panel();
         });
@@ -43,7 +42,7 @@ enum PanelSelector {
 
 impl App<'_> {
 
-    pub fn new(ui: &mut egui::Ui, active_panel: PanelSelector, padding: f32) -> App {
+    pub fn new(ui: &mut egui::Ui, active_panel: PanelSelector, padding_percent: u32) -> App {
 
         let width = ui.available_width();
         let height = ui.available_height();
@@ -51,7 +50,7 @@ impl App<'_> {
         let window = Window::new(
             width, 
             height, 
-            padding, 
+            padding_percent, 
             rounding,
         );
 
@@ -91,38 +90,45 @@ impl App<'_> {
 
         self.ui.label("panel 2");
         self.ui.label("blah blah blah\n blah blah");
+        
         self.paint_grid(4, 4);
     }
 
     fn paint_grid(&mut self, cols: u32, rows: u32) {
 
-        let cell = Cell::new(&self.ui, &self.window, cols, rows);
-        let remaining_height = self.ui.available_height();
+        
+        self.window.update_dims(
+            self.ui.available_width() as u32, 
+            self.ui.available_height() as u32,
+        );
 
         let (_, painter) = self.ui.allocate_painter(
             egui::Vec2::new(
-                self.window.width as f32, 
-                remaining_height,
+                self.window.actual_width as f32, 
+                self.window.actual_height as f32,
             ),
             egui::Sense::hover(),
         );
 
+        let cell = Cell::new(&self.window, cols, rows);
+
         let mut col = 0;
         let mut x = self.window.left + cell.window_centering_horizontal;
-        let mut y = self.window.top + self.window.height - (remaining_height as u32);
+        let header_height = self.window.original_height - self.window.actual_height;
+        let mut y = self.window.top + header_height;
 
         let fill = egui::Color32::BLUE;
 
-        for index in 0..95 {
+        for _index in 0..95 {
 
             let rect = egui::Rect {
                 min: egui::Pos2{
-                    x: (x + cell.padding_horizontal) as f32,
-                    y: (y + cell.padding_vertical) as f32,
+                    x: (x + cell.cell_padding) as f32,
+                    y: (y + cell.cell_padding) as f32,
                 },
                 max: egui::Pos2 { 
-                    x: (x + cell.padding_horizontal + cell.padded_width) as f32,
-                    y: (y + cell.padding_vertical + cell.padded_height) as f32,
+                    x: (x + cell.cell_padding + cell.cell_padded_width) as f32,
+                    y: (y + cell.cell_padding + cell.cell_padded_height) as f32,
                 },
             };
 
@@ -159,9 +165,10 @@ impl App<'_> {
 }
 
 struct Window {
-    width: u32,
-    height: u32,
-    cell_padding: u32,
+    original_height: u32,
+    actual_width: u32,
+    actual_height: u32,
+    cell_padding_percent: u32,
     rounding: egui::Rounding,
     left: u32,
     top: u32,
@@ -169,7 +176,7 @@ struct Window {
 
 impl Window {
 
-    pub fn new(width: f32, height: f32, cell_padding: f32, rounding: f32) -> Window {
+    pub fn new(width: f32, height: f32, cell_padding_percent: u32, rounding: f32) -> Window {
 
         let egui_rounding = egui::Rounding {
             nw: rounding, 
@@ -179,71 +186,75 @@ impl Window {
         };
 
         Window { 
-            width: width as u32, 
-            height: height as u32, 
-            cell_padding: cell_padding as u32, 
+            original_height: height as u32, 
+            actual_width: width as u32, 
+            actual_height: height as u32, 
+            cell_padding_percent, 
             rounding: egui_rounding,
-            left: 6,  // magic
-            top: 9,   // magic
+            left: 6,  // magic value
+            top: 9,   // magic value
         }
     }  
+
+    pub fn update_dims(&mut self, width: u32, height: u32) {
+        self.actual_width = width;
+        self.actual_height = height;
+    }
+
 }
 struct Cell {
     columns: u32,
     rows: u32,
-    window_corrected_width: u32,
+    _window_corrected_width: u32,
     window_centering_horizontal: u32,
-    window_corrected_height: u32,
+    _window_corrected_height: u32,  // used by tests
     cell_width: u32,
     cell_height: u32,
-    padding_horizontal: u32,
-    padding_vertical: u32,
-    padded_width: u32,
-    padded_height: u32,
+    cell_padding: u32,
+    cell_padded_width: u32,
+    cell_padded_height: u32,
 }
 
 impl Cell {
 
-    pub fn new(ui: &egui::Ui, window: &Window, columns: u32, rows: u32) -> Cell {
+    pub fn new(window: &Window, columns: u32, rows: u32) -> Cell {
 
-        let window_actual_width = ui.available_width() as u32;
-        let cell_width = window_actual_width / columns;
+        let cell_width = window.actual_width / columns;
         let window_corrected_width = cell_width * columns;
-        let window_padding_horizontal = (window_actual_width - window_corrected_width) / 2;
-        let mut padding_horizontal = (cell_width * 30) / 200;
+        let window_padding_horizontal = (window.actual_width - window_corrected_width) / 2;
+        let mut padding_horizontal = (cell_width * window.cell_padding_percent) / 200;
         if padding_horizontal < 2 { 
             padding_horizontal = 2;
         }
 
-        let window_actual_height = ui.available_height() as u32;
-        let cell_height = window_actual_height / rows;
+        let cell_height = window.actual_height / rows;
         let window_corrected_height = cell_height * rows;
-        let mut padding_vertical = (cell_height * 30) / 200;
+        let mut padding_vertical = (cell_height * window.cell_padding_percent) / 200;
         if padding_vertical < 2 {
             padding_vertical = 2;
         }
 
-        if padding_horizontal > padding_vertical {
-            padding_horizontal = padding_vertical;
-        }
-        if padding_vertical > padding_horizontal {
-            padding_vertical = padding_horizontal;
-        }
-        let padded_width = cell_width - (padding_horizontal * 2);
-        let padded_height = cell_height - (padding_vertical * 2);
+        let cell_padding = {
+            if padding_horizontal > padding_vertical {
+                padding_vertical
+            } else {
+                padding_horizontal
+            }
+        };
+        let cell_padded_width = cell_width - (cell_padding * 2);
+        let cell_padded_height = cell_height - (cell_padding * 2);
 
         Cell {
             columns,
             rows,
-            window_corrected_width,
+            _window_corrected_width: window_corrected_width, 
             window_centering_horizontal: window_padding_horizontal,
-            window_corrected_height,
+            _window_corrected_height: window_corrected_height,
             cell_width,
             cell_height,
-            padding_horizontal,
-            padding_vertical,
-            padded_width,
-            padded_height,
+            cell_padding,
+            cell_padded_width,
+            cell_padded_height,
         }
     }
 }
@@ -255,62 +266,62 @@ mod tests {
     #[test]    
     fn test_window_corrected_width_exact() {
 
-        let window = Window::new(320.0, 200.0, 0.0, 0.0);
+        let window = Window::new(320.0, 200.0, 0, 0.0);
         let cell = Cell::new(&window, 10, 10);
 
         assert_eq!(cell.cell_width, 32);
-        assert_eq!(cell.window_corrected_width, 320);
+        assert_eq!(cell._window_corrected_width, 320);
         assert_eq!(cell.window_centering_horizontal, 0);
     }
 
     #[test]
     fn test_window_corrected_width_round() {
 
-        let window = Window::new(324.0, 200.0, 0.0, 0.0);
+        let window = Window::new(324.0, 200.0, 0, 0.0);
         let cell = Cell::new(&window, 10, 10);
 
         assert_eq!(cell.cell_width, 32);
-        assert_eq!(cell.window_corrected_width, 320);
+        assert_eq!(cell._window_corrected_width, 320);
         assert_eq!(cell.window_centering_horizontal, 2);
     }
 
     #[test]
     fn test_window_horizontal_padding() {
 
-        let window = Window::new(320.0, 200.0, 0.0, 0.0);
+        let window = Window::new(320.0, 200.0, 0, 0.0);
         let cell = Cell::new(&window, 10, 10);
 
-        let sum = cell.padded_width + (cell.padding_horizontal * 2);
+        let sum = cell.cell_padded_width + (cell.cell_padding * 2);
         assert_eq!(cell.cell_width, sum);
     }
 
     #[test]    
     fn test_window_corrected_height_exact() {
 
-        let window = Window::new(320.0, 200.0, 0.0, 0.0);
+        let window = Window::new(320.0, 200.0, 0, 0.0);
         let cell = Cell::new(&window, 10, 10);
 
         assert_eq!(cell.cell_height, 20);
-        assert_eq!(cell.window_corrected_height, 200);
+        assert_eq!(cell._window_corrected_height, 200);
     }
 
     #[test]
     fn test_window_corrected_height_round() {
 
-        let window = Window::new(320.0, 202.0, 0.0, 0.0);
+        let window = Window::new(320.0, 202.0, 0, 0.0);
         let cell = Cell::new(&window, 10, 10);
 
         assert_eq!(cell.cell_height, 20);
-        assert_eq!(cell.window_corrected_height, 200);
+        assert_eq!(cell._window_corrected_height, 200);
     }
 
     #[test]
     fn test_window_vertical_padding() {
 
-        let window = Window::new(320.0, 200.0, 0.0, 0.0);
+        let window = Window::new(320.0, 200.0, 0, 0.0);
         let cell = Cell::new(&window, 10, 10);
 
-        let sum = cell.padded_height + (cell.padding_vertical * 2);
+        let sum = cell.cell_padded_height + (cell.cell_padding * 2);
         assert_eq!(cell.cell_height, sum);
     }
 
