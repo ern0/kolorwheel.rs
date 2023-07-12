@@ -7,7 +7,6 @@ extern crate kolorwheel;
 fn main() -> Result<(), eframe::Error> {
 
     let size_some_vec2 = Some(egui::vec2(320.0, 256.0));
-    let columns = 8;
     let padding = 0.2;
 
     let options = eframe::NativeOptions {
@@ -22,24 +21,32 @@ fn main() -> Result<(), eframe::Error> {
     let mut active_panel = PanelSelector::Panel1;
 
     eframe::run_simple_native("KolorWheel.rs", options, move |ctx, _frame| {
-
         egui::CentralPanel::default().show(ctx, |ui| {
-            let mut app_window = AppWindow::new(ui, columns, padding, active_panel.clone());
-            app_window.show_panel();
-            active_panel = app_window.get_active_panel();
+            let mut app = App::new(ui, active_panel.clone(), padding);
+            app.show_panel();
+            active_panel = app.get_active_panel();
         });
     })
 
 }
 
-struct AppWindow<'u> {
+struct App<'u> {
     ui: &'u mut egui::Ui,
+    active_panel: PanelSelector,
+    
+    window: Window;
+    dim: Box;
+}
+
+Struct Window {
     width: f32,
     height: f32,
-    columns: u32,
     padding: f32,
-    active_panel: PanelSelector,
     rounding: egui::Rounding,
+}
+
+struct Box {
+
 }
 
 #[derive(Clone, PartialEq)]
@@ -47,9 +54,9 @@ enum PanelSelector {
     Panel1, Panel2,
 }
 
-impl AppWindow<'_> {
+impl App<'_> {
 
-    pub fn new(ui: &mut egui::Ui, columns: u32, padding: f32, active_panel: PanelSelector) -> AppWindow {
+    pub fn new(ui: &mut egui::Ui, active_panel: PanelSelector, padding: f32) -> AppWindow {
 
         let width = ui.available_width();
         let height = ui.available_height();
@@ -64,15 +71,13 @@ impl AppWindow<'_> {
 
         AppWindow { 
             ui, 
-            width, 
-            height, 
-            columns, 
-            padding, 
             active_panel, 
+            width, 
+            height,  
+            padding, 
             rounding,
         }
     }
-
 
     fn get_active_panel(&self) -> PanelSelector {
         self.active_panel.clone()
@@ -92,6 +97,15 @@ impl AppWindow<'_> {
             PanelSelector::Panel2 => self.show_panel2(),
         }
 
+    }
+
+    fn show_panel1(&mut self) {
+
+        self.ui.label("panel 1");
+        self.calc(8);
+
+        self.ui.label(format!("{}", self.ui.available_height()));
+
         let rect = egui::Rect {
             min: egui::Pos2{ x: 50.0, y: 50.0 },
             max: egui::Pos2{ x: 100.0, y: 100.0 },
@@ -101,13 +115,14 @@ impl AppWindow<'_> {
 
     }
 
-    fn show_panel1(&mut self) {
-        self.ui.label("panel 1");
-        self.ui.label(format!("{}", self.ui.available_height()));
+    fn show_panel2(&mut self) {
+
+        self.ui.label("panel 2");
+        self.calc(10);
+
     }
 
-    fn show_panel2(&mut self) {
-        self.ui.label("panel 2");
+    fn calc(&mut self, columns: u32) {
     }
 
     fn show_box(&mut self, rect: egui::Rect, fill: egui::Color32) {
