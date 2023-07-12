@@ -98,8 +98,8 @@ impl App<'_> {
         );
 
         let mut col = 0;
-        let mut x = cell.window_centering_horizontal;
-        let mut y = self.window.height - (remaining_height as u32);
+        let mut x = self.window.left + cell.window_centering_horizontal;
+        let mut y = self.window.top + self.window.height - (remaining_height as u32);
 
         let fill = egui::Color32::BLUE;
 
@@ -123,7 +123,7 @@ impl App<'_> {
             if col == cell.columns {
                 col = 0;
                 y += cell.cell_height;
-                x = cell.window_centering_horizontal;
+                x = self.window.left + cell.window_centering_horizontal;
             }
         }        
     }
@@ -158,6 +158,8 @@ struct Window {
     height: u32,
     cell_padding: u32,
     rounding: egui::Rounding,
+    left: u32,
+    top: u32,
 }
 
 impl Window {
@@ -175,7 +177,9 @@ impl Window {
             width: width as u32, 
             height: height as u32, 
             cell_padding: cell_padding as u32, 
-            rounding: egui_rounding 
+            rounding: egui_rounding,
+            left: 6,  // magic
+            top: 9,   // magic
         }
     }  
 }
@@ -201,19 +205,26 @@ impl Cell {
         let cell_width = window_actual_width / columns;
         let window_corrected_width = cell_width * columns;
         let window_padding_horizontal = (window_actual_width - window_corrected_width) / 2;
-        let mut padding_horizontal = (cell_width * 10) / 200;
-        if padding_horizontal < 1 { 
-            padding_horizontal = 1;
+        let mut padding_horizontal = (cell_width * 30) / 200;
+        if padding_horizontal < 2 { 
+            padding_horizontal = 2;
         }
-        let padded_width = cell_width - (padding_horizontal * 2);
 
         let window_actual_height = ui.available_height() as u32;
         let cell_height = window_actual_height / rows;
         let window_corrected_height = cell_height * rows;
-        let mut padding_vertical = (cell_height * 10) / 200;
-        if padding_vertical < 1 {
-            padding_vertical = 1;
+        let mut padding_vertical = (cell_height * 30) / 200;
+        if padding_vertical < 2 {
+            padding_vertical = 2;
         }
+
+        if padding_horizontal > padding_vertical {
+            padding_horizontal = padding_vertical;
+        }
+        if padding_vertical > padding_horizontal {
+            padding_vertical = padding_horizontal;
+        }
+        let padded_width = cell_width - (padding_horizontal * 2);
         let padded_height = cell_height - (padding_vertical * 2);
 
         Cell {
