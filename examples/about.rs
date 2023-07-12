@@ -63,14 +63,20 @@ impl AppWindow<'_> {
 
     fn show_panel(&mut self) {
         
-        self.ui.selectable_value(&mut self.active_panel, PanelSelector::Panel1, "Panel1");
-        self.ui.selectable_value(&mut self.active_panel, PanelSelector::Panel2, "Panel2");
+        self.ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
 
-        self.ui.label(format!(
-            "{}x{}", 
-            self.width, 
-            self.height,
-        ));
+            ui.selectable_value(&mut self.active_panel, PanelSelector::Panel1, "Panel1");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::Panel2, "Panel2");
+
+            ui.label(format!(
+                "{}x{}", 
+                self.width, 
+                self.height,
+            ));
+
+        });        
+
+        self.ui.separator();
 
         match self.active_panel {
             PanelSelector::Panel1 => self.show_panel1(),
