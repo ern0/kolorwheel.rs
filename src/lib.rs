@@ -10,13 +10,28 @@ impl KolorWheel {
 
     pub fn new() -> KolorWheel {
         KolorWheel {
-            base_color: Color32::BLACK,
+            base_color: Color32::DEBUG_COLOR,
             count: 1,
         }
     }
 
-    pub fn set_count(&self, count: u32) -> &KolorWheel {
-        return &self;
+    pub fn set_count(mut self, count: u32) -> KolorWheel {
+        self.count = count;
+        return self;
+    }
+}
+
+impl Iterator for KolorWheel {
+    type Item = Color32;
+
+    fn next(&mut self) -> Option<Color32>{
+
+        if self.count == 0 {
+            return None;
+        }
+        
+        self.count -= 1;
+        return Some(self.base_color);
     }
 }
 

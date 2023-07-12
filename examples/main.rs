@@ -86,22 +86,25 @@ impl App<'_> {
 
     fn paint_panel1(&mut self, cols: u32, rows: u32) {
 
-        let kw = KolorWheel::new().set_count(cols * rows);
-
-        self.paint_grid(cols, rows);
+        let kw = KolorWheel::new()
+            .set_count(cols * rows)
+        ;
+        self.paint_grid(kw, cols, rows);
     }
 
     fn paint_panel2(&mut self, cols: u32, rows: u32) {
 
         self.ui.label("panel 2");
-        self.ui.label("blah blah blah\n blah blah");
+        self.ui.label("blah blah blah\nblah blah");
         
-        self.paint_grid(cols, rows);
+        let kw = KolorWheel::new()
+            .set_count(cols * rows)
+        ;
+        self.paint_grid(kw, cols, rows);
     }
 
-    fn paint_grid(&mut self, cols: u32, rows: u32) {
+    fn paint_grid(&mut self, kw: KolorWheel, cols: u32, rows: u32) {
 
-        
         self.window.update_dims(
             self.ui.available_width() as u32, 
             self.ui.available_height() as u32,
@@ -122,9 +125,8 @@ impl App<'_> {
         let header_height = self.window.original_height - self.window.actual_height;
         let mut y = self.window.top + header_height;
 
-        let fill = egui::Color32::BLUE;
 
-        for _index in 0..95 {
+        for fill in kw {
 
             let rect = egui::Rect {
                 min: egui::Pos2{
