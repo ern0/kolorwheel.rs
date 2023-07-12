@@ -35,7 +35,7 @@ struct App<'u> {
     active_panel: PanelSelector,
     
     window: Window,
-    cell_opt: Option<Cell>,
+    opt_cell: Option<Cell>,
 }
 
 #[derive(Clone, PartialEq)]
@@ -61,7 +61,7 @@ impl App<'_> {
             ui, 
             active_panel, 
             window,
-            cell_opt: None,
+            opt_cell: None,
         }
     }
 
@@ -88,7 +88,7 @@ impl App<'_> {
     fn show_panel1(&mut self) {
 
         self.ui.label("panel 1");
-        self.cell_opt = Some(Cell::new(&self.window, 10));
+        self.opt_cell = Some(Cell::new(&self.window, 10));
 
         self.ui.label(format!("{}", self.ui.available_height()));
 
@@ -104,7 +104,7 @@ impl App<'_> {
     fn show_panel2(&mut self) {
 
         self.ui.label("panel 2");
-        self.cell_opt = Some(Cell::new(&self.window, 10));
+        self.opt_cell = Some(Cell::new(&self.window, 10));
     }
 
     fn show_box(&mut self, rect: egui::Rect, fill: egui::Color32) {
@@ -159,12 +159,12 @@ impl Window {
             padding: padding as u32, 
             rounding: egui_rounding 
         }
-
     }  
 }
 struct Cell {
-    width: u32,
-    height: u32,
+    window_corrected_width: u32,
+    cell_width: u32,
+    cell_height: u32,
     padding_top: u32,
     padding_bottom: u32,
     padding_left: u32,
@@ -177,9 +177,21 @@ impl Cell {
 
     pub fn new(window: &Window, columns: u32) -> Cell {
 
+        let cell_width = window.width / columns;
+        let window_corrected_width = cell_width * columns;
+        println!(
+            "cw {} = ww {} / cols {} -> corr {}",
+            cell_width,
+            window.width,
+            columns,
+            window_corrected_width,
+        );
+
+
         Cell {
-            width: 0,
-            height: 0,
+            window_corrected_width,
+            cell_width,
+            cell_height: 0,
             padding_top: 0,
             padding_bottom: 0,
             padding_left: 0,
@@ -187,5 +199,30 @@ impl Cell {
             box_width: 0,
             box_height: 0,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]    
+    fn test_window_corrected_width_exact() {
+
+        let window = Window::new(320.0, 200.0, 0.0, 0.0);
+        let cell = Cell::new(&window, 10);
+
+        assert_eq!(cell.cell_width, 32);
+        assert_eq!(cell.window_corrected_width, 320);
+    }
+
+    #[test]
+    fn test_window_corrected_width_round() {
+
+        let window = Window::new(324.0, 200.0, 0.0, 0.0);
+        let cell = Cell::new(&window, 10);
+        
+        assert_eq!(cell.cell_width, 32);
+        assert_eq!(cell.window_corrected_width, 320);
     }
 }
