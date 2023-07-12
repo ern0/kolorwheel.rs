@@ -86,6 +86,10 @@ impl KolorWheel {
 	    let g = Self::hue_to_rgb(p, q, h);
 		let b = Self::hue_to_rgb(p, q, h - (1.0/3.0));
 
+        let r = (r * 100.0).round() / 100.0;
+        let g = (g * 100.0).round() / 100.0;
+        let b = (b * 100.0).round() / 100.0;
+
         self.r = (r * 255.0) as u8;
         self.g = (g * 255.0) as u8;
         self.b = (b * 255.0) as u8;
@@ -156,8 +160,6 @@ impl KolorWheel {
 						
 		}	
 
-        println!("{} {} {}", self.h, self.s, self.l);
-
 		self.h = 360.0 * self.h;
 		self.s = 100.0 * self.s;
 		self.l = 100.0 * self.l;    
@@ -193,12 +195,44 @@ mod tests {
 
     #[test]
     fn hsl_to_rgb_black() {
-
-        let mut kw = KolorWheel::new()
-            .set_hsl(0.0, 0.0, 0.0)
-        ;
-
-        let r = kw.r;
-        
+        let kw = KolorWheel::new().set_hsl(0.0, 0.0, 0.0);
+        assert_eq!((kw.r, kw.g, kw.b,), (0, 0, 0));     
     }
+
+    #[test]
+    fn hsl_to_rgb_red() {
+        let kw = KolorWheel::new().set_hsl(0.0, 100.0, 50.0);
+        assert_eq!((kw.r, kw.g, kw.b,), (255, 0, 0));     
+    }
+
+    #[test]
+    fn hsl_to_rgb_green() {
+        let kw = KolorWheel::new().set_hsl(120.0, 100.0, 50.0);
+        assert_eq!((kw.r, kw.g, kw.b,), (0, 255, 0));     
+    }
+
+    #[test]
+    fn hsl_to_rgb_cyan() {
+        let kw = KolorWheel::new().set_hsl(180.0, 100.0, 50.0);
+        assert_eq!((kw.r, kw.g, kw.b,), (0, 255, 255));     
+    }
+
+    #[test]
+    fn hsl_to_rgb_blue() {
+        let kw = KolorWheel::new().set_hsl(240.0, 100.0, 50.0);
+        assert_eq!((kw.r, kw.g, kw.b,), (0, 0, 255));     
+    }
+
+    #[test]
+    fn hsl_to_rgb_overflow_cyan() {
+        let kw = KolorWheel::new().set_hsl(360.0 + 180.0, 100.0, 50.0);
+        assert_eq!((kw.r, kw.g, kw.b,), (0, 255, 255));     
+    }
+
+    #[test]
+    fn hsl_to_rgb_underflow_blue() {
+        let kw = KolorWheel::new().set_hsl(-120.0, 100.0, 50.0);
+        assert_eq!((kw.r, kw.g, kw.b,), (0, 0, 255));     
+    }
+
 }
