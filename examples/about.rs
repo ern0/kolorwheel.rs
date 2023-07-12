@@ -1,7 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![allow(unused_variables)]
 
 use eframe::egui;
-
 extern crate kolorwheel;
 
 fn main() -> Result<(), eframe::Error> {
@@ -11,27 +11,46 @@ fn main() -> Result<(), eframe::Error> {
         ..Default::default()
     };
 
-    let mut name = "Arthur".to_owned();
-    let mut age = 42;
-
     eframe::run_simple_native("KolorWheel.rs", options, move |ctx, _frame| {
         egui::CentralPanel::default().show(ctx, |ui| {
-            panel(ui, &mut name, &mut age);
+            ui.heading("KolorWheel.rs");
+            panel(ui);
         });
     })
 }
 
-fn panel(ui: &mut egui::Ui, name: &mut String, age: &mut i32) {
+fn panel(ui: &mut egui::Ui) {
 
-    ui.heading("KolorWheel.rs");
-    ui.horizontal(|ui| {
-        let name_label = ui.label("Your name: ");
-        ui.text_edit_singleline(name).labelled_by(name_label.id);
-    });
-    ui.add(egui::Slider::new(age, 0..=120).text("age"));
-    if ui.button("Click each year").clicked() {
-        *age += 1;
-    }
-    ui.label(format!("Hello '{name}', age {age}"));
+    let (_, painter) = ui.allocate_painter(
+        egui::Vec2::new(
+            ui.available_width(), 
+            ui.available_height(),
+        ),
+        egui::Sense::hover(),
+    );
+
+    let rect = egui::Rect {
+        min: egui::Pos2{ x: 50.0, y: 50.0 },
+        max: egui::Pos2{ x: 100.0, y: 100.0 },
+    };
+
+    let uniform_rounding = 4.0;
+    let rounding = egui::Rounding {
+        nw: uniform_rounding, 
+        ne: uniform_rounding,
+        sw: uniform_rounding,
+        se: uniform_rounding,
+    };
+
+    let fill = egui::Color32::BLUE;
+
+    let stroke = egui::epaint::Stroke{
+        width: uniform_rounding,
+        color: fill,
+    };
+
+    let rect_shape = egui::epaint::RectShape { rect, rounding, fill, stroke };
+    let rectangle = egui::Shape::Rect(rect_shape);
+    painter.add(rectangle);
 
 }
