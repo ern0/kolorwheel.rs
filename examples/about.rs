@@ -6,26 +6,30 @@ extern crate kolorwheel;
 
 fn main() -> Result<(), eframe::Error> {
 
-    let initial_size_vec2 = egui::vec2(320.0, 256.0);
+    let size_some_vec2 = Some(egui::vec2(320.0, 256.0));
     let columns = 8;
     let padding = 0.2;
 
     let options = eframe::NativeOptions {
-        initial_window_size: Some(initial_size_vec2),
+        initial_window_size: size_some_vec2,
+        min_window_size: size_some_vec2,
+        icon_data: None,
+        follow_system_theme: true,
+        vsync: true,
         ..Default::default()
     };
+
+    let mut active_panel = PanelSelector::Unselected;
 
     eframe::run_simple_native("KolorWheel.rs", options, move |ctx, _frame| {
 
         egui::CentralPanel::default().show(ctx, |ui| {
-
-        let width = ui.available_width();
-        let height = ui.available_height();
-
-        let mut app_window = AppWindow::new(ui, width, height, columns, padding);
+            let mut app_window = AppWindow::new(ui, columns, padding, active_panel.clone());
             app_window.show_panel();
+            active_panel = app_window.get_active_panel();
         });
     })
+
 }
 
 struct AppWindow<'u> {
@@ -34,17 +38,57 @@ struct AppWindow<'u> {
     height: f32,
     columns: u32,
     padding: f32,
+    active_panel: PanelSelector,
+}
+
+#[derive(Clone)]
+enum PanelSelector {
+    Unselected, Panel1, Panel2,
 }
 
 impl AppWindow<'_> {
 
-    pub fn new(ui: &mut egui::Ui, width: f32, height: f32, columns: u32, padding: f32) -> AppWindow {
-        AppWindow { ui, width, height, columns, padding }
+    pub fn new(ui: &mut egui::Ui, columns: u32, padding: f32, active_panel: PanelSelector) -> AppWindow {
+
+        let width = ui.available_width();
+        let height = ui.available_height();
+
+        AppWindow { ui, width, height, columns, padding, active_panel }
+    }
+
+
+    fn get_active_panel(&self) -> PanelSelector {
+        self.active_panel.clone()
     }
 
     fn show_panel(&mut self) {
+        
+        if self.ui.selectable_label(
+            if let PanelSelector::Panel1 = self.active_panel {true} else {false},
+            "P1",
+        ).clicked() {
+            self.active_panel = PanelSelector::Panel1;
+        }
 
-        self.ui.label(format!("{}x{}", self.width, self.height));
+        if self.ui.selectable_label(
+            if let PanelSelector::Panel2 = self.active_panel {true} else {false},
+            "P2"
+        ).clicked() {
+            self.active_panel = PanelSelector::Panel2;
+        }
+
+        if let PanelSelector::Unselected = self.active_panel {} else {
+            self.ui.label(format!(
+                "{}x{} - {}", 
+                self.width, 
+                self.height,
+                match self.active_panel {
+                    PanelSelector::Unselected => "unselected",
+                    PanelSelector::Panel1 => "p1",
+                    PanelSelector::Panel2 => "p2",
+                }
+            ));
+        }
 
         let rect = egui::Rect {
             min: egui::Pos2{ x: 50.0, y: 50.0 },
