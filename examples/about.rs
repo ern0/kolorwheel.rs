@@ -41,7 +41,7 @@ struct AppWindow<'u> {
     active_panel: PanelSelector,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 enum PanelSelector {
     Unselected, Panel1, Panel2,
 }
@@ -63,39 +63,36 @@ impl AppWindow<'_> {
 
     fn show_panel(&mut self) {
         
-        if self.ui.selectable_label(
-            if let PanelSelector::Panel1 = self.active_panel {true} else {false},
-            "P1",
-        ).clicked() {
-            self.active_panel = PanelSelector::Panel1;
+        self.ui.selectable_value(&mut self.active_panel, PanelSelector::Panel1, "Panel1");
+        self.ui.selectable_value(&mut self.active_panel, PanelSelector::Panel2, "Panel2");
+
+        self.ui.label(format!(
+            "{}x{}", 
+            self.width, 
+            self.height,
+        ));
+
+        match self.active_panel {
+            PanelSelector::Panel1 => self.show_panel1(),
+            PanelSelector::Panel2 => self.show_panel2(),
+            _ => {},
         }
 
-        if self.ui.selectable_label(
-            if let PanelSelector::Panel2 = self.active_panel {true} else {false},
-            "P2"
-        ).clicked() {
-            self.active_panel = PanelSelector::Panel2;
-        }
+        // let rect = egui::Rect {
+        //     min: egui::Pos2{ x: 50.0, y: 50.0 },
+        //     max: egui::Pos2{ x: 100.0, y: 100.0 },
+        // };
 
-        if let PanelSelector::Unselected = self.active_panel {} else {
-            self.ui.label(format!(
-                "{}x{} - {}", 
-                self.width, 
-                self.height,
-                match self.active_panel {
-                    PanelSelector::Unselected => "unselected",
-                    PanelSelector::Panel1 => "p1",
-                    PanelSelector::Panel2 => "p2",
-                }
-            ));
-        }
+        // let fill = egui::Color32::BLUE;
 
-        let rect = egui::Rect {
-            min: egui::Pos2{ x: 50.0, y: 50.0 },
-            max: egui::Pos2{ x: 100.0, y: 100.0 },
-        };
+    }
 
-        let fill = egui::Color32::BLUE;
+    fn show_panel1(&mut self) {
+        self.ui.label("panel 1");
+    }
+
+    fn show_panel2(&mut self) {
+        self.ui.label("panel 2");
     }
 
     fn show_box(&mut self, rect: egui::Rect, fill: egui::Color32) {
