@@ -16,7 +16,7 @@ fn main() -> Result<(), eframe::Error> {
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
-        //initial_window_pos: Some(egui::pos2(1800.0, 80.0)), //TODO: remove this line
+        initial_window_pos: Some(egui::pos2(1800.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
 
@@ -86,9 +86,9 @@ impl App<'_> {
 
     fn paint_panel1(&mut self, cols: u32, rows: u32) {
 
-        let kw = KolorWheel::new()
+        let kw: KolorWheel = KolorWheel::new()
             .set_count(cols * rows)
-            .set_color32(egui::Color32::DARK_BLUE);
+            .set_color32(egui::Color32::DARK_BLUE)
         ;
         self.paint_grid(kw, cols, rows);
     }
@@ -100,9 +100,9 @@ impl App<'_> {
         
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb_u8(128, 128, 255)
+            .set_rgb(128, 128, 255)            
         ;
-        self.paint_grid(kw, cols, rows);
+        //self.paint_grid(kw, cols, rows);
     }
 
     fn paint_grid(&mut self, kw: KolorWheel, cols: u32, rows: u32) {

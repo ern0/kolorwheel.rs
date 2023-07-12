@@ -3,19 +3,17 @@ use egui::Color32;
 
 pub struct KolorWheel {
     count: u32,
-    h: f32,
-    s: f32,
-    l: f32,
+    h: f32, s: f32, l: f32,
+    r: u8, g: u8, b: u8,
 }
 
 impl KolorWheel {
 
     pub fn new() -> KolorWheel {
         Self {
-            h: 0.5,
-            s: 0.5,
-            l: 0.5,
             count: 1,
+            h: 0.5, s: 0.5, l: 0.5,
+            r: 127, g: 127, b: 127,
         }
     }
 
@@ -24,13 +22,18 @@ impl KolorWheel {
         return self;
     }
 
-    pub fn set_rgb_u8(mut self, r: u8, g: u8, b: u8) -> KolorWheel {
+    pub fn set_rgb(mut self, r: u8, g: u8, b: u8) -> KolorWheel {
+
+        self.r = r;
+        self.g = g;
+        self.b = b;
 
         return self;
     }
 
+
     pub fn set_color32(mut self, color: Color32) -> KolorWheel {
-        return self;
+        return self.set_rgb(color.r(), color.g(), color.b());
     }
 }
 
