@@ -39,11 +39,10 @@ impl KolorWheel {
         self.g = g;
         self.b = b;
 
-        self.convert_rgb_to_hsl();
+        //self.convert_rgb_to_hsl();
 
         return self;
     }
-
 
     pub fn set_color32(mut self, color: Color32) -> Self {
         return self.set_rgb(color.r(), color.g(), color.b());
@@ -157,6 +156,8 @@ impl KolorWheel {
 						
 		}	
 
+        println!("{} {} {}", self.h, self.s, self.l);
+
 		self.h = 360.0 * self.h;
 		self.s = 100.0 * self.s;
 		self.l = 100.0 * self.l;    
@@ -178,6 +179,9 @@ impl Iterator for KolorWheel {
         let color32 = Color32::from_rgb(
             self.r, self.g, self.b
         );
+
+        self.h += 10.0;
+        self.convert_hsl_to_rgb();
 
         return Some(color32);
     }
