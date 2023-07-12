@@ -11,7 +11,7 @@ fn main() -> Result<(), eframe::Error> {
 
     let options = eframe::NativeOptions {
         initial_window_size: size_some_vec2,
-        ////min_window_size: size_some_vec2,
+        min_window_size: size_some_vec2,
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
@@ -32,10 +32,8 @@ fn main() -> Result<(), eframe::Error> {
 
 struct App<'u> {
     ui: &'u mut egui::Ui,
-    active_panel: PanelSelector,
-    
+    active_panel: PanelSelector,   
     window: Window,
-    opt_cell: Option<Cell>,
 }
 
 #[derive(Clone, PartialEq)]
@@ -54,14 +52,13 @@ impl App<'_> {
             width, 
             height, 
             padding, 
-            rounding
+            rounding,
         );
 
         App { 
             ui, 
             active_panel, 
             window,
-            opt_cell: None,
         }
     }
 
@@ -88,26 +85,55 @@ impl App<'_> {
     fn show_panel1(&mut self) {
 
         self.ui.label("panel 1");
-        self.opt_cell = Some(Cell::new(&self.window, 10, 10));
 
-        self.ui.label(format!("{}", self.ui.available_height()));
+        let cell = Cell::new(&self.ui, &self.window, 10, 10);
+        let remaining_height = self.ui.available_height();
 
-        let rect = egui::Rect {
-            min: egui::Pos2{ x: 50.0, y: 50.0 },
-            max: egui::Pos2{ x: 100.0, y: 100.0 },
-        };
+        let (_, painter) = self.ui.allocate_painter(
+            egui::Vec2::new(
+                self.window.width as f32, 
+                remaining_height,
+            ),
+            egui::Sense::hover(),
+        );
+
+        let mut col = 0;
+        let mut x = cell.window_centering_horizontal;
+        let mut y = self.window.height - (remaining_height as u32);
 
         let fill = egui::Color32::BLUE;
 
+        for index in 0..95 {
+
+            let rect = egui::Rect {
+                min: egui::Pos2{
+                    x: (x + cell.padding_horizontal) as f32,
+                    y: (y + cell.padding_vertical) as f32,
+                },
+                max: egui::Pos2 { 
+                    x: (x + cell.padding_horizontal + cell.padded_width) as f32,
+                    y: (y + cell.padding_vertical + cell.padded_height) as f32,
+                },
+            };
+
+            self.paint_box(&painter, rect, fill);
+
+            col += 1;
+            x += cell.cell_width;
+            if col == cell.columns {
+                col = 0;
+                y += cell.cell_height;
+                x = cell.window_centering_horizontal;
+            }
+        }        
     }
 
     fn show_panel2(&mut self) {
 
         self.ui.label("panel 2");
-        self.opt_cell = Some(Cell::new(&self.window, 10, 10));
     }
 
-    fn show_box(&mut self, rect: egui::Rect, fill: egui::Color32) {
+    fn paint_box(&self, painter: &egui::Painter, rect: egui::Rect, fill: egui::Color32) {
 
         let stroke = egui::epaint::Stroke{
             width: 1.0,
@@ -121,14 +147,6 @@ impl App<'_> {
             stroke 
         };
 
-        let (_, painter) = self.ui.allocate_painter(
-            egui::Vec2::new(
-                self.window.width as f32, 
-                self.window.height as f32,
-            ),
-            egui::Sense::hover(),
-        );
-
         let rectangle = egui::Shape::Rect(rect_shape);
         painter.add(rectangle);
 
@@ -138,13 +156,13 @@ impl App<'_> {
 struct Window {
     width: u32,
     height: u32,
-    padding: u32,
+    cell_padding: u32,
     rounding: egui::Rounding,
 }
 
 impl Window {
 
-    pub fn new(width: f32, height: f32, padding: f32, rounding: f32) -> Window {
+    pub fn new(width: f32, height: f32, cell_padding: f32, rounding: f32) -> Window {
 
         let egui_rounding = egui::Rounding {
             nw: rounding, 
@@ -156,12 +174,14 @@ impl Window {
         Window { 
             width: width as u32, 
             height: height as u32, 
-            padding: padding as u32, 
+            cell_padding: cell_padding as u32, 
             rounding: egui_rounding 
         }
     }  
 }
 struct Cell {
+    columns: u32,
+    rows: u32,
     window_corrected_width: u32,
     window_centering_horizontal: u32,
     window_corrected_height: u32,
@@ -175,18 +195,20 @@ struct Cell {
 
 impl Cell {
 
-    pub fn new(window: &Window, columns: u32, rows: u32) -> Cell {
+    pub fn new(ui: &egui::Ui, window: &Window, columns: u32, rows: u32) -> Cell {
 
-        let cell_width = window.width / columns;
+        let window_actual_width = ui.available_width() as u32;
+        let cell_width = window_actual_width / columns;
         let window_corrected_width = cell_width * columns;
-        let window_padding_horizontal = (window.width - window_corrected_width) / 2;
+        let window_padding_horizontal = (window_actual_width - window_corrected_width) / 2;
         let mut padding_horizontal = (cell_width * 10) / 200;
         if padding_horizontal < 1 { 
             padding_horizontal = 1;
         }
         let padded_width = cell_width - (padding_horizontal * 2);
 
-        let cell_height = window.height / rows;
+        let window_actual_height = ui.available_height() as u32;
+        let cell_height = window_actual_height / rows;
         let window_corrected_height = cell_height * rows;
         let mut padding_vertical = (cell_height * 10) / 200;
         if padding_vertical < 1 {
@@ -195,6 +217,8 @@ impl Cell {
         let padded_height = cell_height - (padding_vertical * 2);
 
         Cell {
+            columns,
+            rows,
             window_corrected_width,
             window_centering_horizontal: window_padding_horizontal,
             window_corrected_height,
