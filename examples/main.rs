@@ -76,17 +76,27 @@ impl App<'_> {
         self.ui.separator();
 
         match self.active_panel {
-            PanelSelector::Panel1 => self.show_panel1(),
-            PanelSelector::Panel2 => self.show_panel2(),
+            PanelSelector::Panel1 => self.paint_panel1(),
+            PanelSelector::Panel2 => self.paint_panel2(),
         }
 
     }
 
-    fn show_panel1(&mut self) {
+    fn paint_panel1(&mut self) {
 
-        self.ui.label("panel 1");
+        self.paint_grid(10, 10);
+    }
 
-        let cell = Cell::new(&self.ui, &self.window, 10, 10);
+    fn paint_panel2(&mut self) {
+
+        self.ui.label("panel 2");
+        self.ui.label("blah blah blah\n blah blah");
+        self.paint_grid(4, 4);
+    }
+
+    fn paint_grid(&mut self, cols: u32, rows: u32) {
+
+        let cell = Cell::new(&self.ui, &self.window, cols, rows);
         let remaining_height = self.ui.available_height();
 
         let (_, painter) = self.ui.allocate_painter(
@@ -126,11 +136,6 @@ impl App<'_> {
                 x = self.window.left + cell.window_centering_horizontal;
             }
         }        
-    }
-
-    fn show_panel2(&mut self) {
-
-        self.ui.label("panel 2");
     }
 
     fn paint_box(&self, painter: &egui::Painter, rect: egui::Rect, fill: egui::Color32) {
