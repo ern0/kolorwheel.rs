@@ -34,18 +34,18 @@ struct App<'u> {
     ui: &'u mut egui::Ui,
     active_panel: PanelSelector,
     
-    window: Window;
-    dim: Box;
+    window: Window,
+    dim: Option<Dim>,
 }
 
-Struct Window {
+struct Window {
     width: f32,
     height: f32,
     padding: f32,
     rounding: egui::Rounding,
 }
 
-struct Box {
+struct Dim {
 
 }
 
@@ -56,7 +56,7 @@ enum PanelSelector {
 
 impl App<'_> {
 
-    pub fn new(ui: &mut egui::Ui, active_panel: PanelSelector, padding: f32) -> AppWindow {
+    pub fn new(ui: &mut egui::Ui, active_panel: PanelSelector, padding: f32) -> App {
 
         let width = ui.available_width();
         let height = ui.available_height();
@@ -69,13 +69,16 @@ impl App<'_> {
             se: box_rounding,
         };
 
-        AppWindow { 
+        App { 
             ui, 
             active_panel, 
-            width, 
-            height,  
-            padding, 
-            rounding,
+            window: Window {
+                width, 
+                height,  
+                padding, 
+                rounding,
+            },
+            dim: None,
         }
     }
 
@@ -134,13 +137,13 @@ impl App<'_> {
 
         let rect_shape = egui::epaint::RectShape { 
             rect, 
-            rounding: self.rounding, 
+            rounding: self.window.rounding, 
             fill, 
             stroke 
         };
 
         let (_, painter) = self.ui.allocate_painter(
-            egui::Vec2::new(self.width, self.height),
+            egui::Vec2::new(self.window.width, self.window.height),
             egui::Sense::hover(),
         );
 
