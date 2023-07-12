@@ -1,4 +1,4 @@
 #!/bin/bash
 
-alias s="clear ; target/debug/examples/about"
+alias s="clear ; target/debug/examples/main"
 alias p="clear ; cargo build --examples"

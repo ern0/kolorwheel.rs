@@ -1,3 +1,3 @@
 @echo off
 cls
-cargo run --example about
+cargo run --example main

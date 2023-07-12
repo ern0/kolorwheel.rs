@@ -35,18 +35,7 @@ struct App<'u> {
     active_panel: PanelSelector,
     
     window: Window,
-    dim: Option<Dim>,
-}
-
-struct Window {
-    width: f32,
-    height: f32,
-    padding: f32,
-    rounding: egui::Rounding,
-}
-
-struct Dim {
-
+    cell_opt: Option<Cell>,
 }
 
 #[derive(Clone, PartialEq)]
@@ -60,25 +49,19 @@ impl App<'_> {
 
         let width = ui.available_width();
         let height = ui.available_height();
-
-        let box_rounding = width / 100.0;        
-        let rounding = egui::Rounding {
-            nw: box_rounding, 
-            ne: box_rounding,
-            sw: box_rounding, 
-            se: box_rounding,
-        };
+        let rounding = width / 100.0;        
+        let window = Window::new(
+            width, 
+            height, 
+            padding, 
+            rounding
+        );
 
         App { 
             ui, 
             active_panel, 
-            window: Window {
-                width, 
-                height,  
-                padding, 
-                rounding,
-            },
-            dim: None,
+            window,
+            cell_opt: None,
         }
     }
 
@@ -105,7 +88,7 @@ impl App<'_> {
     fn show_panel1(&mut self) {
 
         self.ui.label("panel 1");
-        self.calc(8);
+        self.cell_opt = Some(Cell::new(&self.window, 10));
 
         self.ui.label(format!("{}", self.ui.available_height()));
 
@@ -121,11 +104,7 @@ impl App<'_> {
     fn show_panel2(&mut self) {
 
         self.ui.label("panel 2");
-        self.calc(10);
-
-    }
-
-    fn calc(&mut self, columns: u32) {
+        self.cell_opt = Some(Cell::new(&self.window, 10));
     }
 
     fn show_box(&mut self, rect: egui::Rect, fill: egui::Color32) {
@@ -143,12 +122,70 @@ impl App<'_> {
         };
 
         let (_, painter) = self.ui.allocate_painter(
-            egui::Vec2::new(self.window.width, self.window.height),
+            egui::Vec2::new(
+                self.window.width as f32, 
+                self.window.height as f32,
+            ),
             egui::Sense::hover(),
         );
 
         let rectangle = egui::Shape::Rect(rect_shape);
         painter.add(rectangle);
 
+    }
+}
+
+struct Window {
+    width: u32,
+    height: u32,
+    padding: u32,
+    rounding: egui::Rounding,
+}
+
+impl Window {
+
+    pub fn new(width: f32, height: f32, padding: f32, rounding: f32) -> Window {
+
+        let egui_rounding = egui::Rounding {
+            nw: rounding, 
+            ne: rounding,
+            sw: rounding, 
+            se: rounding,
+        };
+
+        Window { 
+            width: width as u32, 
+            height: height as u32, 
+            padding: padding as u32, 
+            rounding: egui_rounding 
+        }
+
+    }  
+}
+struct Cell {
+    width: u32,
+    height: u32,
+    padding_top: u32,
+    padding_bottom: u32,
+    padding_left: u32,
+    padding_right: u32,
+    box_width: u32,
+    box_height: u32,
+}
+
+impl Cell {
+
+    pub fn new(window: &Window, columns: u32) -> Cell {
+
+        Cell {
+            width: 0,
+            height: 0,
+            padding_top: 0,
+            padding_bottom: 0,
+            padding_left: 0,
+            padding_right: 0,
+            box_width: 0,
+            box_height: 0,
+        }
     }
 }
