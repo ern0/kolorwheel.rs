@@ -39,7 +39,7 @@ impl KolorWheel {
         self.g = g;
         self.b = b;
 
-        //self.convert_rgb_to_hsl();
+        self.convert_rgb_to_hsl();
 
         return self;
     }
@@ -127,7 +127,7 @@ impl KolorWheel {
         if self.g < min { min = self.g; }
         if self.b < min { min = self.b; }
 
-		self.h = (max + min) as f32 / 2.0;
+		self.h = (max as f32 + min as f32) / 255.0 / 2.0;
 		self.s = self.h;
 		self.l = self.h;
 	
@@ -192,11 +192,26 @@ impl Iterator for KolorWheel {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_float_eq::*;
 
     #[test]
     fn hsl_to_rgb_black() {
         let kw = KolorWheel::new().set_hsl(0.0, 0.0, 0.0);
         assert_eq!((kw.r, kw.g, kw.b,), (0, 0, 0));     
+    }
+
+    #[test]
+    fn hsl_to_rgb_white() {
+        let kw = KolorWheel::new().set_hsl(0.0, 100.0, 100.0);
+        assert_eq!((kw.r, kw.g, kw.b,), (255, 255, 255));     
+    }
+
+    #[test]
+    fn hsl_to_rgb_gray() {
+        let kw = KolorWheel::new().set_hsl(240.0, 0.0, 40.0);
+        assert!(kw.r == kw.g);     
+        assert!(kw.g == kw.b);     
+        assert!(kw.r > 1);     
     }
 
     #[test]
@@ -233,6 +248,31 @@ mod tests {
     fn hsl_to_rgb_underflow_blue() {
         let kw = KolorWheel::new().set_hsl(-120.0, 100.0, 50.0);
         assert_eq!((kw.r, kw.g, kw.b,), (0, 0, 255));     
+    }
+
+    #[test]
+    fn hsl_to_rgb_light_blue() {
+        let kw = KolorWheel::new().set_hsl(240.0, 100.0, 90.0);
+        assert!(kw.r == kw.g);     
+        assert!(kw.b > kw.r);
+        assert!(kw.b > 240);
+    }
+
+    #[test]
+    fn rgb_to_hsl_black() {
+        let kw = KolorWheel::new().set_rgb(0, 0, 0);
+        assert_f32_near!(kw.h, 0.0);
+        assert_f32_near!(kw.s, 0.0);
+        assert_f32_near!(kw.l, 0.0);
+    }
+
+    #[test]
+    fn rgb_to_hsl_white() {
+        let kw = KolorWheel::new().set_rgb(255, 255, 255);
+
+        println!("s {}  l {}", kw.s, kw.l);
+        assert_f32_near!(kw.s, 0.0);
+        assert_f32_near!(kw.l, 100.0);
     }
 
 }
