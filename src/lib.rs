@@ -192,7 +192,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn does_nothing() {
-        assert_eq!(2, 2);
+    fn hsl_to_rgb_black() {
+
+        let mut kw = KolorWheel::new()
+            .set_hsl(0.0, 0.0, 0.0)
+        ;
+
+        let r = kw.r;
+        
     }
 }

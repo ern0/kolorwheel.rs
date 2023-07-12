@@ -1,3 +1,4 @@
 @echo off
 cls
-cargo test --examples
+rem cargo test --examples
+cargo test
