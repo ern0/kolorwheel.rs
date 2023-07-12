@@ -100,7 +100,7 @@ impl App<'_> {
         
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb(128, 128, 255)            
+            .set_rgb(128, 128, 255) 
         ;
         self.paint_grid(kw, cols, rows);
     }
