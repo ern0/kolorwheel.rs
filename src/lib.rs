@@ -28,6 +28,7 @@ impl KolorWheel {
         self.s = s;
         self.l = l;
 
+        self.normalize_hsl();
         self.convert_hsl_to_rgb();
 
         return self;
@@ -40,6 +41,7 @@ impl KolorWheel {
         self.b = b;
 
         self.convert_rgb_to_hsl();
+        self.normalize_hsl();
 
         return self;
     }
@@ -48,7 +50,7 @@ impl KolorWheel {
         return self.set_rgb(color.r(), color.g(), color.b());
     }
 
-    fn validate_hsl(&mut self) {
+    fn normalize_hsl(&mut self) {
         
         self.h = self.h % 360.0;
 
@@ -60,8 +62,6 @@ impl KolorWheel {
     }
 
     fn convert_hsl_to_rgb(&mut self) {
-
-		self.validate_hsl();
 		
 		let h = self.h / 360.0;
 		let s = self.s / 100.0;
@@ -141,12 +141,14 @@ impl KolorWheel {
             let r = (self.r as f32) / 255.0;
             let g = (self.g as f32) / 255.0;
             let b = (self.b as f32) / 255.0;
+            let minf = (min as f32) / 255.0;
+            let maxf = (max as f32) / 255.0;
 
-			let d = (max - min) as f32;
+			let d = maxf - minf;
             self.s = if self.l > 0.5 {
-                d / (2.0 - (max as f32) - (min as f32))
+                d / (2.0 - maxf - minf)
             } else {
-                d / ((max as f32) + (min as f32))
+                d / (maxf + minf)
             };
 
             if max == self.r {
@@ -269,10 +271,46 @@ mod tests {
     #[test]
     fn rgb_to_hsl_white() {
         let kw = KolorWheel::new().set_rgb(255, 255, 255);
-
-        println!("s {}  l {}", kw.s, kw.l);
         assert_f32_near!(kw.s, 0.0);
         assert_f32_near!(kw.l, 100.0);
+    }
+
+    #[test]
+    fn rgb_to_hsl_gray_127() {
+        let kw = KolorWheel::new().set_rgb(127, 127, 127);
+        assert_f32_near!(kw.s, 0.0);
+        assert_f32_near!(kw.l, 50.0, 99999);
+    }
+
+    #[test]
+    fn rgb_to_hsl_gray_128() {
+        let kw = KolorWheel::new().set_rgb(128, 128, 128);
+        assert_f32_near!(kw.s, 0.0);
+        assert_f32_near!(kw.l, 50.0, 99999);
+    }
+
+    #[test]
+    fn rgb_to_hsl_light_red() {
+        let kw = KolorWheel::new().set_rgb(255, 127, 127);
+        assert_f32_near!(kw.h, 0.0, 99999);
+        assert_f32_near!(kw.s, 100.0, 99999);
+        assert_f32_near!(kw.l, 75.0, 99999);
+    }
+
+    #[test]
+    fn rgb_to_hsl_deep_purple() {
+        let kw = KolorWheel::new().set_rgb(80, 0, 120);
+        assert_f32_near!(kw.h, 280.0, 99999);
+        assert_f32_near!(kw.s, 100.0, 99999);
+        assert_f32_near!(kw.l, 23.5, 99999);
+    }
+
+    #[test]
+    fn rgb_to_hsl_deep_blue() {
+        let kw = KolorWheel::new().set_rgb(0, 0, 31);
+        assert_f32_near!(kw.h, 240.0, 99999);
+        assert_f32_near!(kw.s, 100.0, 99999);
+        assert_f32_near!(kw.l, 6.1, 99999);
     }
 
 }
