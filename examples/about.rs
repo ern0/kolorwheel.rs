@@ -1,5 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![allow(unused_variables)]
+#![allow(unused)]
 
 use eframe::egui;
 extern crate kolorwheel;
@@ -19,7 +19,7 @@ fn main() -> Result<(), eframe::Error> {
         ..Default::default()
     };
 
-    let mut active_panel = PanelSelector::Unselected;
+    let mut active_panel = PanelSelector::Panel1;
 
     eframe::run_simple_native("KolorWheel.rs", options, move |ctx, _frame| {
 
@@ -39,11 +39,12 @@ struct AppWindow<'u> {
     columns: u32,
     padding: f32,
     active_panel: PanelSelector,
+    rounding: egui::Rounding,
 }
 
 #[derive(Clone, PartialEq)]
 enum PanelSelector {
-    Unselected, Panel1, Panel2,
+    Panel1, Panel2,
 }
 
 impl AppWindow<'_> {
@@ -53,7 +54,23 @@ impl AppWindow<'_> {
         let width = ui.available_width();
         let height = ui.available_height();
 
-        AppWindow { ui, width, height, columns, padding, active_panel }
+        let box_rounding = width / 100.0;        
+        let rounding = egui::Rounding {
+            nw: box_rounding, 
+            ne: box_rounding,
+            sw: box_rounding, 
+            se: box_rounding,
+        };
+
+        AppWindow { 
+            ui, 
+            width, 
+            height, 
+            columns, 
+            padding, 
+            active_panel, 
+            rounding,
+        }
     }
 
 
@@ -64,16 +81,8 @@ impl AppWindow<'_> {
     fn show_panel(&mut self) {
         
         self.ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
-
             ui.selectable_value(&mut self.active_panel, PanelSelector::Panel1, "Panel1");
             ui.selectable_value(&mut self.active_panel, PanelSelector::Panel2, "Panel2");
-
-            ui.label(format!(
-                "{}x{}", 
-                self.width, 
-                self.height,
-            ));
-
         });        
 
         self.ui.separator();
@@ -81,20 +90,20 @@ impl AppWindow<'_> {
         match self.active_panel {
             PanelSelector::Panel1 => self.show_panel1(),
             PanelSelector::Panel2 => self.show_panel2(),
-            _ => {},
         }
 
-        // let rect = egui::Rect {
-        //     min: egui::Pos2{ x: 50.0, y: 50.0 },
-        //     max: egui::Pos2{ x: 100.0, y: 100.0 },
-        // };
+        let rect = egui::Rect {
+            min: egui::Pos2{ x: 50.0, y: 50.0 },
+            max: egui::Pos2{ x: 100.0, y: 100.0 },
+        };
 
-        // let fill = egui::Color32::BLUE;
+        let fill = egui::Color32::BLUE;
 
     }
 
     fn show_panel1(&mut self) {
         self.ui.label("panel 1");
+        self.ui.label(format!("{}", self.ui.available_height()));
     }
 
     fn show_panel2(&mut self) {
@@ -103,24 +112,25 @@ impl AppWindow<'_> {
 
     fn show_box(&mut self, rect: egui::Rect, fill: egui::Color32) {
 
-        // let (_, painter) = self.ui.allocate_painter(
-        //     egui::Vec2::new(self.window_width, self.window_height),
-        //     egui::Sense::hover(),
-        // );
+        let stroke = egui::epaint::Stroke{
+            width: 1.0,
+            color: fill,
+        };
 
-        //let rounding = egui::Rounding {
-            //nw: self.box_rounding, ne: self.box_rounding,
-            //sw: self.box_rounding, se: self.box_rounding,
-        //};
+        let rect_shape = egui::epaint::RectShape { 
+            rect, 
+            rounding: self.rounding, 
+            fill, 
+            stroke 
+        };
 
-        //let stroke = egui::epaint::Stroke{
-            //width: self.box_rounding,
-            //color: fill,
-        //};
+        let (_, painter) = self.ui.allocate_painter(
+            egui::Vec2::new(self.width, self.height),
+            egui::Sense::hover(),
+        );
 
-        //let rect_shape = egui::epaint::RectShape { rect, rounding, fill, stroke };
-        //let rectangle = egui::Shape::Rect(rect_shape);
-        //painter.add(rectangle);
+        let rectangle = egui::Shape::Rect(rect_shape);
+        painter.add(rectangle);
 
     }
 }
