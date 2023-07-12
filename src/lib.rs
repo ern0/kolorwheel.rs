@@ -69,10 +69,10 @@ impl KolorWheel {
 		let l = self.l / 100.0;
 
         if s < 0.001 {
-            let lightness = (l * 255.0) as u8;
-		    self.r = lightness;
-		    self.g = lightness;
-		    self.b = lightness;
+            let gray = (l * 255.0) as u8;
+		    self.r = gray;
+		    self.g = gray;
+		    self.b = gray;
             return;
         }
 
@@ -83,9 +83,13 @@ impl KolorWheel {
         };
         let p = 2.0 * l - q;
 
-        self.r = Self::hue_to_rgb(p, q, h + (1.0/3.0)) as u8;
-	    self.g = Self::hue_to_rgb(p, q, h) as u8;
-		self.b = Self::hue_to_rgb(p, q, h - (1.0/3.0)) as u8;
+        let r = Self::hue_to_rgb(p, q, h + (1.0/3.0));
+	    let g = Self::hue_to_rgb(p, q, h);
+		let b = Self::hue_to_rgb(p, q, h - (1.0/3.0));
+
+        self.r = (r * 255.0) as u8;
+        self.g = (g * 255.0) as u8;
+        self.b = (b * 255.0) as u8;
 		
 	} 
 

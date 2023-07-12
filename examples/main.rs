@@ -20,7 +20,7 @@ fn main() -> Result<(), eframe::Error> {
         ..Default::default()
     };
 
-    let mut active_panel = PanelSelector::Panel1;
+    let mut active_panel = PanelSelector::Panel2;
 
     eframe::run_simple_native("KolorWheel.rs", options, move |ctx, _frame| {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -100,7 +100,7 @@ impl App<'_> {
         
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb(128, 128, 255) 
+            .set_hsl(180.0, 40.0, 90.0) 
         ;
         self.paint_grid(kw, cols, rows);
     }
