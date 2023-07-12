@@ -1,7 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![allow(unused)]
+
+extern crate kolorwheel;
 
 use eframe::egui;
-extern crate kolorwheel;
+use kolorwheel::KolorWheel;
 
 fn main() -> Result<(), eframe::Error> {
 
@@ -13,7 +16,7 @@ fn main() -> Result<(), eframe::Error> {
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
-        initial_window_pos: Some(egui::pos2(1800.0, 80.0)), //TODO: remove this line
+        //initial_window_pos: Some(egui::pos2(1800.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
 
@@ -75,23 +78,25 @@ impl App<'_> {
         self.ui.separator();
 
         match self.active_panel {
-            PanelSelector::Panel1 => self.paint_panel1(),
-            PanelSelector::Panel2 => self.paint_panel2(),
+            PanelSelector::Panel1 => self.paint_panel1(10, 10),
+            PanelSelector::Panel2 => self.paint_panel2(4, 4),
         }
 
     }
 
-    fn paint_panel1(&mut self) {
+    fn paint_panel1(&mut self, cols: u32, rows: u32) {
 
-        self.paint_grid(10, 10);
+        let kw = KolorWheel::new().set_count(cols * rows);
+
+        self.paint_grid(cols, rows);
     }
 
-    fn paint_panel2(&mut self) {
+    fn paint_panel2(&mut self, cols: u32, rows: u32) {
 
         self.ui.label("panel 2");
         self.ui.label("blah blah blah\n blah blah");
         
-        self.paint_grid(4, 4);
+        self.paint_grid(cols, rows);
     }
 
     fn paint_grid(&mut self, cols: u32, rows: u32) {
