@@ -4,22 +4,53 @@ use egui::Color32;
 
 pub struct KolorWheel {
     count: u32,
+    countf: f32,
     h: f32, s: f32, l: f32,
     r: u8, g: u8, b: u8,
+    h_inc: f32,
+    h_spin: Spin,
+    h_counter: u32,
+    s_inc: f32,
+    s_spin: Spin,
+    s_counter: u32,
+    l_inc: f32,
+    l_spin: Spin,
+    l_counter: u32,
+}
+
+enum Spin {
+    IncrementOnly,
+    AbsoluteVec(Vec<u32>),
+    OffsetVec(Vec<u32>),
 }
 
 impl KolorWheel {
 
     pub fn new() -> Self {
         Self {
-            count: 1,
-            h: 180.0, s: 0.0, l: 50.0,
-            r: 127, g: 127, b: 127,
+            count: 1, 
+            countf: 1.0,
+            h: 180.0, 
+            s: 0.0, 
+            l: 50.0,
+            r: 127, 
+            g: 127, 
+            b: 127,
+            h_inc: 0.0, 
+            h_spin: Spin::IncrementOnly, 
+            h_counter: 0,
+            s_inc: 0.0, 
+            s_spin: Spin::IncrementOnly, 
+            s_counter: 0,
+            l_inc: 0.0,
+            l_spin: Spin::IncrementOnly, 
+            l_counter: 0,
         }
     }
 
     pub fn set_count(mut self, count: u32) -> Self {
         self.count = count;
+        self.countf = count as f32;
         return self;
     }
 
@@ -150,9 +181,9 @@ impl KolorWheel {
 	    let g = Self::hue_to_rgb(p, q, h);
 		let b = Self::hue_to_rgb(p, q, h - (1.0/3.0));
 
-        let r = (r * 1000.0).round() / 1000.0;
-        let g = (g * 1000.0).round() / 1000.0;
-        let b = (b * 1000.0).round() / 1000.0;
+        let r = (r * 12000.0).round() / 12000.0;
+        let g = (g * 12000.0).round() / 12000.0;
+        let b = (b * 12000.0).round() / 12000.0;
 
         self.r = (r * 255.0) as u8;
         self.g = (g * 255.0) as u8;
@@ -232,6 +263,47 @@ impl KolorWheel {
         
     }
 
+    pub fn hue_abs(mut self, amount: u32) -> Self {
+        self.h_inc = (amount as f32 - self.h) / self.countf;
+        return self;
+    }
+
+    pub fn hue_rel(mut self, amount: u32) -> Self {
+        self.h_inc = amount as f32 / self.countf;
+        return self;
+    }
+
+    pub fn sat_abs(mut self, amount: u32) -> Self {
+        self.s_inc = (amount as f32 - self.s) / self.countf;
+        return self;
+    }
+
+    pub fn sat_rel(mut self, amount: u32) -> Self {
+        self.s_inc = amount as f32 / self.countf;
+        return self;
+    }
+
+    pub fn lit_abs(mut self, amount: u32) -> Self {
+        self.l_inc = (amount as f32 - self.h) / self.countf;
+        return self;
+    }
+
+    pub fn lit_values(mut self, values: &[u32]) -> Self {
+        self.l_spin = Spin::AbsoluteVec(values.to_vec());
+        return self;
+    }
+
+    pub fn lit_offsets(mut self, offsets: &[u32]) -> Self {
+        self.l_spin = Spin::OffsetVec(offsets.to_vec());
+        return self;
+    }
+
+    pub fn lit_rel(mut self, amount: u32) -> Self {
+        self.l_inc = amount as f32 / self.countf;
+        return self;
+    }
+
+
 }
 
 impl Iterator for KolorWheel {
@@ -248,7 +320,10 @@ impl Iterator for KolorWheel {
             self.r, self.g, self.b
         );
 
-        self.h += 10.0;
+        self.h += self.h_inc;
+        self.s += self.s_inc;
+        self.l += self.l_inc;
+
         self.normalize_hsl();
         self.convert_hsl_to_rgb();
 

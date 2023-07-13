@@ -89,6 +89,9 @@ impl App<'_> {
         let kw = KolorWheel::new()
             .set_count(cols * rows)
             .set_rgb(255, 0, 0)
+            .hue_rel(90)
+            .sat_abs(0)
+            .lit_values(&[70, 80, 90]);
         ;
 
         self.paint_grid(kw, cols, rows);
@@ -214,7 +217,7 @@ impl Window {
 }
 struct Cell {
     columns: u32,
-    rows: u32,
+    _rows: u32,
     _window_corrected_width: u32,
     window_centering_horizontal: u32,
     _window_corrected_height: u32,  // used by tests
@@ -256,7 +259,7 @@ impl Cell {
 
         Cell {
             columns,
-            rows,
+            _rows: rows,
             _window_corrected_width: window_corrected_width, 
             window_centering_horizontal: window_padding_horizontal,
             _window_corrected_height: window_corrected_height,
