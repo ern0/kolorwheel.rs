@@ -1,4 +1,5 @@
 #![allow(unused)]
+
 use egui::Color32;
 
 pub struct KolorWheel {
@@ -46,21 +47,20 @@ impl KolorWheel {
         return self;
     }
 
-    pub fn set_rgb_hex(mut self, mut hex: &str) -> Self {
+    pub fn set_rgb_hex(mut self, hex: &str) -> Self {
 
         let mut hexb = hex.as_bytes();
 
         if hexb.len() == 0 {
             return self.set_rgb_hex_error();
         }
-
         if hexb[0] == b'#' {
             hexb = &hexb[1..];
         }
-
         if hexb.len() == 3 {
             self.set_rgb_hex_parse(&[hexb[0], hexb[0], hexb[1], hexb[1], hexb[2], hexb[2],]);
-        } else {
+        }
+        if hexb.len() == 6 {
             self.set_rgb_hex_parse(hexb);
         }        
 
@@ -68,15 +68,49 @@ impl KolorWheel {
     }
 
     fn set_rgb_hex_parse(&mut self, hexb: &[u8]) {
-        println!("---------------> {}", std::str::from_utf8(hexb).unwrap());
+
+        let r_hi = Self::set_rgb_hex_parse_digit(hexb[0]);
+        if let Err(_) = r_hi { return; }
+        let r_lo = Self::set_rgb_hex_parse_digit(hexb[1]);
+        if let Err(_) = r_lo { return; }
+
+        let g_hi = Self::set_rgb_hex_parse_digit(hexb[2]);
+        if let Err(_) = g_hi { return; }
+        let g_lo = Self::set_rgb_hex_parse_digit(hexb[3]);
+        if let Err(_) = g_lo { return; }
+
+        let b_hi = Self::set_rgb_hex_parse_digit(hexb[4]);
+        if let Err(_) = b_hi { return; }
+        let b_lo = Self::set_rgb_hex_parse_digit(hexb[5]);
+        if let Err(_) = b_lo { return; }
+
+        self.r = (r_hi.unwrap() << 4) + r_lo.unwrap();
+        self.g = (g_hi.unwrap() << 4) + g_lo.unwrap();
+        self.b = (b_hi.unwrap() << 4) + b_lo.unwrap();
+
     }
 
-    fn set_rgb_hex_error(mut self) -> Self {
+    fn set_rgb_hex_parse_digit(digit: u8) -> Result<u8, ()> {
+
+        if digit >= b'0' && digit <= b'9' {
+            return Ok(digit - b'0');
+        }
+        if digit >= b'a' && digit <= b'f' {
+            return Ok(10 + digit - b'a');
+        }
+        if digit >= b'A' && digit <= b'F' {
+            return Ok(10 + digit - b'A');
+        }
+
+        return Err(());
+    }
+
+    fn set_rgb_hex_error(self) -> Self {
         // error handling: silent ignore
         return self;
     }
 
-    pub fn set_color32(mut self, color: Color32) -> Self {
+    pub fn set_color32(self, color: Color32) -> Self {
         return self.set_rgb(color.r(), color.g(), color.b());
     }
 
@@ -161,7 +195,7 @@ impl KolorWheel {
 		self.s = self.h;
 		self.l = self.h;
 	
-		if (max == min) {
+		if max == min {
 		
 			self.h = 0.0;
 			self.s = 0.0;
@@ -347,25 +381,41 @@ mod tests {
     #[test]
     fn rgb_hex_long_unprefixed() {
         let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("1af9cc");
-        assert!(kw.r == 0x1A);
-        assert!(kw.g == 0xF9);
-        assert!(kw.b == 0xCC);
+        assert_eq!(kw.r, 0x1A);
+        assert_eq!(kw.g, 0xF9);
+        assert_eq!(kw.b, 0xCC);
     }
 
     #[test]
     fn rgb_hex_long_prefixed() {
         let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("#d498ea");
-        assert!(kw.r == 0xD4);
-        assert!(kw.g == 0x98);
-        assert!(kw.b == 0xEA);
+        assert_eq!(kw.r, 0xD4);
+        assert_eq!(kw.g, 0x98);
+        assert_eq!(kw.b, 0xEA);
     }
 
     #[test]
     fn rgb_hex_short() {
         let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("#C34");
-        assert!(kw.r == 0xCC);
-        assert!(kw.g == 0x33);
-        assert!(kw.b == 0x44);
+        assert_eq!(kw.r, 0xCC);
+        assert_eq!(kw.g, 0x33);
+        assert_eq!(kw.b, 0x44);
+    }
+
+    #[test]
+    fn rgb_hex_invalid_length() {
+        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("#21");
+        assert_eq!(kw.r, 0);
+        assert_eq!(kw.g, 0);
+        assert_eq!(kw.b, 0);
+    }
+
+    #[test]
+    fn rgb_hex_invalid_digit() {
+        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("12345G");
+        assert_eq!(kw.r, 0);
+        assert_eq!(kw.g, 0);
+        assert_eq!(kw.b, 0);
     }
 
 }
