@@ -46,6 +46,36 @@ impl KolorWheel {
         return self;
     }
 
+    pub fn set_rgb_hex(mut self, mut hex: &str) -> Self {
+
+        let mut hexb = hex.as_bytes();
+
+        if hexb.len() == 0 {
+            return self.set_rgb_hex_error();
+        }
+
+        if hexb[0] == b'#' {
+            hexb = &hexb[1..];
+        }
+
+        if hexb.len() == 3 {
+            self.set_rgb_hex_parse(&[hexb[0], hexb[0], hexb[1], hexb[1], hexb[2], hexb[2],]);
+        } else {
+            self.set_rgb_hex_parse(hexb);
+        }        
+
+        return self;
+    }
+
+    fn set_rgb_hex_parse(&mut self, hexb: &[u8]) {
+        println!("---------------> {}", std::str::from_utf8(hexb).unwrap());
+    }
+
+    fn set_rgb_hex_error(mut self) -> Self {
+        // error handling: silent ignore
+        return self;
+    }
+
     pub fn set_color32(mut self, color: Color32) -> Self {
         return self.set_rgb(color.r(), color.g(), color.b());
     }
@@ -78,17 +108,17 @@ impl KolorWheel {
         let q = if l < 0.5 { 
             l * (1.0 + s)
         } else {
-            l + s - l * s
+            l + s - (l * s)
         };
-        let p = 2.0 * l - q;
+        let p = (2.0 * l) - q;
 
         let r = Self::hue_to_rgb(p, q, h + (1.0/3.0));
 	    let g = Self::hue_to_rgb(p, q, h);
 		let b = Self::hue_to_rgb(p, q, h - (1.0/3.0));
 
-        let r = (r * 100.0).round() / 100.0;
-        let g = (g * 100.0).round() / 100.0;
-        let b = (b * 100.0).round() / 100.0;
+        let r = (r * 1000.0).round() / 1000.0;
+        let g = (g * 1000.0).round() / 1000.0;
+        let b = (b * 1000.0).round() / 1000.0;
 
         self.r = (r * 255.0) as u8;
         self.g = (g * 255.0) as u8;
@@ -105,13 +135,13 @@ impl KolorWheel {
             t -= 1.0;
         }
 		if t < (1.0/6.0) {
-            return p + (q - p) * 6.0 * t;
+            return p + ((q - p) * 6.0 * t);
         }
 		if t < (1.0/2.0) {
             return q;
         }
 		if t < (2.0/3.0) {
-            return p + (q - p) * ((2.0/3.0) - t) * 6.0;
+            return p + ((q - p) * ((2.0/3.0) - t) * 6.0);
         }
 		
 		return p;
@@ -152,19 +182,19 @@ impl KolorWheel {
             };
 
             if max == self.r {
-                self.h = (g - b) / d + (if g < b { 6.0 } else { 0.0 });
+                self.h = (g - b) / (d + (if g < b { 6.0 } else { 0.0 }));
             } else if max == self.g {
-                self.h = (b - r) / d + 2.0;
+                self.h = ((b - r) / d) + 2.0;
             } else {
-                self.h = (r - g) / d + 4.0;
+                self.h = ((r - g) / d) + 4.0;
             }
 			self.h = self.h / 6.0;
 						
 		}	
 
-		self.h = 360.0 * self.h;
-		self.s = 100.0 * self.s;
-		self.l = 100.0 * self.l;    
+		self.h *= 360.0;
+		self.s *= 100.0;
+		self.l *= 100.0;    
         
     }
 
@@ -185,6 +215,7 @@ impl Iterator for KolorWheel {
         );
 
         self.h += 10.0;
+        self.normalize_hsl();
         self.convert_hsl_to_rgb();
 
         return Some(color32);
@@ -311,6 +342,30 @@ mod tests {
         assert_f32_near!(kw.h, 240.0, 99999);
         assert_f32_near!(kw.s, 100.0, 99999);
         assert_f32_near!(kw.l, 6.1, 99999);
+    }
+
+    #[test]
+    fn rgb_hex_long_unprefixed() {
+        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("1af9cc");
+        assert!(kw.r == 0x1A);
+        assert!(kw.g == 0xF9);
+        assert!(kw.b == 0xCC);
+    }
+
+    #[test]
+    fn rgb_hex_long_prefixed() {
+        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("#d498ea");
+        assert!(kw.r == 0xD4);
+        assert!(kw.g == 0x98);
+        assert!(kw.b == 0xEA);
+    }
+
+    #[test]
+    fn rgb_hex_short() {
+        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("#C34");
+        assert!(kw.r == 0xCC);
+        assert!(kw.g == 0x33);
+        assert!(kw.b == 0x44);
     }
 
 }

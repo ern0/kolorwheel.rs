@@ -16,7 +16,7 @@ fn main() -> Result<(), eframe::Error> {
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
-        initial_window_pos: Some(egui::pos2(700.0, 80.0)), //TODO: remove this line
+        initial_window_pos: Some(egui::pos2(2000.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
 
