@@ -9,20 +9,31 @@ pub struct KolorWheel {
     r: u8, g: u8, b: u8,
     h_inc: f32,
     h_spin: Spin,
-    h_counter: usize,
+    h_spin_counter: usize,
+    h_offset: Offset,
+    h_offset_counter: usize,
     s_inc: f32,
     s_spin: Spin,
-    s_counter: usize,
+    s_spin_counter: usize,
+    s_offset: Offset,
+    s_offset_counter: usize,
     l_inc: f32,
     l_spin: Spin,
-    l_counter: usize,
+    l_spin_counter: usize,
+    l_offset: Offset,
+    l_offset_counter: usize,
 }
 
 enum Spin {
     IncrementOnly,
-    AbsoluteVec(Vec<u32>),
-    OffsetVec(Vec<u32>),
+    AbsoluteVec(Vec<i32>),
 }
+
+enum Offset {
+    Zero,
+    OffsetVec(Vec<i32>),
+}
+
 
 impl KolorWheel {
 
@@ -38,13 +49,19 @@ impl KolorWheel {
             b: 127,
             h_inc: 0.0, 
             h_spin: Spin::IncrementOnly, 
-            h_counter: 0,
-            s_inc: 0.0, 
+            h_spin_counter: 0,
+            h_offset: Offset::Zero,
+            h_offset_counter: 0,
+            s_inc: 0.0,
             s_spin: Spin::IncrementOnly, 
-            s_counter: 0,
+            s_spin_counter: 0,
+            s_offset: Offset::Zero,
+            s_offset_counter: 0,
             l_inc: 0.0,
             l_spin: Spin::IncrementOnly, 
-            l_counter: 0,
+            l_spin_counter: 0,
+            l_offset: Offset::Zero,
+            l_offset_counter: 0,
         }
     }
 
@@ -52,10 +69,6 @@ impl KolorWheel {
         self.count = count;
         self.countf = count as f32;
         return self;
-    }
-
-    pub fn set_color(self, color: egui::Color32) -> Self {
-        return self.set_rgb(color.r(), color.g(), color.b());
     }
 
     pub fn set_hsl(mut self, h: u32, s: u32, l: u32) -> Self {
@@ -80,6 +93,14 @@ impl KolorWheel {
         self.normalize_hsl();
 
         return self;
+    }
+
+    pub fn gradient(mut self, target: KolorWheel) -> Self {
+        return self
+            .hue_abs(target.h as u32)
+            .sat_abs(target.s as u32)
+            .lit_abs(target.l as u32)
+        ;
     }
 
     pub fn set_rgb_hex(mut self, hex: &str) -> Self {
@@ -273,8 +294,13 @@ impl KolorWheel {
         return self;
     }
 
-    pub fn hue_values(mut self, values: &[u32]) -> Self {
+    pub fn hue_vals(mut self, values: &[i32]) -> Self {
         self.h_spin = Spin::AbsoluteVec(Vec::from(values));
+        return self;
+    }
+
+    pub fn hue_offs(mut self, offsets: &[i32]) -> Self {
+        self.h_offset = Offset::OffsetVec(offsets.to_vec());
         return self;
     }
 
@@ -288,8 +314,13 @@ impl KolorWheel {
         return self;
     }
 
-    pub fn sat_values(mut self, values: &[u32]) -> Self {
+    pub fn sat_vals(mut self, values: &[i32]) -> Self {
         self.s_spin = Spin::AbsoluteVec(Vec::from(values));
+        return self;
+    }
+
+    pub fn sat_offs(mut self, offsets: &[i32]) -> Self {
+        self.s_offset = Offset::OffsetVec(offsets.to_vec());
         return self;
     }
 
@@ -298,22 +329,22 @@ impl KolorWheel {
         return self;
     }
 
-    pub fn lit_values(mut self, values: &[u32]) -> Self {
-        self.l_spin = Spin::AbsoluteVec(Vec::from(values));
-        return self;
-    }
-
-    pub fn lit_offsets(mut self, offsets: &[u32]) -> Self {
-        self.l_spin = Spin::OffsetVec(offsets.to_vec());
-        return self;
-    }
-
-    pub fn lit_rel(mut self, amount: u32) -> Self {
+    pub fn lit_rel(mut self, amount: i32) -> Self {
         self.l_inc = amount as f32 / self.countf;
         return self;
     }
 
-    fn next_spin_values(values: Vec<u32>, counter: &mut usize) -> f32 {
+    pub fn lit_vals(mut self, values: &[i32]) -> Self {
+        self.l_spin = Spin::AbsoluteVec(Vec::from(values));
+        return self;
+    }
+
+    pub fn lit_offs(mut self, offsets: &[i32]) -> Self {
+        self.l_offset = Offset::OffsetVec(offsets.to_vec());
+        return self;
+    }
+
+    fn next_from_vector(values: Vec<i32>, counter: &mut usize) -> f32 {
 
         let mut result = values[*counter] as f32;
         *counter += 1;
@@ -327,7 +358,7 @@ impl KolorWheel {
     fn next_pre_channel(channel_value: &mut f32, channel_spin: &Spin, channel_counter: &mut usize) {
 
         if let Spin::AbsoluteVec(values) = channel_spin {
-            *channel_value = Self::next_spin_values(values.to_vec(), channel_counter);
+            *channel_value = Self::next_from_vector(values.to_vec(), channel_counter);
         }
     }
 
@@ -337,24 +368,23 @@ impl KolorWheel {
             Spin::IncrementOnly => {
                 *channel_value += channel_inc;
             },
-            Spin::OffsetVec(values) => {
-                *channel_value += channel_inc;;
-                *channel_value += Self::next_spin_values(values.to_vec(), channel_counter);
+            Spin::AbsoluteVec(values) => {
+                *channel_value += Self::next_from_vector(values.to_vec(), channel_counter);
             },
             _ => {},
         }
     }
 
     fn next_pre(&mut self) {
-        Self::next_pre_channel(&mut self.h, &self.h_spin, &mut self.h_counter);
-        Self::next_pre_channel(&mut self.s, &self.s_spin, &mut self.s_counter);
-        Self::next_pre_channel(&mut self.l, &self.l_spin, &mut self.l_counter);
+        Self::next_pre_channel(&mut self.h, &self.h_spin, &mut self.h_spin_counter);
+        Self::next_pre_channel(&mut self.s, &self.s_spin, &mut self.s_spin_counter);
+        Self::next_pre_channel(&mut self.l, &self.l_spin, &mut self.l_spin_counter);
     }
 
     fn next_post(&mut self) {
-        Self::next_post_channel(&mut self.h, self.h_inc, &self.h_spin, &mut self.h_counter);
-        Self::next_post_channel(&mut self.s, self.s_inc, &self.s_spin, &mut self.s_counter);
-        Self::next_post_channel(&mut self.l, self.l_inc, &self.l_spin, &mut self.l_counter);
+        Self::next_post_channel(&mut self.h, self.h_inc, &self.h_spin, &mut self.h_spin_counter);
+        Self::next_post_channel(&mut self.s, self.s_inc, &self.s_spin, &mut self.s_spin_counter);
+        Self::next_post_channel(&mut self.l, self.l_inc, &self.l_spin, &mut self.l_spin_counter);
     }
 
 }

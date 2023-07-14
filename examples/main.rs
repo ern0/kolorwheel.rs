@@ -85,14 +85,14 @@ impl App<'_> {
 
     fn paint_panel1(&mut self, cols: u32, rows: u32) {
 
-        // let kw = KolorWheel::new()
-        //     .set_count(cols * rows)
-        //     .set_rgb(255, 0, 0)
-        //     .hue_values(&[70, 80, 90])
-        //     .lit_abs(100)
-        // ;
+        let kw = KolorWheel::new()
+            .set_count(cols * rows)
+            .set_rgb(255, 0, 0)
+            .hue_vals(&[70, 80, 90])
+            .lit_abs(100)
+        ;
 
-        // self.paint_grid(kw, cols, rows);
+        self.paint_grid(kw, cols, rows);
     }
 
     fn paint_panel2(&mut self, cols: u32, rows: u32) {
@@ -102,7 +102,10 @@ impl App<'_> {
         
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_color(egui::Color32::from_rgb(99, 0, 77))
+            .set_rgb(99, 0, 77)
+            .gradient(KolorWheel::new().set_rgb(255,0,0))
+            .lit_offs(&[0, 20])
+            //.gray()
         ;
         self.paint_grid(kw, cols, rows);
     }
