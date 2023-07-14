@@ -1,8 +1,9 @@
 #![allow(unused)]
 
-use egui::Color32;
+use egui;
 
-pub struct KolorWheel {
+pub struct KolorWheel<COLOR> {
+    phantom: std::marker::PhantomData<COLOR>,
     count: u32,
     countf: f32,
     h: f32, s: f32, l: f32,
@@ -24,10 +25,11 @@ enum Spin {
     OffsetVec(Vec<u32>),
 }
 
-impl KolorWheel {
+impl<COLOR> KolorWheel<COLOR> {
 
     pub fn new() -> Self {
         Self {
+            phantom: std::marker::PhantomData,
             count: 1, 
             countf: 1.0,
             h: 180.0, 
@@ -139,10 +141,6 @@ impl KolorWheel {
     fn set_rgb_hex_error(self) -> Self {
         // error handling: silent ignore
         return self;
-    }
-
-    pub fn set_color32(self, color: Color32) -> Self {
-        return self.set_rgb(color.r(), color.g(), color.b());
     }
 
     fn normalize_hsl(&mut self) {
@@ -362,10 +360,16 @@ impl KolorWheel {
 
 }
 
-impl Iterator for KolorWheel {
-    type Item = Color32;
+impl KolorWheel<egui::Color32> {
+    pub fn set_color(self, color: egui::Color32) -> Self {
+        return self.set_rgb(color.r(), color.g(), color.b());
+    }
+}
 
-    fn next(&mut self) -> Option<Color32>{
+impl<COLOR> Iterator for KolorWheel<COLOR> {
+    type Item = egui::Color32;
+
+    fn next(&mut self) -> Option<egui::Color32>{
 
         if self.count == 0 {
             return None;
@@ -376,7 +380,7 @@ impl Iterator for KolorWheel {
         self.normalize_hsl();
         self.convert_hsl_to_rgb();
 
-        let color32 = Color32::from_rgb(
+        let color32 = egui::Color32::from_rgb(
             self.r, self.g, self.b
         );
 

@@ -3,7 +3,6 @@
 
 extern crate kolorwheel;
 
-use eframe::egui;
 use kolorwheel::KolorWheel;
 
 fn main() -> Result<(), eframe::Error> {
@@ -86,14 +85,14 @@ impl App<'_> {
 
     fn paint_panel1(&mut self, cols: u32, rows: u32) {
 
-        let kw = KolorWheel::new()
-            .set_count(cols * rows)
-            .set_rgb(255, 0, 0)
-            .hue_values(&[70, 80, 90])
-            .lit_abs(100)
-        ;
+        // let kw = KolorWheel::new()
+        //     .set_count(cols * rows)
+        //     .set_rgb(255, 0, 0)
+        //     .hue_values(&[70, 80, 90])
+        //     .lit_abs(100)
+        // ;
 
-        self.paint_grid(kw, cols, rows);
+        // self.paint_grid(kw, cols, rows);
     }
 
     fn paint_panel2(&mut self, cols: u32, rows: u32) {
@@ -101,14 +100,14 @@ impl App<'_> {
         self.ui.label("panel 2");
         self.ui.label("blah blah blah\nblah blah");
         
-        let kw = KolorWheel::new()
+        let kw: KolorWheel<egui::Color32> = KolorWheel::new()
             .set_count(cols * rows)
-            .set_hsl(180, 40, 90)
+            .set_color(egui::Color32::from_rgb(99, 0, 77))
         ;
         self.paint_grid(kw, cols, rows);
     }
 
-    fn paint_grid(&mut self, kw: KolorWheel, cols: u32, rows: u32) {
+    fn paint_grid(&mut self, kw: KolorWheel<egui::Color32>, cols: u32, rows: u32) {
 
         self.window.update_dims(
             self.ui.available_width() as u32, 
