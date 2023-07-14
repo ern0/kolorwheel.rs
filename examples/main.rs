@@ -103,7 +103,7 @@ impl App<'_> {
         let kw = KolorWheel::new()
             .set_count(cols * rows)
             .set_rgb(99, 0, 77)
-            .gradient(KolorWheel::new().set_rgb(255,0,0))
+            //.gradient(KolorWheel::new().set_rgb(255,0,0))
             .lit_offs(&[0, 20])
             //.gray()
         ;

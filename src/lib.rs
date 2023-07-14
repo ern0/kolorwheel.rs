@@ -7,17 +7,14 @@ pub struct KolorWheel {
     countf: f32,
     h: f32, s: f32, l: f32,
     r: u8, g: u8, b: u8,
-    h_inc: f32,
     h_spin: Spin,
     h_spin_counter: usize,
     h_offset: Offset,
     h_offset_counter: usize,
-    s_inc: f32,
     s_spin: Spin,
     s_spin_counter: usize,
     s_offset: Offset,
     s_offset_counter: usize,
-    l_inc: f32,
     l_spin: Spin,
     l_spin_counter: usize,
     l_offset: Offset,
@@ -25,7 +22,8 @@ pub struct KolorWheel {
 }
 
 enum Spin {
-    IncrementOnly,
+    Rest,
+    IncrementOnly(f32),
     AbsoluteVec(Vec<i32>),
 }
 
@@ -47,18 +45,15 @@ impl KolorWheel {
             r: 127, 
             g: 127, 
             b: 127,
-            h_inc: 0.0, 
-            h_spin: Spin::IncrementOnly, 
+            h_spin: Spin::Rest, 
             h_spin_counter: 0,
             h_offset: Offset::Zero,
             h_offset_counter: 0,
-            s_inc: 0.0,
-            s_spin: Spin::IncrementOnly, 
+            s_spin: Spin::Rest, 
             s_spin_counter: 0,
             s_offset: Offset::Zero,
             s_offset_counter: 0,
-            l_inc: 0.0,
-            l_spin: Spin::IncrementOnly, 
+            l_spin: Spin::Rest, 
             l_spin_counter: 0,
             l_offset: Offset::Zero,
             l_offset_counter: 0,
@@ -285,12 +280,14 @@ impl KolorWheel {
     }
 
     pub fn hue_abs(mut self, amount: u32) -> Self {
-        self.h_inc = (amount as f32 - self.h) / self.countf;
+        let inc = (amount as f32 - self.h) / self.countf;
+        self.h_spin = Spin::IncrementOnly(inc);
         return self;
     }
 
     pub fn hue_rel(mut self, amount: u32) -> Self {
-        self.h_inc = amount as f32 / self.countf;
+        let inc = amount as f32 / self.countf;
+        self.h_spin = Spin::IncrementOnly(inc);
         return self;
     }
 
@@ -305,12 +302,14 @@ impl KolorWheel {
     }
 
     pub fn sat_abs(mut self, amount: u32) -> Self {
-        self.s_inc = (amount as f32 - self.s) / self.countf;
+        let inc = (amount as f32 - self.s) / self.countf;
+        self.s_spin = Spin::IncrementOnly(inc);
         return self;
     }
 
     pub fn sat_rel(mut self, amount: u32) -> Self {
-        self.s_inc = amount as f32 / self.countf;
+        let inc = amount as f32 / self.countf;
+        self.s_spin = Spin::IncrementOnly(inc);
         return self;
     }
 
@@ -325,12 +324,14 @@ impl KolorWheel {
     }
 
     pub fn lit_abs(mut self, amount: u32) -> Self {
-        self.l_inc = (amount as f32 - self.l) / self.countf;
+        let inc = (amount as f32 - self.l) / self.countf;
+        self.l_spin = Spin::IncrementOnly(inc);
         return self;
     }
 
     pub fn lit_rel(mut self, amount: i32) -> Self {
-        self.l_inc = amount as f32 / self.countf;
+        let inc = amount as f32 / self.countf;
+        self.l_spin = Spin::IncrementOnly(inc);
         return self;
     }
 
@@ -360,12 +361,14 @@ impl KolorWheel {
         if let Spin::AbsoluteVec(values) = channel_spin {
             *channel_value = Self::next_from_vector(values.to_vec(), channel_counter);
         }
+
+        #TODO: figure out pre/post ops
     }
 
-    fn next_post_channel(channel_value: &mut f32, channel_inc: f32, channel_spin: &Spin, channel_counter: &mut usize) {
+    fn next_post_channel(channel_value: &mut f32, channel_spin: &Spin, channel_counter: &mut usize) {
 
         match channel_spin {
-            Spin::IncrementOnly => {
+            Spin::IncrementOnly(channel_inc) => {
                 *channel_value += channel_inc;
             },
             Spin::AbsoluteVec(values) => {
@@ -382,9 +385,9 @@ impl KolorWheel {
     }
 
     fn next_post(&mut self) {
-        Self::next_post_channel(&mut self.h, self.h_inc, &self.h_spin, &mut self.h_spin_counter);
-        Self::next_post_channel(&mut self.s, self.s_inc, &self.s_spin, &mut self.s_spin_counter);
-        Self::next_post_channel(&mut self.l, self.l_inc, &self.l_spin, &mut self.l_spin_counter);
+        Self::next_post_channel(&mut self.h, &self.h_spin, &mut self.h_spin_counter);
+        Self::next_post_channel(&mut self.s, &self.s_spin, &mut self.s_spin_counter);
+        Self::next_post_channel(&mut self.l, &self.l_spin, &mut self.l_spin_counter);
     }
 
 }
