@@ -16,7 +16,7 @@ fn main() -> Result<(), eframe::Error> {
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
-        initial_window_pos: Some(egui::pos2(2000.0, 80.0)), //TODO: remove this line
+        initial_window_pos: Some(egui::pos2(600.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
 
@@ -89,9 +89,8 @@ impl App<'_> {
         let kw = KolorWheel::new()
             .set_count(cols * rows)
             .set_rgb(255, 0, 0)
-            .hue_rel(90)
-            .sat_abs(0)
-            .lit_values(&[70, 80, 90]);
+            .hue_values(&[70, 80, 90])
+            .lit_abs(50) //TODO wtf
         ;
 
         self.paint_grid(kw, cols, rows);
