@@ -100,14 +100,14 @@ impl App<'_> {
         self.ui.label("panel 2");
         self.ui.label("blah blah blah\nblah blah");
         
-        let kw: KolorWheel<egui::Color32> = KolorWheel::new()
+        let kw = KolorWheel::new()
             .set_count(cols * rows)
             .set_color(egui::Color32::from_rgb(99, 0, 77))
         ;
         self.paint_grid(kw, cols, rows);
     }
 
-    fn paint_grid(&mut self, kw: KolorWheel<egui::Color32>, cols: u32, rows: u32) {
+    fn paint_grid(&mut self, kw: KolorWheel, cols: u32, rows: u32) {
 
         self.window.update_dims(
             self.ui.available_width() as u32, 

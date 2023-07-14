@@ -2,8 +2,7 @@
 
 use egui;
 
-pub struct KolorWheel<COLOR> {
-    phantom: std::marker::PhantomData<COLOR>,
+pub struct KolorWheel {
     count: u32,
     countf: f32,
     h: f32, s: f32, l: f32,
@@ -25,11 +24,10 @@ enum Spin {
     OffsetVec(Vec<u32>),
 }
 
-impl<COLOR> KolorWheel<COLOR> {
+impl KolorWheel {
 
     pub fn new() -> Self {
         Self {
-            phantom: std::marker::PhantomData,
             count: 1, 
             countf: 1.0,
             h: 180.0, 
@@ -54,6 +52,10 @@ impl<COLOR> KolorWheel<COLOR> {
         self.count = count;
         self.countf = count as f32;
         return self;
+    }
+
+    pub fn set_color(self, color: egui::Color32) -> Self {
+        return self.set_rgb(color.r(), color.g(), color.b());
     }
 
     pub fn set_hsl(mut self, h: u32, s: u32, l: u32) -> Self {
@@ -327,7 +329,6 @@ impl<COLOR> KolorWheel<COLOR> {
         if let Spin::AbsoluteVec(values) = channel_spin {
             *channel_value = Self::next_spin_values(values.to_vec(), channel_counter);
         }
-
     }
 
     fn next_post_channel(channel_value: &mut f32, channel_inc: f32, channel_spin: &Spin, channel_counter: &mut usize) {
@@ -342,7 +343,6 @@ impl<COLOR> KolorWheel<COLOR> {
             },
             _ => {},
         }
-
     }
 
     fn next_pre(&mut self) {
@@ -357,16 +357,9 @@ impl<COLOR> KolorWheel<COLOR> {
         Self::next_post_channel(&mut self.l, self.l_inc, &self.l_spin, &mut self.l_counter);
     }
 
-
 }
 
-impl KolorWheel<egui::Color32> {
-    pub fn set_color(self, color: egui::Color32) -> Self {
-        return self.set_rgb(color.r(), color.g(), color.b());
-    }
-}
-
-impl<COLOR> Iterator for KolorWheel<COLOR> {
+impl Iterator for KolorWheel {
     type Item = egui::Color32;
 
     fn next(&mut self) -> Option<egui::Color32>{
@@ -380,7 +373,8 @@ impl<COLOR> Iterator for KolorWheel<COLOR> {
         self.normalize_hsl();
         self.convert_hsl_to_rgb();
 
-        let color32 = egui::Color32::from_rgb(
+
+        let color = egui::Color32::from_rgb(
             self.r, self.g, self.b
         );
 
@@ -391,7 +385,7 @@ impl<COLOR> Iterator for KolorWheel<COLOR> {
         self.normalize_hsl();
         self.convert_hsl_to_rgb();
 
-        return Some(color32);
+        return Some(color);
     }
 
 }
@@ -403,19 +397,19 @@ mod tests {
 
     #[test]
     fn hsl_to_rgb_black() {
-        let kw = KolorWheel::new().set_hsl(0.0, 0.0, 0.0);
+        let kw = KolorWheel::new().set_hsl(0, 0, 0);
         assert_eq!((kw.r, kw.g, kw.b,), (0, 0, 0));     
     }
 
     #[test]
     fn hsl_to_rgb_white() {
-        let kw = KolorWheel::new().set_hsl(0.0, 100.0, 100.0);
+        let kw = KolorWheel::new().set_hsl(0, 100, 100);
         assert_eq!((kw.r, kw.g, kw.b,), (255, 255, 255));     
     }
 
     #[test]
     fn hsl_to_rgb_gray() {
-        let kw = KolorWheel::new().set_hsl(240.0, 0.0, 40.0);
+        let kw = KolorWheel::new().set_hsl(240, 0, 40);
         assert!(kw.r == kw.g);     
         assert!(kw.g == kw.b);     
         assert!(kw.r > 1);     
@@ -423,43 +417,37 @@ mod tests {
 
     #[test]
     fn hsl_to_rgb_red() {
-        let kw = KolorWheel::new().set_hsl(0.0, 100.0, 50.0);
+        let kw = KolorWheel::new().set_hsl(0, 100, 50);
         assert_eq!((kw.r, kw.g, kw.b,), (255, 0, 0));     
     }
 
     #[test]
     fn hsl_to_rgb_green() {
-        let kw = KolorWheel::new().set_hsl(120.0, 100.0, 50.0);
+        let kw = KolorWheel::new().set_hsl(120, 100, 50);
         assert_eq!((kw.r, kw.g, kw.b,), (0, 255, 0));     
     }
 
     #[test]
     fn hsl_to_rgb_cyan() {
-        let kw = KolorWheel::new().set_hsl(180.0, 100.0, 50.0);
+        let kw = KolorWheel::new().set_hsl(180, 100, 50);
         assert_eq!((kw.r, kw.g, kw.b,), (0, 255, 255));     
     }
 
     #[test]
     fn hsl_to_rgb_blue() {
-        let kw = KolorWheel::new().set_hsl(240.0, 100.0, 50.0);
+        let kw = KolorWheel::new().set_hsl(240, 100, 50);
         assert_eq!((kw.r, kw.g, kw.b,), (0, 0, 255));     
     }
 
     #[test]
     fn hsl_to_rgb_overflow_cyan() {
-        let kw = KolorWheel::new().set_hsl(360.0 + 180.0, 100.0, 50.0);
+        let kw = KolorWheel::new().set_hsl(360 + 180, 100, 50);
         assert_eq!((kw.r, kw.g, kw.b,), (0, 255, 255));     
     }
 
     #[test]
-    fn hsl_to_rgb_underflow_blue() {
-        let kw = KolorWheel::new().set_hsl(-120.0, 100.0, 50.0);
-        assert_eq!((kw.r, kw.g, kw.b,), (0, 0, 255));     
-    }
-
-    #[test]
     fn hsl_to_rgb_light_blue() {
-        let kw = KolorWheel::new().set_hsl(240.0, 100.0, 90.0);
+        let kw = KolorWheel::new().set_hsl(240, 100, 90);
         assert!(kw.r == kw.g);     
         assert!(kw.b > kw.r);
         assert!(kw.b > 240);
