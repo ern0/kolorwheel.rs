@@ -54,11 +54,11 @@ impl KolorWheel {
         return self;
     }
 
-    pub fn set_hsl(mut self, h: f32, s: f32, l: f32) -> Self {
+    pub fn set_hsl(mut self, h: u32, s: u32, l: u32) -> Self {
       
-        self.h = h;
-        self.s = s;
-        self.l = l;
+        self.h = h as f32;
+        self.s = s as f32;
+        self.l = l as f32;
 
         self.normalize_hsl();
         self.convert_hsl_to_rgb();
