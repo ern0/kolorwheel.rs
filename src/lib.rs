@@ -294,7 +294,7 @@ impl KolorWheel {
     }
 
     pub fn lit_abs(mut self, amount: u32) -> Self {
-        self.l_inc = (amount as f32 - self.h) / self.countf;
+        self.l_inc = (amount as f32 - self.l) / self.countf;
         return self;
     }
 
@@ -313,7 +313,7 @@ impl KolorWheel {
         return self;
     }
 
-    fn next_spin(values: Vec<u32>, counter: &mut usize) -> f32 {
+    fn next_spin_values(values: Vec<u32>, counter: &mut usize) -> f32 {
 
         let mut result = values[*counter] as f32;
         *counter += 1;
@@ -327,7 +327,7 @@ impl KolorWheel {
     fn next_pre_channel(channel_value: &mut f32, channel_spin: &Spin, channel_counter: &mut usize) {
 
         if let Spin::AbsoluteVec(values) = channel_spin {
-            *channel_value = Self::next_spin(values.to_vec(), channel_counter);
+            *channel_value = Self::next_spin_values(values.to_vec(), channel_counter);
         }
 
     }
@@ -340,7 +340,7 @@ impl KolorWheel {
             },
             Spin::OffsetVec(values) => {
                 *channel_value += channel_inc;;
-                *channel_value += Self::next_spin(values.to_vec(), channel_counter);
+                *channel_value += Self::next_spin_values(values.to_vec(), channel_counter);
             },
             _ => {},
         }

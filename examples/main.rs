@@ -90,7 +90,7 @@ impl App<'_> {
             .set_count(cols * rows)
             .set_rgb(255, 0, 0)
             .hue_values(&[70, 80, 90])
-            .lit_abs(50) //TODO wtf
+            .lit_abs(100) //TODO wtf
         ;
 
         self.paint_grid(kw, cols, rows);
