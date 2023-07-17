@@ -88,7 +88,7 @@ impl App<'_> {
         let kw = KolorWheel::new()
             .set_count(cols * rows)
             .set_rgb(255, 0, 0)
-            .hue_vals(&[70, 80, 90])
+            .hue_vals(&[0, 90, 180, 270])
             .lit_abs(100)
         ;
 
@@ -102,8 +102,9 @@ impl App<'_> {
         
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb(99, 0, 77)
-            //.gradient(KolorWheel::new().set_rgb(255,0,0))
+            .set_hsl(180, 100, 40)
+            .hue_abs(190)
+            //.gradient(KolorWheel::new().set_rgb(255,25,0))
             .lit_offs(&[0, 20])
             //.gray()
         ;
@@ -158,7 +159,9 @@ impl App<'_> {
         }        
     }
 
-    fn paint_box(&self, painter: &egui::Painter, rect: egui::Rect, fill: egui::Color32) {
+    fn paint_box(&self, painter: &egui::Painter, rect: egui::Rect, color: kolorwheel::Color) {
+        
+        let fill = egui::Color32::from_rgb(color.r, color.g, color.b);
 
         let stroke = egui::epaint::Stroke{
             width: 1.0,

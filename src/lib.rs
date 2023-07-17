@@ -1,6 +1,10 @@
 #![allow(unused)]
 
-use egui;
+pub struct Color {
+    pub r: u8,
+    pub g: u8, 
+    pub b: u8,
+}
 
 pub struct KolorWheel {
     count: u32,
@@ -22,9 +26,9 @@ pub struct KolorWheel {
 }
 
 enum Spin {
-    Rest,
-    IncrementOnly(f32),
-    AbsoluteVec(Vec<i32>),
+    Unchanged,
+    Calculated(f32),
+    Stored(Vec<i32>),
 }
 
 enum Offset {
@@ -45,15 +49,15 @@ impl KolorWheel {
             r: 127, 
             g: 127, 
             b: 127,
-            h_spin: Spin::Rest, 
+            h_spin: Spin::Unchanged, 
             h_spin_counter: 0,
             h_offset: Offset::Zero,
             h_offset_counter: 0,
-            s_spin: Spin::Rest, 
+            s_spin: Spin::Unchanged, 
             s_spin_counter: 0,
             s_offset: Offset::Zero,
             s_offset_counter: 0,
-            l_spin: Spin::Rest, 
+            l_spin: Spin::Unchanged, 
             l_spin_counter: 0,
             l_offset: Offset::Zero,
             l_offset_counter: 0,
@@ -281,18 +285,18 @@ impl KolorWheel {
 
     pub fn hue_abs(mut self, amount: u32) -> Self {
         let inc = (amount as f32 - self.h) / self.countf;
-        self.h_spin = Spin::IncrementOnly(inc);
+        self.h_spin = Spin::Calculated(inc);
         return self;
     }
 
     pub fn hue_rel(mut self, amount: u32) -> Self {
         let inc = amount as f32 / self.countf;
-        self.h_spin = Spin::IncrementOnly(inc);
+        self.h_spin = Spin::Calculated(inc);
         return self;
     }
 
     pub fn hue_vals(mut self, values: &[i32]) -> Self {
-        self.h_spin = Spin::AbsoluteVec(Vec::from(values));
+        self.h_spin = Spin::Stored(Vec::from(values));
         return self;
     }
 
@@ -303,18 +307,18 @@ impl KolorWheel {
 
     pub fn sat_abs(mut self, amount: u32) -> Self {
         let inc = (amount as f32 - self.s) / self.countf;
-        self.s_spin = Spin::IncrementOnly(inc);
+        self.s_spin = Spin::Calculated(inc);
         return self;
     }
 
     pub fn sat_rel(mut self, amount: u32) -> Self {
         let inc = amount as f32 / self.countf;
-        self.s_spin = Spin::IncrementOnly(inc);
+        self.s_spin = Spin::Calculated(inc);
         return self;
     }
 
     pub fn sat_vals(mut self, values: &[i32]) -> Self {
-        self.s_spin = Spin::AbsoluteVec(Vec::from(values));
+        self.s_spin = Spin::Stored(Vec::from(values));
         return self;
     }
 
@@ -325,18 +329,18 @@ impl KolorWheel {
 
     pub fn lit_abs(mut self, amount: u32) -> Self {
         let inc = (amount as f32 - self.l) / self.countf;
-        self.l_spin = Spin::IncrementOnly(inc);
+        self.l_spin = Spin::Calculated(inc);
         return self;
     }
 
     pub fn lit_rel(mut self, amount: i32) -> Self {
         let inc = amount as f32 / self.countf;
-        self.l_spin = Spin::IncrementOnly(inc);
+        self.l_spin = Spin::Calculated(inc);
         return self;
     }
 
     pub fn lit_vals(mut self, values: &[i32]) -> Self {
-        self.l_spin = Spin::AbsoluteVec(Vec::from(values));
+        self.l_spin = Spin::Stored(Vec::from(values));
         return self;
     }
 
@@ -358,20 +362,19 @@ impl KolorWheel {
 
     fn next_pre_channel(channel_value: &mut f32, channel_spin: &Spin, channel_counter: &mut usize) {
 
-        if let Spin::AbsoluteVec(values) = channel_spin {
+        if let Spin::Stored(values) = channel_spin {
             *channel_value = Self::next_from_vector(values.to_vec(), channel_counter);
         }
 
-        #TODO: figure out pre/post ops
     }
 
     fn next_post_channel(channel_value: &mut f32, channel_spin: &Spin, channel_counter: &mut usize) {
 
         match channel_spin {
-            Spin::IncrementOnly(channel_inc) => {
+            Spin::Calculated(channel_inc) => {
                 *channel_value += channel_inc;
             },
-            Spin::AbsoluteVec(values) => {
+            Spin::Stored(values) => {
                 *channel_value += Self::next_from_vector(values.to_vec(), channel_counter);
             },
             _ => {},
@@ -393,9 +396,9 @@ impl KolorWheel {
 }
 
 impl Iterator for KolorWheel {
-    type Item = egui::Color32;
+    type Item = Color;
 
-    fn next(&mut self) -> Option<egui::Color32>{
+    fn next(&mut self) -> Option<Color>{
 
         if self.count == 0 {
             return None;
@@ -406,10 +409,9 @@ impl Iterator for KolorWheel {
         self.normalize_hsl();
         self.convert_hsl_to_rgb();
 
-
-        let color = egui::Color32::from_rgb(
-            self.r, self.g, self.b
-        );
+        let color = Color {
+            r: self.r, g: self.g, b: self.b
+        };
 
         if self.count > 0 {
             self.next_post();
