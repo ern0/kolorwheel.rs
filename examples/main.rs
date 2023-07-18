@@ -7,10 +7,16 @@ use kolorwheel::KolorWheel;
 
 fn main() -> Result<(), eframe::Error> {
 
-    let padding_percent = 30;
+    let app_options = AppOptions {
+        window_width: 720.0, 
+        window_height: 512.0,
+        padding_percent: 30,
+        initial_panel: PanelSelector::Panel1,        
+    };    
+    let mut app = App::new(&app_options);
 
-    let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(720.0, 512.0)),
+    let eframe_options = eframe::NativeOptions {
+        initial_window_size: Some(egui::vec2(app_options.window_width, app_options.window_height)),
         min_window_size: Some(egui::vec2(320.0, 256.0)),
         icon_data: None,
         follow_system_theme: true,
@@ -18,10 +24,7 @@ fn main() -> Result<(), eframe::Error> {
         initial_window_pos: Some(egui::pos2(300.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
-
-    let mut app = App::new(PanelSelector::Panel1, padding_percent);
-
-    eframe::run_simple_native("KolorWheel.rs", options, move |ctx, _frame| {
+    eframe::run_simple_native("KolorWheel.rs", eframe_options, move |ctx, _frame| {
         egui::CentralPanel::default().show(ctx, |ui| {
             app.show_panel(ui);
         });
@@ -29,32 +32,36 @@ fn main() -> Result<(), eframe::Error> {
 
 }
 
+struct AppOptions {
+    window_width: f32,
+    window_height: f32,
+    padding_percent: u32,
+    initial_panel: PanelSelector,
+}
+
 struct App {
     active_panel: PanelSelector,   
     window: Window,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
     Panel1, Panel2,
 }
 
 impl App {
 
-    pub fn new(active_panel: PanelSelector, padding_percent: u32) -> App {
+    pub fn new(options: &AppOptions) -> App {
 
-        let width = 720.0;
-        let height = 512.0;
-        let rounding = width / 100.0;        
         let window = Window::new(
-            width, 
-            height, 
-            padding_percent, 
-            rounding
+            options.window_width, 
+            options.window_height, 
+            options.padding_percent, 
+            options.window_width / 100.0,
         );
 
         App { 
-            active_panel, 
+            active_panel: options.initial_panel, 
             window,
         }
     }
