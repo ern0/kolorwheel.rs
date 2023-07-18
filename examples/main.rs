@@ -11,7 +11,9 @@ fn main() -> Result<(), eframe::Error> {
         window_width: 720.0, 
         window_height: 512.0,
         padding_percent: 30,
-        initial_panel: PanelSelector::Panel1,        
+        initial_panel: PanelSelector::Panel1,       
+        p1_color1: [255.0, 0.0, 0.0],
+        p1_color2: [0.0, 0.0, 255.0],
     };    
     let mut app = App::new(&app_options);
 
@@ -37,11 +39,15 @@ struct AppOptions {
     window_height: f32,
     padding_percent: u32,
     initial_panel: PanelSelector,
+    p1_color1: [f32; 3],
+    p1_color2: [f32; 3],
 }
 
 struct App {
-    active_panel: PanelSelector,   
     window: Window,
+    active_panel: PanelSelector,   
+    p1_color1: [f32; 3],
+    p1_color2: [f32; 3],
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -61,8 +67,10 @@ impl App {
         );
 
         App { 
-            active_panel: options.initial_panel, 
             window,
+            active_panel: options.initial_panel, 
+            p1_color1: options.p1_color1,
+            p1_color2: options.p1_color2,
         }
     }
 
@@ -89,19 +97,22 @@ impl App {
 
     fn paint_panel1(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
 
-        ui.label("Of course, it can make gradient");
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
 
-        let mut color1 = [255.0, 0.0, 0.0];
+            ui.label("Of course, it can make gradient");
 
-        egui::widgets::color_picker::color_edit_button_rgb(
-            ui, 
-            &mut color1,
-        );
+            egui::widgets::color_picker::color_edit_button_rgb(
+                ui, &mut self.p1_color1,
+            );
+            egui::widgets::color_picker::color_edit_button_rgb(
+                ui, &mut self.p1_color2,
+            );
+        });
 
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb(color1[0] as u8, color1[1] as u8, color1[2] as u8)
-            //.gradient(color2),
+            .set_rgb_fa(self.p1_color1)
+            .gradient(KolorWheel::new().set_rgb_fa(self.p1_color2))
         ;
 
         self.paint_grid(ui, kw, cols, rows);

@@ -98,12 +98,20 @@ impl KolorWheel {
         return self;
     }
 
-    pub fn gradient(mut self, target: KolorWheel) -> Self {
-        return self
-            .hue_abs(target.h as u32)
-            .sat_abs(target.s as u32)
-            .lit_abs(target.l as u32)
-        ;
+    pub fn set_rgb_f(mut self, r: f32, g: f32, b: f32) -> Self {
+        self.set_rgb(
+            (r * 255.0) as u8, 
+            (g * 255.0) as u8, 
+            (b * 255.0) as u8,
+        )
+    }
+
+    pub fn set_rgb_fa(mut self, rgb: [f32; 3]) -> Self {
+        self.set_rgb_f(
+            rgb[0], 
+            rgb[1], 
+            rgb[2]
+        )
     }
 
     pub fn set_rgb_hex(mut self, hex: &str) -> Self {
@@ -167,6 +175,14 @@ impl KolorWheel {
     fn set_rgb_hex_error(self) -> Self {
         // error handling: silent ignore
         return self;
+    }
+
+    pub fn gradient(mut self, target: KolorWheel) -> Self {
+        return self
+            .hue_abs(target.h as u32)
+            .sat_abs(target.s as u32)
+            .lit_abs(target.l as u32)
+        ;
     }
 
     fn normalize_hsl(&mut self) {
