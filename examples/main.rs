@@ -10,16 +10,16 @@ fn main() -> Result<(), eframe::Error> {
     let padding_percent = 30;
 
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(480.0, 320.0)),
+        initial_window_size: Some(egui::vec2(720.0, 512.0)),
         min_window_size: Some(egui::vec2(320.0, 256.0)),
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
-        initial_window_pos: Some(egui::pos2(600.0, 80.0)), //TODO: remove this line
+        initial_window_pos: Some(egui::pos2(300.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
 
-    let mut active_panel = PanelSelector::Panel2;
+    let mut active_panel = PanelSelector::Panel1;
 
     eframe::run_simple_native("KolorWheel.rs", options, move |ctx, _frame| {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -69,10 +69,16 @@ impl App<'_> {
 
     fn show_panel(&mut self) {
         
-        self.ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
+
+        self.ui.with_layout(egui::Layout::right_to_left(egui::Align::LEFT), |ui| {
+            ui.label(" ");
+            ui.hyperlink("https://github.com/ern0/kolorwheel.rs");
+        });
+
+        self.ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
             ui.selectable_value(&mut self.active_panel, PanelSelector::Panel1, "Panel1");
             ui.selectable_value(&mut self.active_panel, PanelSelector::Panel2, "Panel2");
-        });        
+        });
 
         self.ui.separator();
 
@@ -85,11 +91,19 @@ impl App<'_> {
 
     fn paint_panel1(&mut self, cols: u32, rows: u32) {
 
+        self.ui.label("Of course, it can make gradient");
+
+        let mut color1 = [255.0, 0.0, 0.0];
+
+        egui::widgets::color_picker::color_edit_button_rgb(
+            &mut self.ui, 
+            &mut color1,
+        );
+
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb(255, 0, 0)
-            .hue_vals(&[0, 90, 180, 270])
-            .lit_abs(100)
+            .set_rgb(color1[0] as u8, color1[1] as u8, color1[2] as u8)
+            //.gradient(color2),
         ;
 
         self.paint_grid(kw, cols, rows);

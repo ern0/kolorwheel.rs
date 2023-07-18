@@ -411,7 +411,7 @@ impl KolorWheel {
         self.saved_s = self.s;
         self.saved_l = self.l;
     }
-    
+
     fn restore_hsl(&mut self) {
         self.h = self.saved_h;
         self.s = self.saved_s;
@@ -431,9 +431,9 @@ impl Iterator for KolorWheel {
         self.count -= 1;
 
         self.spin_stored_hsl();
-        self.normalize_hsl();
         self.save_hsl();
         self.offset_hsl();
+        self.normalize_hsl();
         self.convert_hsl_to_rgb();
         self.restore_hsl();
 
