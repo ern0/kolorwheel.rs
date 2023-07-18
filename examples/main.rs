@@ -19,20 +19,17 @@ fn main() -> Result<(), eframe::Error> {
         ..Default::default()
     };
 
-    let mut active_panel = PanelSelector::Panel1;
+    let mut app = App::new(PanelSelector::Panel1, padding_percent);
 
     eframe::run_simple_native("KolorWheel.rs", options, move |ctx, _frame| {
         egui::CentralPanel::default().show(ctx, |ui| {
-            let mut app = App::new(ui, active_panel.clone(), padding_percent);
-            app.show_panel();
-            active_panel = app.get_active_panel();
+            app.show_panel(ui);
         });
     })
 
 }
 
-struct App<'u> {
-    ui: &'u mut egui::Ui,
+struct App {
     active_panel: PanelSelector,   
     window: Window,
 }
@@ -42,61 +39,55 @@ enum PanelSelector {
     Panel1, Panel2,
 }
 
-impl App<'_> {
+impl App {
 
-    pub fn new(ui: &mut egui::Ui, active_panel: PanelSelector, padding_percent: u32) -> App {
+    pub fn new(active_panel: PanelSelector, padding_percent: u32) -> App {
 
-        let width = ui.available_width();
-        let height = ui.available_height();
+        let width = 720.0;
+        let height = 512.0;
         let rounding = width / 100.0;        
         let window = Window::new(
             width, 
             height, 
             padding_percent, 
-            rounding,
+            rounding
         );
 
         App { 
-            ui, 
             active_panel, 
             window,
         }
     }
 
-    fn get_active_panel(&self) -> PanelSelector {
-        self.active_panel.clone()
-    }
+    fn show_panel(&mut self, ui: &mut egui::Ui) {
 
-    fn show_panel(&mut self) {
-        
-
-        self.ui.with_layout(egui::Layout::right_to_left(egui::Align::LEFT), |ui| {
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::LEFT), |ui| {
             ui.label(" ");
             ui.hyperlink("https://github.com/ern0/kolorwheel.rs");
         });
 
-        self.ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
             ui.selectable_value(&mut self.active_panel, PanelSelector::Panel1, "Panel1");
             ui.selectable_value(&mut self.active_panel, PanelSelector::Panel2, "Panel2");
         });
 
-        self.ui.separator();
+        ui.separator();
 
         match self.active_panel {
-            PanelSelector::Panel1 => self.paint_panel1(10, 10),
-            PanelSelector::Panel2 => self.paint_panel2(4, 4),
+            PanelSelector::Panel1 => self.paint_panel1(ui, 10, 10),
+            PanelSelector::Panel2 => self.paint_panel2(ui, 4, 4),
         }
 
     }
 
-    fn paint_panel1(&mut self, cols: u32, rows: u32) {
+    fn paint_panel1(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
 
-        self.ui.label("Of course, it can make gradient");
+        ui.label("Of course, it can make gradient");
 
         let mut color1 = [255.0, 0.0, 0.0];
 
         egui::widgets::color_picker::color_edit_button_rgb(
-            &mut self.ui, 
+            ui, 
             &mut color1,
         );
 
@@ -106,13 +97,14 @@ impl App<'_> {
             //.gradient(color2),
         ;
 
-        self.paint_grid(kw, cols, rows);
+        self.paint_grid(ui, kw, cols, rows);
     }
 
-    fn paint_panel2(&mut self, cols: u32, rows: u32) {
+    fn paint_panel2(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
 
-        self.ui.label("panel 2");
-        self.ui.label("blah blah blah\nblah blah");
+
+        ui.label("panel 2");
+        ui.label("blah blah blah\nblah blah");
         
         let kw = KolorWheel::new()
             .set_count(cols * rows)
@@ -122,17 +114,17 @@ impl App<'_> {
             .lit_offs(&[0, 20])
             //.gray()
         ;
-        self.paint_grid(kw, cols, rows);
+        self.paint_grid(ui, kw, cols, rows);
     }
 
-    fn paint_grid(&mut self, kw: KolorWheel, cols: u32, rows: u32) {
+    fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
 
         self.window.update_dims(
-            self.ui.available_width() as u32, 
-            self.ui.available_height() as u32,
+            ui.available_width() as u32, 
+            ui.available_height() as u32,
         );
 
-        let (_, painter) = self.ui.allocate_painter(
+        let (_, painter) = ui.allocate_painter(
             egui::Vec2::new(
                 self.window.actual_width as f32, 
                 self.window.actual_height as f32,
@@ -233,6 +225,7 @@ impl Window {
     }
 
 }
+
 struct Cell {
     columns: u32,
     _rows: u32,
