@@ -23,7 +23,7 @@ fn main() -> Result<(), eframe::Error> {
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
-        initial_window_pos: Some(egui::pos2(300.0, 80.0)), //TODO: remove this line
+        initial_window_pos: Some(egui::pos2(1800.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
     eframe::run_simple_native("KolorWheel.rs", eframe_options, move |ctx, _frame| {
@@ -76,6 +76,8 @@ impl App {
 
     fn show_panel(&mut self, ui: &mut egui::Ui) {
 
+        self.window.original_height = ui.available_height() as u32;
+
         ui.with_layout(egui::Layout::right_to_left(egui::Align::LEFT), |ui| {
             ui.label(" ");
             ui.hyperlink("https://github.com/ern0/kolorwheel.rs");
@@ -120,7 +122,6 @@ impl App {
 
     fn paint_panel2(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
 
-
         ui.label("panel 2");
         ui.label("blah blah blah\nblah blah");
         
@@ -137,10 +138,8 @@ impl App {
 
     fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
 
-        self.window.update_dims(
-            ui.available_width() as u32, 
-            ui.available_height() as u32,
-        );
+        self.window.actual_width = ui.available_width() as u32;
+        self.window.actual_height = ui.available_height() as u32;
 
         let (_, painter) = ui.allocate_painter(
             egui::Vec2::new(
@@ -156,7 +155,6 @@ impl App {
         let mut x = self.window.left + cell.window_centering_horizontal;
         let header_height = self.window.original_height - self.window.actual_height;
         let mut y = self.window.top + header_height;
-
 
         for fill in kw {
 
@@ -236,11 +234,6 @@ impl Window {
             top: 9,   // magic value
         }
     }  
-
-    pub fn update_dims(&mut self, width: u32, height: u32) {
-        self.actual_width = width;
-        self.actual_height = height;
-    }
 
 }
 
