@@ -11,7 +11,7 @@ fn main() -> Result<(), eframe::Error> {
         window_width: 720.0, 
         window_height: 512.0,
         padding_percent: 30,
-        initial_panel: PanelSelector::Panel1,       
+        initial_panel: PanelSelector::Gradient,       
         p1_color1: [255.0, 0.0, 0.0],
         p1_color2: [0.0, 0.0, 255.0],
     };    
@@ -52,7 +52,7 @@ struct App {
 
 #[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
-    Panel1, Panel2,
+    Gradient, Panel2,
 }
 
 impl App {
@@ -84,32 +84,34 @@ impl App {
         });
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-            ui.selectable_value(&mut self.active_panel, PanelSelector::Panel1, "Panel1");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::Gradient, "Gradient");
             ui.selectable_value(&mut self.active_panel, PanelSelector::Panel2, "Panel2");
         });
 
         ui.separator();
 
         match self.active_panel {
-            PanelSelector::Panel1 => self.paint_panel1(ui, 10, 10),
+            PanelSelector::Gradient => self.paint_p1_gradient(ui, 5, 5),
             PanelSelector::Panel2 => self.paint_panel2(ui, 4, 4),
         }
 
     }
 
-    fn paint_panel1(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
+    fn paint_p1_gradient(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
 
-            ui.label("Of course, it can make gradient");
+            ui.label("Make simple gradient:");
 
             egui::widgets::color_picker::color_edit_button_rgb(
                 ui, &mut self.p1_color1,
             );
+            ui.label("=>");
             egui::widgets::color_picker::color_edit_button_rgb(
                 ui, &mut self.p1_color2,
             );
         });
+
 
         let kw = KolorWheel::new()
             .set_count(cols * rows)
