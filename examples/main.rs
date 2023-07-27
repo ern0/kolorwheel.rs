@@ -12,8 +12,8 @@ fn main() -> Result<(), eframe::Error> {
         window_height: 512.0,
         padding_percent: 30,
         initial_panel: PanelSelector::Gradient,       
-        p1_color1: [255.0, 0.0, 0.0],
-        p1_color2: [0.0, 0.0, 255.0],
+        p1_color1: egui::Rgba::from_rgb(1.0, 0.0, 0.0), 
+        p1_color2: egui::Rgba::from_rgb(0.0, 0.0, 1.0),
     };    
     let mut app = App::new(&app_options);
 
@@ -39,15 +39,15 @@ struct AppOptions {
     window_height: f32,
     padding_percent: u32,
     initial_panel: PanelSelector,
-    p1_color1: [f32; 3],
-    p1_color2: [f32; 3],
+    p1_color1: egui::Rgba,
+    p1_color2: egui::Rgba,
 }
 
 struct App {
     window: Window,
     active_panel: PanelSelector,   
-    p1_color1: [f32; 3],
-    p1_color2: [f32; 3],
+    p1_color1: egui::Rgba,
+    p1_color2: egui::Rgba,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -103,20 +103,27 @@ impl App {
 
             ui.label("Make simple gradient:");
 
-            egui::widgets::color_picker::color_edit_button_rgb(
-                ui, &mut self.p1_color1,
+            egui::widgets::color_picker::color_edit_button_rgba(
+                ui, 
+                &mut self.p1_color1,
+                egui::widgets::color_picker::Alpha::Opaque
             );
-            ui.label("=>");
-            egui::widgets::color_picker::color_edit_button_rgb(
-                ui, &mut self.p1_color2,
+            ui.label("-");
+            egui::widgets::color_picker::color_edit_button_rgba(
+                ui, 
+                &mut self.p1_color2,
+                egui::widgets::color_picker::Alpha::Opaque
             );
         });
 
 
+        let c1 = [self.p1_color1.r(), self.p1_color1.g(), self.p1_color1.b()];
+        let c2 = [self.p1_color2.r(), self.p1_color2.g(), self.p1_color2.b()];
+
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb_fa(self.p1_color1)
-            .gradient(KolorWheel::new().set_rgb_fa(self.p1_color2))
+            .set_rgb_fa(c1)
+            .gradient(KolorWheel::new().set_rgb_fa(c2))
         ;
 
         self.paint_grid(ui, kw, cols, rows);
