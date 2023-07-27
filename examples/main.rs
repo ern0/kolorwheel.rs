@@ -8,14 +8,16 @@ use kolorwheel::KolorWheel;
 fn main() -> Result<(), eframe::Error> {
 
     let window_width = 720.0;
+    let min_width = 320.0;
     let window_height = 512.0;
+    let min_height = 256.0;
     let cell_padding = 30;
 
     let mut app = App::new(window_width, window_height, cell_padding);
 
     let eframe_options = eframe::NativeOptions {
         initial_window_size: Some(egui::vec2(window_width, window_height)),
-        min_window_size: Some(egui::vec2(320.0, 256.0)),
+        min_window_size: Some(egui::vec2(min_width, min_height)),
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
@@ -36,7 +38,7 @@ struct App {
     p1_color1: egui::Rgba,
     p1_color2: egui::Rgba,
     p2_color: egui::Rgba,
-    p2_hue: f32,
+    p2_hue: i32,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -46,17 +48,22 @@ enum PanelSelector {
 
 impl App {
 
-    pub fn new(window_width: f32, window_height: f32, cell_padding: u32) -> App {
+    pub fn new(window_width: f32, window_height: f32, cell_padding: u32) -> Self {
 
-        let window = Window::new(window_width, window_height, cell_padding, window_width / 100.0);
+        let window = Window::new(
+            window_width, 
+            window_height, 
+            cell_padding, 
+            window_width / 100.0
+        );
 
-        App { 
+        Self { 
             window,
             active_panel: PanelSelector::Gradient,       
             p1_color1: egui::Rgba::from_rgb(1.0, 0.0, 0.0), 
             p1_color2: egui::Rgba::from_rgb(0.0, 0.0, 1.0),
             p2_color: egui::Rgba::from_rgb(0.0, 1.0, 0.5),
-            p2_hue: 0.0,
+            p2_hue: 0,
         }
     }
 
@@ -77,13 +84,16 @@ impl App {
         ui.separator();
 
         match self.active_panel {
-            PanelSelector::Gradient => self.paint_p1_gradient(ui, 5, 5),
-            PanelSelector::HueAbs => self.paint_p2_hue_abs(ui, 4, 4),
+            PanelSelector::Gradient => self.paint_p1_gradient(ui),
+            PanelSelector::HueAbs => self.paint_p2_hue_abs(ui),
         }
 
     }
 
-    fn paint_p1_gradient(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
+    fn paint_p1_gradient(&mut self, ui: &mut egui::Ui) {
+
+        let cols = 5;
+        let rows = 5;
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
 
@@ -114,18 +124,21 @@ impl App {
 
     }
 
-    fn paint_p2_hue_abs(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
+    fn paint_p2_hue_abs(&mut self, ui: &mut egui::Ui) {
+
+        let cols = 4;
+        let rows = 4;
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
 
-            ui.label("Change hue, absolute");
+            ui.label("Change hue to absolute:");
 
             egui::widgets::color_picker::color_edit_button_rgba(
                 ui, 
                 &mut self.p2_color,
                 egui::widgets::color_picker::Alpha::Opaque
             );
-            ui.label("-");
+            ui.add(egui::Slider::new(&mut self.p2_hue, 0..=360).text("deg"));
 
         });
 
@@ -134,7 +147,7 @@ impl App {
         let kw = KolorWheel::new()
             .set_count(cols * rows)
             .set_rgb_fa(color)
-            .hue_abs(190)
+            .hue_abs((self.p2_hue as u32).try_into().unwrap())
         ;
 
         self.paint_grid(ui, kw, cols, rows);
