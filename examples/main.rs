@@ -39,11 +39,16 @@ struct App {
     p1_color2: egui::Rgba,
     p2_color: egui::Rgba,
     p2_hue: i32,
+    p3_color: egui::Rgba,
+    p3_sat: i32,
+    p4_color: egui::Rgba,
+    p4_lit: i32,
 }
 
 #[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
-    Gradient, HueAbs,
+    Gradient, 
+    HueAbs, SatAbs, LitAbs,
 }
 
 impl App {
@@ -60,10 +65,18 @@ impl App {
         Self { 
             window,
             active_panel: PanelSelector::Gradient,       
+
             p1_color1: egui::Rgba::from_rgb(1.0, 0.0, 0.0), 
             p1_color2: egui::Rgba::from_rgb(0.0, 0.0, 1.0),
-            p2_color: egui::Rgba::from_rgb(0.0, 1.0, 0.5),
-            p2_hue: 0,
+
+            p2_color: egui::Rgba::from_rgb(1.0, 0.0, 0.0),
+            p2_hue: 120,
+
+            p3_color: egui::Rgba::from_rgb(0.0, 1.0, 0.0),
+            p3_sat: 100,
+
+            p4_color: egui::Rgba::from_rgb(0.0, 0.0, 0.7),
+            p4_lit: 50,
         }
     }
 
@@ -79,6 +92,8 @@ impl App {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
             ui.selectable_value(&mut self.active_panel, PanelSelector::Gradient, "Gradient");
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueAbs, "Hue/abs");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::SatAbs, "Sat/abs");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::LitAbs, "Lit/abs");
         });
 
         ui.separator();
@@ -86,6 +101,8 @@ impl App {
         match self.active_panel {
             PanelSelector::Gradient => self.paint_p1_gradient(ui),
             PanelSelector::HueAbs => self.paint_p2_hue_abs(ui),
+            PanelSelector::SatAbs => self.paint_p3_sat_abs(ui),
+            PanelSelector::LitAbs => self.paint_p4_lit_abs(ui),
         }
 
     }
@@ -148,6 +165,66 @@ impl App {
             .set_count(cols * rows)
             .set_rgb_fa(color)
             .hue_abs((self.p2_hue as u32).try_into().unwrap())
+        ;
+
+        self.paint_grid(ui, kw, cols, rows);
+
+    }
+
+    fn paint_p3_sat_abs(&mut self, ui: &mut egui::Ui) {
+
+        let cols = 4;
+        let rows = 4;
+
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
+
+            ui.label("Change saturation to absolute:");
+
+            egui::widgets::color_picker::color_edit_button_rgba(
+                ui, 
+                &mut self.p3_color,
+                egui::widgets::color_picker::Alpha::Opaque
+            );
+            ui.add(egui::Slider::new(&mut self.p3_sat, 0..=100).text("%"));
+
+        });
+
+        let color = [self.p3_color.r(), self.p3_color.g(), self.p3_color.b()];
+
+        let kw = KolorWheel::new()
+            .set_count(cols * rows)
+            .set_rgb_fa(color)
+            .sat_abs((self.p3_sat as u32).try_into().unwrap())
+        ;
+
+        self.paint_grid(ui, kw, cols, rows);
+
+    }
+
+    fn paint_p4_lit_abs(&mut self, ui: &mut egui::Ui) {
+
+        let cols = 4;
+        let rows = 4;
+
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
+
+            ui.label("Change lightness to absolute:");
+
+            egui::widgets::color_picker::color_edit_button_rgba(
+                ui, 
+                &mut self.p4_color,
+                egui::widgets::color_picker::Alpha::Opaque
+            );
+            ui.add(egui::Slider::new(&mut self.p4_lit, 0..=100).text("%"));
+
+        });
+
+        let color = [self.p4_color.r(), self.p4_color.g(), self.p4_color.b()];
+
+        let kw = KolorWheel::new()
+            .set_count(cols * rows)
+            .set_rgb_fa(color)
+            .lit_abs((self.p4_lit as u32).try_into().unwrap())
         ;
 
         self.paint_grid(ui, kw, cols, rows);
