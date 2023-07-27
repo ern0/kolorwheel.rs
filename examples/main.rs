@@ -7,18 +7,14 @@ use kolorwheel::KolorWheel;
 
 fn main() -> Result<(), eframe::Error> {
 
-    let app_options = AppOptions {
-        window_width: 720.0, 
-        window_height: 512.0,
-        padding_percent: 30,
-        initial_panel: PanelSelector::Gradient,       
-        p1_color1: egui::Rgba::from_rgb(1.0, 0.0, 0.0), 
-        p1_color2: egui::Rgba::from_rgb(0.0, 0.0, 1.0),
-    };    
-    let mut app = App::new(&app_options);
+    let window_width = 720.0;
+    let window_height = 512.0;
+    let cell_padding = 30;
+
+    let mut app = App::new(window_width, window_height, cell_padding);
 
     let eframe_options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(app_options.window_width, app_options.window_height)),
+        initial_window_size: Some(egui::vec2(window_width, window_height)),
         min_window_size: Some(egui::vec2(320.0, 256.0)),
         icon_data: None,
         follow_system_theme: true,
@@ -34,43 +30,33 @@ fn main() -> Result<(), eframe::Error> {
 
 }
 
-struct AppOptions {
-    window_width: f32,
-    window_height: f32,
-    padding_percent: u32,
-    initial_panel: PanelSelector,
-    p1_color1: egui::Rgba,
-    p1_color2: egui::Rgba,
-}
-
 struct App {
     window: Window,
     active_panel: PanelSelector,   
     p1_color1: egui::Rgba,
     p1_color2: egui::Rgba,
+    p2_color: egui::Rgba,
+    p2_hue: f32,
 }
 
 #[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
-    Gradient, Panel2,
+    Gradient, HueAbs,
 }
 
 impl App {
 
-    pub fn new(options: &AppOptions) -> App {
+    pub fn new(window_width: f32, window_height: f32, cell_padding: u32) -> App {
 
-        let window = Window::new(
-            options.window_width, 
-            options.window_height, 
-            options.padding_percent, 
-            options.window_width / 100.0,
-        );
+        let window = Window::new(window_width, window_height, cell_padding, window_width / 100.0);
 
         App { 
             window,
-            active_panel: options.initial_panel, 
-            p1_color1: options.p1_color1,
-            p1_color2: options.p1_color2,
+            active_panel: PanelSelector::Gradient,       
+            p1_color1: egui::Rgba::from_rgb(1.0, 0.0, 0.0), 
+            p1_color2: egui::Rgba::from_rgb(0.0, 0.0, 1.0),
+            p2_color: egui::Rgba::from_rgb(0.0, 1.0, 0.5),
+            p2_hue: 0.0,
         }
     }
 
@@ -85,14 +71,14 @@ impl App {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
             ui.selectable_value(&mut self.active_panel, PanelSelector::Gradient, "Gradient");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::Panel2, "Panel2");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::HueAbs, "Hue/abs");
         });
 
         ui.separator();
 
         match self.active_panel {
             PanelSelector::Gradient => self.paint_p1_gradient(ui, 5, 5),
-            PanelSelector::Panel2 => self.paint_panel2(ui, 4, 4),
+            PanelSelector::HueAbs => self.paint_p2_hue_abs(ui, 4, 4),
         }
 
     }
@@ -116,10 +102,8 @@ impl App {
             );
         });
 
-
         let c1 = [self.p1_color1.r(), self.p1_color1.g(), self.p1_color1.b()];
         let c2 = [self.p1_color2.r(), self.p1_color2.g(), self.p1_color2.b()];
-
         let kw = KolorWheel::new()
             .set_count(cols * rows)
             .set_rgb_fa(c1)
@@ -127,22 +111,34 @@ impl App {
         ;
 
         self.paint_grid(ui, kw, cols, rows);
+
     }
 
-    fn paint_panel2(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
+    fn paint_p2_hue_abs(&mut self, ui: &mut egui::Ui, cols: u32, rows: u32) {
 
-        ui.label("panel 2");
-        ui.label("blah blah blah\nblah blah");
-        
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
+
+            ui.label("Change hue, absolute");
+
+            egui::widgets::color_picker::color_edit_button_rgba(
+                ui, 
+                &mut self.p2_color,
+                egui::widgets::color_picker::Alpha::Opaque
+            );
+            ui.label("-");
+
+        });
+
+        let color = [self.p2_color.r(), self.p2_color.g(), self.p2_color.b()];
+
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_hsl(180, 100, 40)
+            .set_rgb_fa(color)
             .hue_abs(190)
-            //.gradient(KolorWheel::new().set_rgb(255,25,0))
-            .lit_offs(&[0, 20])
-            //.gray()
         ;
+
         self.paint_grid(ui, kw, cols, rows);
+
     }
 
     fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
