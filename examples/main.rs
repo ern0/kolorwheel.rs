@@ -43,12 +43,15 @@ struct App {
     p3_sat: i32,
     p4_color: egui::Rgba,
     p4_lit: i32,
+    p5_p6_color: egui::Rgba,
+    p5_p6_hue: i32,
 }
 
 #[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
     Gradient, 
     HueAbs, SatAbs, LitAbs,
+    HueReli, HueRelx,
 }
 
 impl App {
@@ -72,11 +75,14 @@ impl App {
             p2_color: egui::Rgba::from_rgb(1.0, 0.0, 0.0),
             p2_hue: 120,
 
-            p3_color: egui::Rgba::from_rgb(0.0, 1.0, 0.0),
+            p3_color: egui::Rgba::from_rgb(0.6, 0.7, 0.6),
             p3_sat: 100,
 
             p4_color: egui::Rgba::from_rgb(0.0, 0.0, 0.7),
             p4_lit: 50,
+
+            p5_p6_color: egui::Rgba::from_rgb(1.0, 1.0, 0.0),
+            p5_p6_hue: 360,
         }
     }
 
@@ -94,6 +100,8 @@ impl App {
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueAbs, "Hue/abs");
             ui.selectable_value(&mut self.active_panel, PanelSelector::SatAbs, "Sat/abs");
             ui.selectable_value(&mut self.active_panel, PanelSelector::LitAbs, "Lit/abs");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::HueReli, "Hue/reli");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::HueRelx, "Hue/relx");
         });
 
         ui.separator();
@@ -103,6 +111,8 @@ impl App {
             PanelSelector::HueAbs => self.paint_p2_hue_abs(ui),
             PanelSelector::SatAbs => self.paint_p3_sat_abs(ui),
             PanelSelector::LitAbs => self.paint_p4_lit_abs(ui),
+            PanelSelector::HueReli => self.paint_p5_hue_reli(ui),
+            PanelSelector::HueRelx => self.paint_p6_hue_relx(ui),
         }
 
     }
@@ -230,6 +240,53 @@ impl App {
         self.paint_grid(ui, kw, cols, rows);
 
     }
+
+    fn paint_p5_hue_reli(&mut self, ui: &mut egui::Ui) {
+        self.paint_p5_p6_hue_rel_univ(ui, true);
+    }
+
+    fn paint_p6_hue_relx(&mut self, ui: &mut egui::Ui) {
+        self.paint_p5_p6_hue_rel_univ(ui, false);
+    }
+
+    fn paint_p5_p6_hue_rel_univ(&mut self, ui: &mut egui::Ui, include: bool) {
+
+        let cols = 6;
+        let rows = 6;
+
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
+
+            ui.label(
+                if include { "Change hue relative, including target:" }
+                else { "Change hue relative, excluding target:" }
+            );
+
+            egui::widgets::color_picker::color_edit_button_rgba(
+                ui, 
+                &mut self.p5_p6_color,
+                egui::widgets::color_picker::Alpha::Opaque
+            );
+            ui.add(egui::Slider::new(&mut self.p5_p6_hue, -720..=720).text("deg"));
+
+        });
+
+        let color = [self.p5_p6_color.r(), self.p5_p6_color.g(), self.p5_p6_color.b()];
+
+        let mut kw = KolorWheel::new()
+            .set_count(cols * rows)
+            .set_rgb_fa(color)
+        ;
+
+        if include {
+            kw = kw.hue_reli((self.p5_p6_hue as i32).try_into().unwrap());
+        } else {
+            kw = kw.hue_relx((self.p5_p6_hue as i32).try_into().unwrap());
+        }
+
+        self.paint_grid(ui, kw, cols, rows);
+
+    }
+
 
     fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
 

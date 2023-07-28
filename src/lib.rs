@@ -188,6 +188,7 @@ impl KolorWheel {
     fn normalize_hsl(&mut self) {
         
         self.h = self.h % 360.0;
+        if self.h < 0.0 { self.h += 360.0 };
 
         if self.s < 0.0 { self.s = 0.0 };
         if self.s > 100.0 { self.s = 100.0 };
@@ -303,20 +304,38 @@ impl KolorWheel {
         
     }
 
+    fn slice_u32_to_vec_i32(values: &[u32]) -> Vec<i32> {
+
+        let mut vec_values: Vec<i32> = Vec::new();
+
+        for uvalue in values { 
+            let ivalue = *uvalue as i32;
+            vec_values.push(ivalue) 
+        };
+
+        return vec_values;
+    }
+
     pub fn hue_abs(mut self, amount: u32) -> Self {
         let inc = (amount as f32 - self.h) / self.countf;
         self.h_spin = Spin::Calculated(inc);
         return self;
     }
 
-    pub fn hue_rel(mut self, amount: u32) -> Self {
+    pub fn hue_reli(mut self, amount: i32) -> Self {
+        let inc = amount as f32 / (self.countf - 1.0);
+        self.h_spin = Spin::Calculated(inc);
+        return self;
+    }
+
+    pub fn hue_relx(mut self, amount: i32) -> Self {
         let inc = amount as f32 / self.countf;
         self.h_spin = Spin::Calculated(inc);
         return self;
     }
 
-    pub fn hue_vals(mut self, values: &[i32]) -> Self {
-        self.h_spin = Spin::Stored(Vec::from(values));
+    pub fn hue_vals(mut self, values: &[u32]) -> Self {
+        self.h_spin = Spin::Stored(Self::slice_u32_to_vec_i32(values));
         return self;
     }
 
@@ -331,14 +350,20 @@ impl KolorWheel {
         return self;
     }
 
-    pub fn sat_rel(mut self, amount: u32) -> Self {
+    pub fn sat_reli(mut self, amount: i32) -> Self {
+        let inc = amount as f32 / (self.countf - 1.0);
+        self.s_spin = Spin::Calculated(inc);
+        return self;
+    }
+
+    pub fn sat_relx(mut self, amount: i32) -> Self {
         let inc = amount as f32 / self.countf;
         self.s_spin = Spin::Calculated(inc);
         return self;
     }
 
-    pub fn sat_vals(mut self, values: &[i32]) -> Self {
-        self.s_spin = Spin::Stored(Vec::from(values));
+    pub fn sat_vals(mut self, values: &[u32]) -> Self {
+        self.s_spin = Spin::Stored(Vec::from(Self::slice_u32_to_vec_i32(values)));
         return self;
     }
 
@@ -353,14 +378,20 @@ impl KolorWheel {
         return self;
     }
 
-    pub fn lit_rel(mut self, amount: i32) -> Self {
+    pub fn lit_reli(mut self, amount: i32) -> Self {
+        let inc = amount as f32 / (self.countf - 1.0);
+        self.l_spin = Spin::Calculated(inc);
+        return self;
+    }
+
+    pub fn lit_relx(mut self, amount: i32) -> Self {
         let inc = amount as f32 / self.countf;
         self.l_spin = Spin::Calculated(inc);
         return self;
     }
 
-    pub fn lit_vals(mut self, values: &[i32]) -> Self {
-        self.l_spin = Spin::Stored(Vec::from(values));
+    pub fn lit_vals(mut self, values: &[u32]) -> Self {
+        self.l_spin = Spin::Stored(Vec::from(Self::slice_u32_to_vec_i32(values)));
         return self;
     }
 
@@ -447,6 +478,7 @@ impl Iterator for KolorWheel {
         self.count -= 1;
 
         self.spin_stored_hsl();
+        self.normalize_hsl();
         self.save_hsl();
         self.offset_hsl();
         self.normalize_hsl();
