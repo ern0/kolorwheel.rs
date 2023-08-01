@@ -45,6 +45,9 @@ struct App {
     p4_lit: i32,
     p5_p6_color: egui::Rgba,
     p5_p6_hue: i32,
+    p7_color: egui::Rgba,
+    p7_sat: i32,
+    p7_lit: i32,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -52,6 +55,7 @@ enum PanelSelector {
     Gradient, 
     HueAbs, SatAbs, LitAbs,
     HueReli, HueRelx,
+    SatLitRel,
 }
 
 impl App {
@@ -83,6 +87,10 @@ impl App {
 
             p5_p6_color: egui::Rgba::from_rgb(1.0, 1.0, 0.0),
             p5_p6_hue: 360,
+
+            p7_color: egui::Rgba::from_rgb(1.0, 0.5, 0.0),
+            p7_sat: 25,
+            p7_lit: 10,
         }
     }
 
@@ -102,6 +110,7 @@ impl App {
             ui.selectable_value(&mut self.active_panel, PanelSelector::LitAbs, "Lit/abs");
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueReli, "Hue/reli");
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueRelx, "Hue/relx");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::SatLitRel, "Sat+Lit/reli");
         });
 
         ui.separator();
@@ -113,6 +122,7 @@ impl App {
             PanelSelector::LitAbs => self.paint_p4_lit_abs(ui),
             PanelSelector::HueReli => self.paint_p5_hue_reli(ui),
             PanelSelector::HueRelx => self.paint_p6_hue_relx(ui),
+            PanelSelector::SatLitRel => self.paint_p7_sat_lit_rel(ui),
         }
 
     }
@@ -287,6 +297,36 @@ impl App {
 
     }
 
+    fn paint_p7_sat_lit_rel(&mut self, ui: &mut egui::Ui) {
+
+        let cols = 8;
+        let rows = 6;
+
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
+
+            ui.label("Change saturation and lightness:");
+
+            egui::widgets::color_picker::color_edit_button_rgba(
+                ui, 
+                &mut self.p7_color,
+                egui::widgets::color_picker::Alpha::Opaque
+            );
+            ui.add(egui::Slider::new(&mut self.p7_sat, -100..=100).text("%"));
+            ui.add(egui::Slider::new(&mut self.p7_lit, -100..=100).text("%"));
+
+        });
+
+        let color = [self.p7_color.r(), self.p7_color.g(), self.p7_color.b()];
+
+        let kw = KolorWheel::new()
+            .set_count(cols * rows)
+            .set_rgb_fa(color)
+            .sat_reli(self.p7_sat)
+            .lit_reli(self.p7_lit)
+        ;
+
+        self.paint_grid(ui, kw, cols, rows);    
+    }
 
     fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
 
