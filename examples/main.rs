@@ -167,6 +167,7 @@ impl App {
                 egui::Slider::new(&mut self.p2_hue, 0..=359)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
+                .text("Hue")
                 .suffix("°")
             );
         });
@@ -192,6 +193,7 @@ impl App {
                 egui::Slider::new(&mut self.p3_sat, 0..=100)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
+                .text("Sat")
                 .suffix("%")
             );
         });
@@ -218,6 +220,7 @@ impl App {
                 egui::Slider::new(&mut self.p4_lit, 0..=100)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
+                .text("Lit")
                 .suffix("%")
             );
         });
@@ -255,6 +258,7 @@ impl App {
                 egui::Slider::new(&mut self.p5_p6_hue, -360..=360)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
+                .text("Hue±")
                 .suffix("°")
             );
 
@@ -287,14 +291,14 @@ impl App {
                 egui::Slider::new(&mut self.p7_sat, -100..=100)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
-                .text("sat")
+                .text("Sat±")
                 .suffix("%")
             );
             ui.add(
                 egui::Slider::new(&mut self.p7_lit, -100..=100)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
-                .text("lit")
+                .text("Lit±")
                 .suffix("%")
             );
         });
