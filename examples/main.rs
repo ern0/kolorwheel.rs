@@ -32,20 +32,26 @@ fn main() -> Result<(), eframe::Error> {
 
 }
 
+struct Hsl {
+    h: u32,
+    s: u32,
+    l: u32,
+}
+
 struct App {
     window: Window,
     active_panel: PanelSelector,   
-    p1_color1: egui::Rgba,
-    p1_color2: egui::Rgba,
-    p2_color: egui::Rgba,
+    p1_color1: Hsl,
+    p1_color2: Hsl,
+    p2_color: Hsl,
     p2_hue: i32,
-    p3_color: egui::Rgba,
+    p3_color: Hsl,
     p3_sat: i32,
-    p4_color: egui::Rgba,
+    p4_color: Hsl,
     p4_lit: i32,
-    p5_p6_color: egui::Rgba,
+    p5_p6_color: Hsl,
     p5_p6_hue: i32,
-    p7_color: egui::Rgba,
+    p7_color: Hsl,
     p7_sat: i32,
     p7_lit: i32,
 }
@@ -73,24 +79,24 @@ impl App {
             window,
             active_panel: PanelSelector::Gradient,       
 
-            p1_color1: egui::Rgba::from_rgb(1.0, 0.0, 0.0), 
-            p1_color2: egui::Rgba::from_rgb(0.0, 0.0, 1.0),
+            p1_color1: Hsl { h: 0, s: 100, l: 50 },
+            p1_color2: Hsl { h: 270, s: 70, l: 30 },
 
-            p2_color: egui::Rgba::from_rgb(1.0, 0.0, 0.0),
+            p2_color: Hsl { h: 0, s: 100, l: 50 },
             p2_hue: 120,
 
-            p3_color: egui::Rgba::from_rgb(0.6, 0.7, 0.6),
-            p3_sat: 100,
+            p3_color: Hsl { h: 180, s: 31, l: 50 },
+            p3_sat: 0,
 
-            p4_color: egui::Rgba::from_rgb(0.0, 0.0, 0.7),
-            p4_lit: 50,
+            p4_color: Hsl { h: 140, s: 70, l: 60 },
+            p4_lit: 40,
 
-            p5_p6_color: egui::Rgba::from_rgb(1.0, 1.0, 0.0),
+            p5_p6_color: Hsl { h: 0, s: 100, l: 50 },
             p5_p6_hue: 360,
 
-            p7_color: egui::Rgba::from_rgb(1.0, 0.5, 0.0),
-            p7_sat: 25,
-            p7_lit: 10,
+            p7_color: Hsl { h: 60, s: 70, l: 50 },
+            p7_sat: -50,
+            p7_lit: -15,
         }
     }
 
@@ -133,32 +139,19 @@ impl App {
         let rows = 5;
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-
-            ui.label("Make simple gradient:");
-
-            egui::widgets::color_picker::color_edit_button_rgba(
-                ui, 
-                &mut self.p1_color1,
-                egui::widgets::color_picker::Alpha::Opaque
-            );
-            ui.label("-");
-            egui::widgets::color_picker::color_edit_button_rgba(
-                ui, 
-                &mut self.p1_color2,
-                egui::widgets::color_picker::Alpha::Opaque
-            );
+            ui.label("Base color:");
+            Self::paint_hsl_sliders(ui, &mut self.p1_color1);
+            ui.label("  Gradient to:");
+            Self::paint_hsl_sliders(ui, &mut self.p1_color2);
         });
 
-        let c1 = [self.p1_color1.r(), self.p1_color1.g(), self.p1_color1.b()];
-        let c2 = [self.p1_color2.r(), self.p1_color2.g(), self.p1_color2.b()];
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb_fa(c1)
-            .gradient(KolorWheel::new().set_rgb_fa(c2))
+            .set_hsl(self.p1_color1.h, self.p1_color1.s, self.p1_color1.l)
+            .gradient(KolorWheel::new().set_hsl(self.p1_color2.h, self.p1_color2.s, self.p1_color2.l))
         ;
 
         self.paint_grid(ui, kw, cols, rows);
-
     }
 
     fn paint_p2_hue_abs(&mut self, ui: &mut egui::Ui) {
@@ -167,28 +160,23 @@ impl App {
         let rows = 4;
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-
-            ui.label("Change hue to absolute:");
-
-            egui::widgets::color_picker::color_edit_button_rgba(
-                ui, 
-                &mut self.p2_color,
-                egui::widgets::color_picker::Alpha::Opaque
+            ui.label("Base color:");
+            Self::paint_hsl_sliders(ui, &mut self.p2_color);
+            ui.label("  Change hue to absolute:");
+            ui.add(
+                egui::Slider::new(&mut self.p2_hue, 0..=359)
+                .orientation(egui::SliderOrientation::Vertical)
+                .trailing_fill(true)
+                .suffix("°")
             );
-            ui.add(egui::Slider::new(&mut self.p2_hue, 0..=360).text("deg"));
-
         });
-
-        let color = [self.p2_color.r(), self.p2_color.g(), self.p2_color.b()];
-
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb_fa(color)
+            .set_hsl(self.p2_color.h, self.p2_color.s, self.p2_color.l)
             .hue_abs((self.p2_hue as u32).try_into().unwrap())
         ;
 
         self.paint_grid(ui, kw, cols, rows);
-
     }
 
     fn paint_p3_sat_abs(&mut self, ui: &mut egui::Ui) {
@@ -197,28 +185,24 @@ impl App {
         let rows = 4;
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-
-            ui.label("Change saturation to absolute:");
-
-            egui::widgets::color_picker::color_edit_button_rgba(
-                ui, 
-                &mut self.p3_color,
-                egui::widgets::color_picker::Alpha::Opaque
+            ui.label("Base color:");
+            Self::paint_hsl_sliders(ui, &mut self.p3_color);
+            ui.label("  Change saturation to absolute:");
+            ui.add(
+                egui::Slider::new(&mut self.p3_sat, 0..=100)
+                .orientation(egui::SliderOrientation::Vertical)
+                .trailing_fill(true)
+                .suffix("%")
             );
-            ui.add(egui::Slider::new(&mut self.p3_sat, 0..=100).text("%"));
-
         });
-
-        let color = [self.p3_color.r(), self.p3_color.g(), self.p3_color.b()];
 
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb_fa(color)
+            .set_hsl(self.p3_color.h, self.p3_color.s, self.p3_color.l)
             .sat_abs((self.p3_sat as u32).try_into().unwrap())
         ;
 
         self.paint_grid(ui, kw, cols, rows);
-
     }
 
     fn paint_p4_lit_abs(&mut self, ui: &mut egui::Ui) {
@@ -227,28 +211,24 @@ impl App {
         let rows = 4;
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-
-            ui.label("Change lightness to absolute:");
-
-            egui::widgets::color_picker::color_edit_button_rgba(
-                ui, 
-                &mut self.p4_color,
-                egui::widgets::color_picker::Alpha::Opaque
+            ui.label("Base color:");
+            Self::paint_hsl_sliders(ui, &mut self.p4_color);
+            ui.label("  Change lightness to absolute:");
+            ui.add(
+                egui::Slider::new(&mut self.p4_lit, 0..=100)
+                .orientation(egui::SliderOrientation::Vertical)
+                .trailing_fill(true)
+                .suffix("%")
             );
-            ui.add(egui::Slider::new(&mut self.p4_lit, 0..=100).text("%"));
-
         });
-
-        let color = [self.p4_color.r(), self.p4_color.g(), self.p4_color.b()];
 
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb_fa(color)
+            .set_hsl(self.p4_color.h, self.p4_color.s, self.p4_color.l)
             .lit_abs((self.p4_lit as u32).try_into().unwrap())
         ;
 
         self.paint_grid(ui, kw, cols, rows);
-
     }
 
     fn paint_p5_hue_reli(&mut self, ui: &mut egui::Ui) {
@@ -261,30 +241,28 @@ impl App {
 
     fn paint_p5_p6_hue_rel_univ(&mut self, ui: &mut egui::Ui, include: bool) {
 
-        let cols = 6;
-        let rows = 6;
+        let cols = 3;
+        let rows = 2;
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-
+            ui.label("Base color:");
+            Self::paint_hsl_sliders(ui, &mut self.p5_p6_color);
             ui.label(
-                if include { "Change hue relative, including target:" }
-                else { "Change hue relative, excluding target:" }
+                if include { "  Change hue relative, including target:" }
+                else { "  Change hue relative, excluding target:" }
             );
-
-            egui::widgets::color_picker::color_edit_button_rgba(
-                ui, 
-                &mut self.p5_p6_color,
-                egui::widgets::color_picker::Alpha::Opaque
+            ui.add(
+                egui::Slider::new(&mut self.p5_p6_hue, -360..=360)
+                .orientation(egui::SliderOrientation::Vertical)
+                .trailing_fill(true)
+                .suffix("°")
             );
-            ui.add(egui::Slider::new(&mut self.p5_p6_hue, -720..=720).text("deg"));
 
         });
 
-        let color = [self.p5_p6_color.r(), self.p5_p6_color.g(), self.p5_p6_color.b()];
-
         let mut kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb_fa(color)
+            .set_hsl(self.p5_p6_color.h, self.p5_p6_color.s, self.p5_p6_color.l)
         ;
 
         if include {
@@ -294,7 +272,6 @@ impl App {
         }
 
         self.paint_grid(ui, kw, cols, rows);
-
     }
 
     fn paint_p7_sat_lit_rel(&mut self, ui: &mut egui::Ui) {
@@ -303,29 +280,61 @@ impl App {
         let rows = 6;
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-
-            ui.label("Change saturation and lightness:");
-
-            egui::widgets::color_picker::color_edit_button_rgba(
-                ui, 
-                &mut self.p7_color,
-                egui::widgets::color_picker::Alpha::Opaque
+            ui.label("Base color:");
+            Self::paint_hsl_sliders(ui, &mut self.p7_color);
+            ui.label("  Change saturation and lightness:");
+            ui.add(
+                egui::Slider::new(&mut self.p7_sat, -100..=100)
+                .orientation(egui::SliderOrientation::Vertical)
+                .trailing_fill(true)
+                .text("sat")
+                .suffix("%")
             );
-            ui.add(egui::Slider::new(&mut self.p7_sat, -100..=100).text("%"));
-            ui.add(egui::Slider::new(&mut self.p7_lit, -100..=100).text("%"));
-
+            ui.add(
+                egui::Slider::new(&mut self.p7_lit, -100..=100)
+                .orientation(egui::SliderOrientation::Vertical)
+                .trailing_fill(true)
+                .text("lit")
+                .suffix("%")
+            );
         });
-
-        let color = [self.p7_color.r(), self.p7_color.g(), self.p7_color.b()];
 
         let kw = KolorWheel::new()
             .set_count(cols * rows)
-            .set_rgb_fa(color)
+            .set_hsl(self.p7_color.h, self.p7_color.s, self.p7_color.l)
             .sat_reli(self.p7_sat)
             .lit_reli(self.p7_lit)
         ;
 
         self.paint_grid(ui, kw, cols, rows);    
+    }
+
+    fn paint_hsl_sliders(ui: &mut egui::Ui, color: &mut Hsl) {
+
+        let mut slider_hue = egui::widgets::Slider::new(&mut color.h, 0..=359)
+            .orientation(egui::SliderOrientation::Vertical)
+            .trailing_fill(true)
+            .text("Hue")
+            .suffix("°")
+        ;
+        ui.add(slider_hue);
+
+        let mut slider_sat = egui::widgets::Slider::new(&mut color.s, 0..=100)
+            .orientation(egui::SliderOrientation::Vertical)
+            .trailing_fill(true)
+            .text("Sat")
+            .suffix("%")
+        ;
+        ui.add(slider_sat);
+
+        let mut slider_lit = egui::widgets::Slider::new(&mut color.l, 0..=100)
+            .orientation(egui::SliderOrientation::Vertical)
+            .trailing_fill(true)
+            .text("Lit")
+            .suffix("%")
+        ;
+        ui.add(slider_lit);
+
     }
 
     fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
