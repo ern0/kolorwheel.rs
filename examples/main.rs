@@ -54,6 +54,10 @@ struct App {
     p7_color: Hsl,
     p7_sat: i32,
     p7_lit: i32,
+    p8_color1: Hsl,
+    p8_color2: Hsl,
+    p8_count: usize,
+    p8_values: [i32; 8],
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -97,6 +101,11 @@ impl App {
             p7_color: Hsl { h: 60, s: 70, l: 50 },
             p7_sat: -50,
             p7_lit: -15,
+
+            p8_color1: Hsl { h: 270, s: 70, l: 70 },
+            p8_color2: Hsl { h: 270, s: 80, l: 30 },
+            p8_count: 4,
+            p8_values: [ 0, 0, 0, 0, 0, 0, 0, 0 ],
         }
     }
 
@@ -258,7 +267,7 @@ impl App {
                 egui::Slider::new(&mut self.p5_p6_hue, -360..=360)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
-                .text("Hue±")
+                .text("Hue+")
                 .suffix("°")
             );
 
@@ -291,14 +300,14 @@ impl App {
                 egui::Slider::new(&mut self.p7_sat, -100..=100)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
-                .text("Sat±")
+                .text("Sat+")
                 .suffix("%")
             );
             ui.add(
                 egui::Slider::new(&mut self.p7_lit, -100..=100)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
-                .text("Lit±")
+                .text("Lit+")
                 .suffix("%")
             );
         });
