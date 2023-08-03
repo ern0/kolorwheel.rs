@@ -2,8 +2,12 @@
 #![allow(unused)]
 
 extern crate kolorwheel;
-
 use kolorwheel::KolorWheel;
+
+mod hsl;
+use crate::hsl::Hsl;
+mod panel1_gradient;
+use crate::panel1_gradient::P1Gradient;
 
 fn main() -> Result<(), eframe::Error> {
 
@@ -32,17 +36,12 @@ fn main() -> Result<(), eframe::Error> {
 
 }
 
-struct Hsl {
-    h: u32,
-    s: u32,
-    l: u32,
-}
-
 struct App {
     window: Window,
     active_panel: PanelSelector,   
-    p1_color1: Hsl,
-    p1_color2: Hsl,
+
+    p1: panel1_gradient::P1Gradient,
+
     p2_color: Hsl,
     p2_hue: i32,
     p3_color: Hsl,
@@ -81,10 +80,9 @@ impl App {
 
         Self { 
             window,
-            active_panel: PanelSelector::Gradient,       
+            active_panel: PanelSelector::Gradient,   
 
-            p1_color1: Hsl { h: 0, s: 100, l: 50 },
-            p1_color2: Hsl { h: 270, s: 70, l: 30 },
+            p1: panel1_gradient::P1Gradient::new(),    
 
             p2_color: Hsl { h: 0, s: 100, l: 50 },
             p2_hue: 120,
@@ -144,23 +142,26 @@ impl App {
 
     fn paint_p1_gradient(&mut self, ui: &mut egui::Ui) {
 
-        let cols = 5;
-        let rows = 5;
+        self.p1.hello();
+        //TODO: uncomment
 
-        ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-            ui.label("Base color:");
-            Self::paint_hsl_sliders(ui, &mut self.p1_color1);
-            ui.label("  Gradient to:");
-            Self::paint_hsl_sliders(ui, &mut self.p1_color2);
-        });
+        // let cols = 5;
+        // let rows = 5;
 
-        let kw = KolorWheel::new()
-            .set_count(cols * rows)
-            .set_hsl(self.p1_color1.h, self.p1_color1.s, self.p1_color1.l)
-            .gradient(KolorWheel::new().set_hsl(self.p1_color2.h, self.p1_color2.s, self.p1_color2.l))
-        ;
+        // ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
+        //     ui.label("Base color:");
+        //     Self::paint_hsl_sliders(ui, &mut self.p1_color1);
+        //     ui.label("  Gradient to:");
+        //     Self::paint_hsl_sliders(ui, &mut self.p1_color2);
+        // });
 
-        self.paint_grid(ui, kw, cols, rows);
+        // let kw = KolorWheel::new()
+        //     .set_count(cols * rows)
+        //     .set_hsl(self.p1_color1.h, self.p1_color1.s, self.p1_color1.l)
+        //     .gradient(KolorWheel::new().set_hsl(self.p1_color2.h, self.p1_color2.s, self.p1_color2.l))
+        // ;
+
+        // self.paint_grid(ui, kw, cols, rows);
     }
 
     fn paint_p2_hue_abs(&mut self, ui: &mut egui::Ui) {
