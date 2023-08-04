@@ -25,7 +25,7 @@ fn main() -> Result<(), eframe::Error> {
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
-        initial_window_pos: Some(egui::pos2(1800.0, 80.0)), //TODO: remove this line
+        //initial_window_pos: Some(egui::pos2(1800.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
     eframe::run_simple_native("KolorWheel.rs", eframe_options, move |ctx, _frame| {
@@ -81,7 +81,6 @@ impl App {
         Self { 
             window,
             active_panel: PanelSelector::Gradient,   
-
             p1: panel1_gradient::P1Gradient::new(),    
 
             p2_color: Hsl { h: 0, s: 100, l: 50 },
@@ -128,40 +127,19 @@ impl App {
 
         ui.separator();
 
-        match self.active_panel {
-            PanelSelector::Gradient => self.paint_p1_gradient(ui),
-            PanelSelector::HueAbs => self.paint_p2_hue_abs(ui),
-            PanelSelector::SatAbs => self.paint_p3_sat_abs(ui),
-            PanelSelector::LitAbs => self.paint_p4_lit_abs(ui),
-            PanelSelector::HueReli => self.paint_p5_hue_reli(ui),
-            PanelSelector::HueRelx => self.paint_p6_hue_relx(ui),
-            PanelSelector::SatLitRel => self.paint_p7_sat_lit_rel(ui),
-        }
+        let mut panel = match self.active_panel {
+            PanelSelector::Gradient => &mut self.p1,
+            PanelSelector::HueAbs => &mut self.p1,
+            PanelSelector::SatAbs => &mut self.p1,
+            PanelSelector::LitAbs => &mut self.p1,
+            PanelSelector::HueReli => &mut self.p1,
+            PanelSelector::HueRelx => &mut self.p1,
+            PanelSelector::SatLitRel => &mut self.p1,
+        };
 
-    }
+        let (kw, cols, rows) = panel.paint(ui);
+        self.paint_grid(ui, kw, cols, rows);
 
-    fn paint_p1_gradient(&mut self, ui: &mut egui::Ui) {
-
-        self.p1.hello();
-        //TODO: uncomment
-
-        // let cols = 5;
-        // let rows = 5;
-
-        // ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-        //     ui.label("Base color:");
-        //     Self::paint_hsl_sliders(ui, &mut self.p1_color1);
-        //     ui.label("  Gradient to:");
-        //     Self::paint_hsl_sliders(ui, &mut self.p1_color2);
-        // });
-
-        // let kw = KolorWheel::new()
-        //     .set_count(cols * rows)
-        //     .set_hsl(self.p1_color1.h, self.p1_color1.s, self.p1_color1.l)
-        //     .gradient(KolorWheel::new().set_hsl(self.p1_color2.h, self.p1_color2.s, self.p1_color2.l))
-        // ;
-
-        // self.paint_grid(ui, kw, cols, rows);
     }
 
     fn paint_p2_hue_abs(&mut self, ui: &mut egui::Ui) {
