@@ -4,15 +4,16 @@ use kolorwheel::KolorWheel;
 use egui;
 use crate::hsl::Hsl;
 use crate::App;
+use crate::Panel;
 
-pub struct P1Gradient {
-    pub cols: u32,
-    pub rows: u32,
+pub struct Gradient {
+    cols: u32,
+    rows: u32,
     color1: Hsl,
     color2: Hsl,
 }
 
-impl P1Gradient {
+impl Gradient {
 	
 	pub fn new() -> Self {
 		Self {
@@ -22,8 +23,11 @@ impl P1Gradient {
 			color2: Hsl { h: 270, s: 70, l: 30 },
 		}
 	}
+}
 
-	pub fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
+impl Panel for Gradient {
+
+	fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
 
 		ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
             ui.label("Base color:");
@@ -40,5 +44,4 @@ impl P1Gradient {
 
         return (kw, self.cols, self.rows);
 	}
-
 }
