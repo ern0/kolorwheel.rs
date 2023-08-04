@@ -16,7 +16,7 @@ pub struct Gradient {
 impl Gradient {
 	
 	pub fn new() -> Self {
-		Self {
+        Self {
             cols: 5,
             rows: 5,
 			color1: Hsl { h: 0, s: 100, l: 50 },
