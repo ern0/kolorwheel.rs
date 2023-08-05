@@ -19,6 +19,8 @@ mod panel5_p6_hue_rel_univ;
 use crate::panel5_p6_hue_rel_univ::HueRelUniv;
 mod panel7_sat_lit_rel;
 use crate::panel7_sat_lit_rel::SatLitRel;
+mod panel8_hue_offsets;
+use crate::panel8_hue_offsets::HueOffsets;
 
 fn main() -> Result<(), eframe::Error> {
 
@@ -62,11 +64,7 @@ struct App {
     p5: panel5_p6_hue_rel_univ::HueRelUniv,
     p6: panel5_p6_hue_rel_univ::HueRelUniv,
     p7: panel7_sat_lit_rel::SatLitRel,
-
-    // p8_color1: Hsl,
-    // p8_color2: Hsl,
-    // p8_count: usize,
-    // p8_values: [i32; 8],
+    p8: panel8_hue_offsets::HueOffsets,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -74,7 +72,7 @@ enum PanelSelector {
     Gradient, 
     HueAbs, SatAbs, LitAbs,
     HueReli, HueRelx,
-    SatLitRel,
+    SatLitRel, HueOffsets,
 }
 
 impl App {
@@ -98,11 +96,7 @@ impl App {
             p5: panel5_p6_hue_rel_univ::HueRelUniv::new(true),
             p6: panel5_p6_hue_rel_univ::HueRelUniv::new(false),
             p7: panel7_sat_lit_rel::SatLitRel::new(),
-
-            // p8_color1: Hsl { h: 270, s: 70, l: 70 },
-            // p8_color2: Hsl { h: 270, s: 80, l: 30 },
-            // p8_count: 4,
-            // p8_values: [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+            p8: panel8_hue_offsets::HueOffsets::new(),
         }
     }
 
@@ -123,6 +117,7 @@ impl App {
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueReli, "Hue/reli");
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueRelx, "Hue/relx");
             ui.selectable_value(&mut self.active_panel, PanelSelector::SatLitRel, "Sat+Lit/reli");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::HueOffsets, "HueOffsets");
         });
 
         ui.separator();
@@ -135,6 +130,7 @@ impl App {
             PanelSelector::HueReli => &mut self.p5,
             PanelSelector::HueRelx => &mut self.p6,
             PanelSelector::SatLitRel => &mut self.p7,
+            PanelSelector::HueOffsets => &mut self.p8,
         };
 
         let (kw, cols, rows) = panel.paint(ui);
