@@ -15,20 +15,20 @@ pub struct SatLitRel {
 }
 
 impl SatLitRel {
-	
-	pub fn new() -> Self {
-		Self {
+    
+    pub fn new() -> Self {
+        Self {
             cols: 8,
             rows: 6,
             color: Hsl { h: 60, s: 70, l: 50 },
             sat: -50,
             lit: -15,
-		}
-	}
+        }
+    }
 }
 
 impl Panel for SatLitRel {
-	
+    
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
@@ -59,6 +59,6 @@ impl Panel for SatLitRel {
         ;
 
         return (kw, self.cols, self.rows);
-	}
+    }
 
 }

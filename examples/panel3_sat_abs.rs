@@ -14,20 +14,20 @@ pub struct SatAbs {
 }
 
 impl SatAbs {
-	
-	pub fn new() -> Self {
-		Self {
+    
+    pub fn new() -> Self {
+        Self {
             cols: 4,
             rows: 4,
             color: Hsl { h: 180, s: 30, l: 50 },
             sat: 0,
-		}
-	}
+        }
+    }
 }
 
 impl Panel for SatAbs {
 
-	fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
+    fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
             ui.label("Base color:");
@@ -49,6 +49,6 @@ impl Panel for SatAbs {
         ;
 
         return (kw, self.cols, self.rows);
-	}
+    }
 
 }

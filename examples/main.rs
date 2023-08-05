@@ -50,7 +50,7 @@ fn main() -> Result<(), eframe::Error> {
 }
 
 trait Panel {
-	fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32);
+    fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32);
 }
 
 struct App {

@@ -15,20 +15,20 @@ pub struct HueRelUniv {
 }
 
 impl HueRelUniv {
-	
-	pub fn new(include: bool) -> Self {
-		Self {
+    
+    pub fn new(include: bool) -> Self {
+        Self {
             include,
             cols: 3,
             rows: 2,
             color: Hsl { h: 0, s: 100, l: 50 },
             hue: 360,
-		}
-	}
+        }
+    }
 }
 
 impl Panel for HueRelUniv {
-	
+    
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
@@ -60,6 +60,6 @@ impl Panel for HueRelUniv {
         }
 
         return (kw, self.cols, self.rows);
-	}
+    }
 
 }

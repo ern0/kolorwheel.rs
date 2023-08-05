@@ -14,20 +14,20 @@ pub struct HueAbs {
 }
 
 impl HueAbs {
-	
-	pub fn new() -> Self {
-		Self {
+    
+    pub fn new() -> Self {
+        Self {
             cols: 4,
             rows: 4,
             color: Hsl { h: 0, s: 100, l: 50 },
             hue: 120,
-		}
-	}
+        }
+    }
 }
 
 impl Panel for HueAbs {
 
-	fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
+    fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
             ui.label("Base color:");
@@ -49,6 +49,6 @@ impl Panel for HueAbs {
         ;
 
         return (kw, self.cols, self.rows);
-	}
+    }
 
 }

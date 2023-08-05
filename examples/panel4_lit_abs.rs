@@ -14,19 +14,19 @@ pub struct LitAbs {
 }
 
 impl LitAbs {
-	
-	pub fn new() -> Self {
-		Self {
+    
+    pub fn new() -> Self {
+        Self {
             cols: 4,
             rows: 4,
             color: Hsl { h: 140, s: 70, l: 60 },
             lit: 40,
-		}
-	}
+        }
+    }
 }
 
 impl Panel for LitAbs {
-	
+    
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
@@ -49,6 +49,6 @@ impl Panel for LitAbs {
         ;
 
         return (kw, self.cols, self.rows);
-	}
+    }
 
 }

@@ -198,16 +198,16 @@ impl KolorWheel {
     }
 
     fn convert_hsl_to_rgb(&mut self) {
-		
-		let h = self.h / 360.0;
-		let s = self.s / 100.0;
-		let l = self.l / 100.0;
+        
+        let h = self.h / 360.0;
+        let s = self.s / 100.0;
+        let l = self.l / 100.0;
 
         if s < 0.001 {
             let gray = (l * 255.0) as u8;
-		    self.r = gray;
-		    self.g = gray;
-		    self.b = gray;
+            self.r = gray;
+            self.g = gray;
+            self.b = gray;
             return;
         }
 
@@ -219,8 +219,8 @@ impl KolorWheel {
         let p = (2.0 * l) - q;
 
         let r = Self::hue_to_rgb(p, q, h + (1.0/3.0));
-	    let g = Self::hue_to_rgb(p, q, h);
-		let b = Self::hue_to_rgb(p, q, h - (1.0/3.0));
+        let g = Self::hue_to_rgb(p, q, h);
+        let b = Self::hue_to_rgb(p, q, h - (1.0/3.0));
 
         let r = (r * 12000.0).round() / 12000.0;
         let g = (g * 12000.0).round() / 12000.0;
@@ -229,29 +229,29 @@ impl KolorWheel {
         self.r = (r * 255.0) as u8;
         self.g = (g * 255.0) as u8;
         self.b = (b * 255.0) as u8;
-		
-	} 
+        
+    } 
 
-	fn hue_to_rgb(p: f32, q: f32, mut t: f32) -> f32 {
-		
-		if t < 0.0 {
+    fn hue_to_rgb(p: f32, q: f32, mut t: f32) -> f32 {
+        
+        if t < 0.0 {
             t += 1.0;
         }
-		if t > 1.0 {
+        if t > 1.0 {
             t -= 1.0;
         }
-		if t < (1.0/6.0) {
+        if t < (1.0/6.0) {
             return p + ((q - p) * 6.0 * t);
         }
-		if t < (1.0/2.0) {
+        if t < (1.0/2.0) {
             return q;
         }
-		if t < (2.0/3.0) {
+        if t < (2.0/3.0) {
             return p + ((q - p) * ((2.0/3.0) - t) * 6.0);
         }
-		
-		return p;
-	}
+        
+        return p;
+    }
 
     fn convert_rgb_to_hsl(&mut self) {
         
@@ -263,16 +263,16 @@ impl KolorWheel {
         if self.g < min { min = self.g; }
         if self.b < min { min = self.b; }
 
-		self.h = (max as f32 + min as f32) / 255.0 / 2.0;
-		self.s = self.h;
-		self.l = self.h;
-	
-		if max == min {
-		
-			self.h = 0.0;
-			self.s = 0.0;
-			
-		} else {
+        self.h = (max as f32 + min as f32) / 255.0 / 2.0;
+        self.s = self.h;
+        self.l = self.h;
+    
+        if max == min {
+        
+            self.h = 0.0;
+            self.s = 0.0;
+            
+        } else {
 
             let r = (self.r as f32) / 255.0;
             let g = (self.g as f32) / 255.0;
@@ -280,7 +280,7 @@ impl KolorWheel {
             let minf = (min as f32) / 255.0;
             let maxf = (max as f32) / 255.0;
 
-			let d = maxf - minf;
+            let d = maxf - minf;
             self.s = if self.l > 0.5 {
                 d / (2.0 - maxf - minf)
             } else {
@@ -294,13 +294,13 @@ impl KolorWheel {
             } else {
                 self.h = ((r - g) / d) + 4.0;
             }
-			self.h = self.h / 6.0;
-						
-		}	
+            self.h = self.h / 6.0;
+                        
+        }	
 
-		self.h *= 360.0;
-		self.s *= 100.0;
-		self.l *= 100.0;    
+        self.h *= 360.0;
+        self.s *= 100.0;
+        self.l *= 100.0;    
         
     }
 

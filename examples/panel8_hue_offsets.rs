@@ -16,21 +16,21 @@ pub struct HueOffsets {
 }
 
 impl HueOffsets {
-	
-	pub fn new() -> Self {
-		Self {
+    
+    pub fn new() -> Self {
+        Self {
             cols: 8,
             rows: 6,
             color1: Hsl { h: 270, s: 70, l: 70 },
             color2: Hsl { h: 270, s: 80, l: 30 },
             count: 4,
             values: [ 0, -150, 120, -210, 95, -90, 325, -330 ],
-		}
-	}
+        }
+    }
 }
 
 impl Panel for HueOffsets {
-	
+    
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
@@ -64,6 +64,6 @@ impl Panel for HueOffsets {
         ;
 
         return (kw, self.cols, self.rows);
-	}
+    }
 
 }
