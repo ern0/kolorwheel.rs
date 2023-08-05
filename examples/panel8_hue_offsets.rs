@@ -3,7 +3,6 @@ use kolorwheel::KolorWheel;
 
 use egui;
 use crate::hsl::Hsl;
-use crate::App;
 use crate::Panel;
 
 pub struct HueOffsets {

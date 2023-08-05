@@ -1,5 +1,4 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![allow(unused)]
 
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
@@ -8,19 +7,14 @@ mod hsl;
 use crate::hsl::Hsl;
 
 mod panel1_gradient;
-use crate::panel1_gradient::Gradient;
 mod panel2_hue_abs;
-use crate::panel2_hue_abs::HueAbs;
 mod panel3_sat_abs;
-use crate::panel3_sat_abs::SatAbs;
 mod panel4_lit_abs;
-use crate::panel4_lit_abs::LitAbs;
 mod panel5_p6_hue_rel_univ;
-use crate::panel5_p6_hue_rel_univ::HueRelUniv;
 mod panel7_sat_lit_rel;
-use crate::panel7_sat_lit_rel::SatLitRel;
 mod panel8_hue_offsets;
-use crate::panel8_hue_offsets::HueOffsets;
+mod panel9_palette1;
+mod panel10_palette2;
 
 fn main() -> Result<(), eframe::Error> {
 
@@ -38,7 +32,6 @@ fn main() -> Result<(), eframe::Error> {
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
-        //initial_window_pos: Some(egui::pos2(1800.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
     eframe::run_simple_native("KolorWheel.rs", eframe_options, move |ctx, _frame| {
@@ -65,6 +58,8 @@ struct App {
     p6: panel5_p6_hue_rel_univ::HueRelUniv,
     p7: panel7_sat_lit_rel::SatLitRel,
     p8: panel8_hue_offsets::HueOffsets,
+    p9: panel9_palette1::Palette1,
+    p10: panel10_palette2::Palette2,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -73,6 +68,7 @@ enum PanelSelector {
     HueAbs, SatAbs, LitAbs,
     HueReli, HueRelx,
     SatLitRel, HueOffsets,
+    Palette1, Palette2,
 }
 
 impl App {
@@ -97,6 +93,8 @@ impl App {
             p6: panel5_p6_hue_rel_univ::HueRelUniv::new(false),
             p7: panel7_sat_lit_rel::SatLitRel::new(),
             p8: panel8_hue_offsets::HueOffsets::new(),
+            p9: panel9_palette1::Palette1::new(),
+            p10: panel10_palette2::Palette2::new(),
         }
     }
 
@@ -118,6 +116,8 @@ impl App {
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueRelx, "Hue/relx");
             ui.selectable_value(&mut self.active_panel, PanelSelector::SatLitRel, "Sat+Lit/reli");
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueOffsets, "HueOffsets");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::Palette1, "Palette1");
+            ui.selectable_value(&mut self.active_panel, PanelSelector::Palette2, "Palette2");
         });
 
         ui.separator();
@@ -131,6 +131,8 @@ impl App {
             PanelSelector::HueRelx => &mut self.p6,
             PanelSelector::SatLitRel => &mut self.p7,
             PanelSelector::HueOffsets => &mut self.p8,
+            PanelSelector::Palette1 => &mut self.p9,
+            PanelSelector::Palette2 => &mut self.p10,
         };
 
         let (kw, cols, rows) = panel.paint(ui);
@@ -140,7 +142,7 @@ impl App {
 
     fn paint_hsl_sliders(ui: &mut egui::Ui, color: &mut Hsl) {
 
-        let mut slider_hue = egui::widgets::Slider::new(&mut color.h, 0..=359)
+        let slider_hue = egui::widgets::Slider::new(&mut color.h, 0..=359)
             .orientation(egui::SliderOrientation::Vertical)
             .trailing_fill(true)
             .text("Hue")
@@ -148,7 +150,7 @@ impl App {
         ;
         ui.add(slider_hue);
 
-        let mut slider_sat = egui::widgets::Slider::new(&mut color.s, 0..=100)
+        let slider_sat = egui::widgets::Slider::new(&mut color.s, 0..=100)
             .orientation(egui::SliderOrientation::Vertical)
             .trailing_fill(true)
             .text("Sat")
@@ -156,7 +158,7 @@ impl App {
         ;
         ui.add(slider_sat);
 
-        let mut slider_lit = egui::widgets::Slider::new(&mut color.l, 0..=100)
+        let slider_lit = egui::widgets::Slider::new(&mut color.l, 0..=100)
             .orientation(egui::SliderOrientation::Vertical)
             .trailing_fill(true)
             .text("Lit")
