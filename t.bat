@@ -1,4 +1,5 @@
 @echo off
 cls
-cargo test --lib
-cargo test --example main
+
+rem cargo test --example main
+cargo test --lib hsl_color
