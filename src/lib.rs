@@ -1,6 +1,7 @@
 #![allow(unused)]
 
 mod hsl_color;
+mod rgb_color;
 
 
 pub struct Color {

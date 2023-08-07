@@ -1,18 +1,43 @@
 #![allow(unused)]
+use std::convert::From;
+use crate::rgb_color::RgbColor;
 
-struct HslColor {
-    h: f32, s: f32, l: f32,
+#[derive(Clone, Copy, Default, PartialEq, Debug)]
+pub struct HslColor {
+    pub h: f32, 
+    pub s: f32, 
+    pub l: f32,
+}
+
+impl From<(i32, i32, i32)> for HslColor {
+    fn from((h, s, l): (i32, i32, i32)) -> HslColor {
+        HslColor::new(h, s, l)
+    }
+}
+
+impl From<[i32; 3]> for HslColor {
+    fn from(hsl: [i32; 3]) -> HslColor {
+        HslColor::new(hsl[0], hsl[1], hsl[2])
+    }
+}
+
+impl From<&[i32; 3]> for HslColor {
+    fn from(hsl: &[i32; 3]) -> HslColor {
+        HslColor::new(hsl[0], hsl[1], hsl[2])
+    }
 }
 
 impl HslColor {
 
     pub fn new(h: i32, s: i32, l: i32) -> Self {                
         Self {
-            h: h as f32, s: s as f32, l: l as f32,
+            h: h as f32, 
+            s: s as f32, 
+            l: l as f32,
         }
     }
 
-    pub fn rgb(&mut self) -> (u8, u8, u8) {
+    pub fn rgb_tuple(&mut self) -> (u8, u8, u8) {
         Self::normalize_hsl(&mut self.h, &mut self.s, &mut self.l);
         return Self::hsl_to_rgb(self.h, self.s, self.l);
     }
@@ -92,8 +117,8 @@ mod tests {
 
     #[test]
     fn hsl_to_rgb_black() {
-        let mut hsl = HslColor::new(0, 0, 0);
-        let rgb = hsl.rgb();
+        let mut hsl = HslColor::from([0, 0, 0]);
+        let rgb = hsl.rgb_tuple();
         assert_eq!(rgb, (0, 0, 0));     
     }
 
