@@ -1,11 +1,10 @@
-#![allow(unused)]
 use std::convert::{From, Into};
 use crate::hsl_color::HslColor;
 use crate::rgb_color::RgbColor;
 
-impl Into<RgbColor> for HslColor {
-    fn into(self) -> RgbColor {
-        self.convert_hsl_to_rgb()
+impl From<HslColor> for RgbColor {
+    fn from(val: HslColor) -> Self {
+        val.convert_hsl_to_rgb()
     }
 }
 

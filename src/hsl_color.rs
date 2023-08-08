@@ -1,4 +1,3 @@
-#![allow(unused)]
 use std::convert::{From, Into};
 use crate::rgb_color::RgbColor;
 

@@ -256,7 +256,7 @@ impl KolorWheel {
     }
 
     pub fn sat_vals(mut self, values: &[u32]) -> Self {
-        self.s_spin = Spin::Stored(Vec::from(Self::slice_u32_to_vec_i32(values)));
+        self.s_spin = Spin::Stored(Self::slice_u32_to_vec_i32(values));
         return self;
     }
 
@@ -284,7 +284,7 @@ impl KolorWheel {
     }
 
     pub fn lit_vals(mut self, values: &[u32]) -> Self {
-        self.l_spin = Spin::Stored(Vec::from(Self::slice_u32_to_vec_i32(values)));
+        self.l_spin = Spin::Stored(Self::slice_u32_to_vec_i32(values));
         return self;
     }
 

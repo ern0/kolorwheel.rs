@@ -1,4 +1,3 @@
-#![allow(unused)]
 use std::convert::{From, TryFrom};
 use thiserror::Error;
 use crate::hsl_color::HslColor;
@@ -68,7 +67,7 @@ impl RgbColor {
 
         let mut hexb = hex.as_bytes();
 
-        if hexb.len() == 0 {
+        if hexb.is_empty() {
             return Err(ParseError::InvalidLength(0));
         }
 
@@ -100,19 +99,18 @@ impl RgbColor {
 
     fn parse_hex_digit(digit: u8) -> Result<u8, ParseError> {
 
-        if digit >= b'0' && digit <= b'9' {
+        if digit.is_ascii_digit() {
             return Ok(digit - b'0');
         }
-        if digit >= b'a' && digit <= b'f' {
+        if (b'a'..=b'f').contains(&digit) {
             return Ok(10 + digit - b'a');
         }
-        if digit >= b'A' && digit <= b'F' {
+        if (b'A'..=b'F').contains(&digit) {
             return Ok(10 + digit - b'A');
         }
 
         Err(ParseError::InvalidDigit(digit))
     }
-
 }
 
 impl RgbColor {
