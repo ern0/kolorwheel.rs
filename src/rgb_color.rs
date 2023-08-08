@@ -116,11 +116,9 @@ impl RgbColor {
 }
 
 impl RgbColor {
-
     pub fn new(r: u8, g: u8, b: u8) -> Self {                
         Self { r, g, b }
     }
-
 }
 
 #[cfg(test)]
@@ -137,41 +135,41 @@ mod tests {
         assert_eq!(rgb.b, 0xCC);
     }
 
-
-/*
     #[test]
     fn rgb_hex_long_prefixed() {
-        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("#d498ea");
-        assert_eq!(kw.r, 0xD4);
-        assert_eq!(kw.g, 0x98);
-        assert_eq!(kw.b, 0xEA);
+        let rgb_result = RgbColor::try_from("#d498ea");
+        assert!(matches!(rgb_result, Ok(_)));
+        let rgb = rgb_result.unwrap();
+        assert_eq!(rgb.r, 0xD4);
+        assert_eq!(rgb.g, 0x98);
+        assert_eq!(rgb.b, 0xEA);
     }
 
     #[test]
     fn rgb_hex_short() {
-        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("#C34");
-        assert_eq!(kw.r, 0xCC);
-        assert_eq!(kw.g, 0x33);
-        assert_eq!(kw.b, 0x44);
+        let rgb_result = RgbColor::try_from("#C34");
+        assert!(matches!(rgb_result, Ok(_)));
+        let rgb = rgb_result.unwrap();
+        assert_eq!(rgb.r, 0xCC);
+        assert_eq!(rgb.g, 0x33);
+        assert_eq!(rgb.b, 0x44);
     }
 
     #[test]
     fn rgb_hex_invalid_length() {
-        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("#21");
-        assert_eq!(kw.r, 0);
-        assert_eq!(kw.g, 0);
-        assert_eq!(kw.b, 0);
+        let rgb_result = RgbColor::try_from("#21");
+        assert!(matches!(rgb_result, Err(ParseError::InvalidLength(2))));
     }
 
     #[test]
     fn rgb_hex_invalid_digit() {
-        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("12345G");
-        assert_eq!(kw.r, 0);
-        assert_eq!(kw.g, 0);
-        assert_eq!(kw.b, 0);
+        let rgb_result = RgbColor::try_from("12345G");
+        assert!(matches!(rgb_result, Err(ParseError::InvalidDigit(b'G'))));
     }
 
-*/
-
+    #[test]
+    fn rgb_hex_invalid_empty() {
+        let rgb_result = RgbColor::try_from("");
+        assert!(matches!(rgb_result, Err(ParseError::InvalidLength(0))));
+    }
 }
-
