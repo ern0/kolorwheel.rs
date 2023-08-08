@@ -1,5 +1,6 @@
 #![allow(unused)]
-use std::convert::From;
+use std::convert::{From, TryFrom};
+use thiserror::Error;
 use crate::hsl_color::HslColor;
 
 #[derive(Clone, Copy, Default, PartialEq, Debug)]
@@ -45,6 +46,75 @@ impl From<&[f32; 3]> for RgbColor {
     }
 }
 
+#[derive(Debug, Error)]
+pub enum ParseError {
+    #[error("invalid length: {0}")]
+    InvalidLength(usize),
+    #[error("invalid digit: {0}")]
+    InvalidDigit(u8),
+}
+
+impl TryFrom<&str> for RgbColor {
+    type Error = ParseError;
+
+    fn try_from(hex: &str) -> Result<RgbColor, Self::Error> {
+        Self::try_parse_hex_auto(hex)
+    }
+}
+
+impl RgbColor {
+
+    fn try_parse_hex_auto(hex: &str) -> Result<RgbColor, ParseError> {
+
+        let mut hexb = hex.as_bytes();
+
+        if hexb.len() == 0 {
+            return Err(ParseError::InvalidLength(0));
+        }
+
+        if hexb[0] == b'#' { hexb = &hexb[1..]; }
+        let len = hexb.len();
+
+        match len {
+            3 => Self::parse_hex_6_digits(&[hexb[0], hexb[0], hexb[1], hexb[1], hexb[2], hexb[2]]),
+            6 => Self::parse_hex_6_digits(hexb),
+            _ => Err(ParseError::InvalidLength(len)),
+        }
+    }
+
+    fn parse_hex_6_digits(hexb: &[u8]) -> Result<RgbColor, ParseError> {
+
+        let r_hi = Self::parse_hex_digit(hexb[0])?;
+        let r_lo = Self::parse_hex_digit(hexb[1])?;
+        let g_hi = Self::parse_hex_digit(hexb[2])?;
+        let g_lo = Self::parse_hex_digit(hexb[3])?;
+        let b_hi = Self::parse_hex_digit(hexb[4])?;
+        let b_lo = Self::parse_hex_digit(hexb[5])?;
+
+        let r = (r_hi << 4) + r_lo;
+        let g = (g_hi << 4) + g_lo;
+        let b = (b_hi << 4) + b_lo;
+
+        Ok(RgbColor::new(r, g, b))
+    }
+
+    fn parse_hex_digit(digit: u8) -> Result<u8, ParseError> {
+
+        if digit >= b'0' && digit <= b'9' {
+            return Ok(digit - b'0');
+        }
+        if digit >= b'a' && digit <= b'f' {
+            return Ok(10 + digit - b'a');
+        }
+        if digit >= b'A' && digit <= b'F' {
+            return Ok(10 + digit - b'A');
+        }
+
+        Err(ParseError::InvalidDigit(digit))
+    }
+
+}
+
 impl RgbColor {
 
     pub fn new(r: u8, g: u8, b: u8) -> Self {                
@@ -57,15 +127,18 @@ impl RgbColor {
 mod tests {
     use super::*;
 
-/*    
     #[test]
     fn rgb_hex_long_unprefixed() {
-        let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("1af9cc");
-        assert_eq!(kw.r, 0x1A);
-        assert_eq!(kw.g, 0xF9);
-        assert_eq!(kw.b, 0xCC);
+        let rgb_result = RgbColor::try_from("1af9cc");
+        assert!(matches!(rgb_result, Ok(_)));
+        let rgb = rgb_result.unwrap();
+        assert_eq!(rgb.r, 0x1A);
+        assert_eq!(rgb.g, 0xF9);
+        assert_eq!(rgb.b, 0xCC);
     }
 
+
+/*
     #[test]
     fn rgb_hex_long_prefixed() {
         let kw = KolorWheel::new().set_rgb(0, 0, 0).set_rgb_hex("#d498ea");

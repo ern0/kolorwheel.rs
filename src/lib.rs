@@ -120,69 +120,6 @@ impl KolorWheel {
         )
     }
 
-    pub fn set_rgb_hex(mut self, hex: &str) -> Self {
-
-        let mut hexb = hex.as_bytes();
-
-        if hexb.len() == 0 {
-            return self.set_rgb_hex_error();
-        }
-        if hexb[0] == b'#' {
-            hexb = &hexb[1..];
-        }
-        if hexb.len() == 3 {
-            self.set_rgb_hex_parse(&[hexb[0], hexb[0], hexb[1], hexb[1], hexb[2], hexb[2],]);
-        }
-        if hexb.len() == 6 {
-            self.set_rgb_hex_parse(hexb);
-        }        
-
-        return self;
-    }
-
-    fn set_rgb_hex_parse(&mut self, hexb: &[u8]) {
-
-        let r_hi = Self::set_rgb_hex_parse_digit(hexb[0]);
-        if let Err(_) = r_hi { return; }
-        let r_lo = Self::set_rgb_hex_parse_digit(hexb[1]);
-        if let Err(_) = r_lo { return; }
-
-        let g_hi = Self::set_rgb_hex_parse_digit(hexb[2]);
-        if let Err(_) = g_hi { return; }
-        let g_lo = Self::set_rgb_hex_parse_digit(hexb[3]);
-        if let Err(_) = g_lo { return; }
-
-        let b_hi = Self::set_rgb_hex_parse_digit(hexb[4]);
-        if let Err(_) = b_hi { return; }
-        let b_lo = Self::set_rgb_hex_parse_digit(hexb[5]);
-        if let Err(_) = b_lo { return; }
-
-        self.r = (r_hi.unwrap() << 4) + r_lo.unwrap();
-        self.g = (g_hi.unwrap() << 4) + g_lo.unwrap();
-        self.b = (b_hi.unwrap() << 4) + b_lo.unwrap();
-
-    }
-
-    fn set_rgb_hex_parse_digit(digit: u8) -> Result<u8, ()> {
-
-        if digit >= b'0' && digit <= b'9' {
-            return Ok(digit - b'0');
-        }
-        if digit >= b'a' && digit <= b'f' {
-            return Ok(10 + digit - b'a');
-        }
-        if digit >= b'A' && digit <= b'F' {
-            return Ok(10 + digit - b'A');
-        }
-
-        return Err(());
-    }
-
-    fn set_rgb_hex_error(self) -> Self {
-        // error handling: silent ignore
-        return self;
-    }
-
     pub fn gradient(mut self, target: KolorWheel) -> Self {
         return self
             .hue_abs(target.h as u32)
