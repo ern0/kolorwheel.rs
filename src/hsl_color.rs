@@ -1,5 +1,5 @@
 #![allow(unused)]
-use std::convert::From;
+use std::convert::{From, Into};
 use crate::rgb_color::RgbColor;
 
 #[derive(Clone, Copy, Default, PartialEq, Debug)]
@@ -27,42 +27,85 @@ impl From<&[i32; 3]> for HslColor {
     }
 }
 
+impl From<RgbColor> for HslColor {
+    fn from(rgb: RgbColor) -> HslColor {
+        HslColor::convert_rgb_to_hsl(rgb)
+    }
+}
+
 impl HslColor {
 
-    pub fn new(h: i32, s: i32, l: i32) -> Self {                
-        Self {
-            h: h as f32, 
-            s: s as f32, 
-            l: l as f32,
+    fn convert_rgb_to_hsl(rgb: RgbColor) -> HslColor {
+
+        let mut max = rgb.r;
+        if rgb.g > max { max = rgb.g; }
+        if rgb.b > max { max = rgb.b; }
+
+        let mut min = rgb.r;
+        if rgb.g < min { min = rgb.g; }
+        if rgb.b < min { min = rgb.b; }
+
+        let mut h = (max as f32 + min as f32) / 255.0 / 2.0;
+        let mut s = h;
+        let mut l = h;
+    
+        if max == min {
+        
+            h = 0.0;
+            s = 0.0;
+            
+        } else {
+
+            let r = (rgb.r as f32) / 255.0;
+            let g = (rgb.g as f32) / 255.0;
+            let b = (rgb.b as f32) / 255.0;
+            let minf = (min as f32) / 255.0;
+            let maxf = (max as f32) / 255.0;
+
+            let d = maxf - minf;
+            s = if l > 0.5 {
+                d / (2.0 - maxf - minf)
+            } else {
+                d / (maxf + minf)
+            };
+
+            if max == rgb.r {
+                h = (g - b) / (d + (if g < b { 6.0 } else { 0.0 }));
+            } else if max == rgb.g {
+                h = ((b - r) / d) + 2.0;
+            } else {
+                h = ((r - g) / d) + 4.0;
+            }
+            h /= 6.0;
+                        
+        }	
+
+        HslColor {
+            h: h * 360.0, 
+            s: s * 100.0, 
+            l: l * 100.0,
         }
     }
 
-    pub fn rgb_tuple(&mut self) -> (u8, u8, u8) {
-        Self::normalize_hsl(&mut self.h, &mut self.s, &mut self.l);
-        return Self::hsl_to_rgb(self.h, self.s, self.l);
+}
+
+impl Into<RgbColor> for HslColor {
+    fn into(self) -> RgbColor {
+        self.convert_hsl_to_rgb()
     }
+}
 
-    fn normalize_hsl(h: &mut f32, s: &mut f32, l: &mut f32) {
+impl HslColor {
+
+    fn convert_hsl_to_rgb(&self) -> RgbColor {
         
-        *h = *h % 360.0;
-        if *h < 0.0 { *h += 360.0 };
-
-        if *s < 0.0 { *s = 0.0 };
-        if *s > 100.0 { *s = 100.0 };
-
-        if *l < 0.0 { *l = 0.0 };
-        if *l > 100.0 { *l = 100.0 };
-    }
-
-    pub fn hsl_to_rgb(h: f32, s: f32, l: f32) -> (u8, u8, u8) {
-        
-        let h = h / 360.0;
-        let s = s / 100.0;
-        let l = l / 100.0;
+        let h = self.h / 360.0;
+        let s = self.s / 100.0;
+        let l = self.l / 100.0;
 
         if s < 0.001 {
             let gray = (l * 255.0) as u8;
-            return (gray, gray, gray);
+            return RgbColor::new(gray, gray, gray);
         }
 
         let q = if l < 0.5 { 
@@ -84,7 +127,7 @@ impl HslColor {
         let g = (g * 255.0) as u8;
         let b = (b * 255.0) as u8;
         
-        return (r, g, b);
+        RgbColor::new(r, g, b)
     } 
 
     fn hue_to_rgb_component(p: f32, q: f32, mut t: f32) -> f32 {
@@ -105,7 +148,31 @@ impl HslColor {
             return p + ((q - p) * ((2.0/3.0) - t) * 6.0);
         }
         
-        return p;
+        p
+    }
+}
+
+impl HslColor {
+
+    pub fn new(h: i32, s: i32, l: i32) -> Self {                
+        Self {
+            h: h as f32, 
+            s: s as f32, 
+            l: l as f32,
+        }
+    }
+
+
+    fn normalize_hsl(h: &mut f32, s: &mut f32, l: &mut f32) {
+        
+        *h = *h % 360.0;
+        if *h < 0.0 { *h += 360.0 };
+
+        if *s < 0.0 { *s = 0.0 };
+        if *s > 100.0 { *s = 100.0 };
+
+        if *l < 0.0 { *l = 0.0 };
+        if *l > 100.0 { *l = 100.0 };
     }
 
 }
@@ -116,10 +183,18 @@ mod tests {
     use assert_float_eq::*;
 
     #[test]
-    fn hsl_to_rgb_black() {
-        let mut hsl = HslColor::from([0, 0, 0]);
-        let rgb = hsl.rgb_tuple();
-        assert_eq!(rgb, (0, 0, 0));     
+    fn hsl_into_rgb_black() {
+        let mut hsl = HslColor::new(0, 0, 0);
+        let rgb: RgbColor = hsl.into();
+        assert_eq!(rgb, RgbColor::new(0, 0, 0));
+    }
+
+    #[test]
+    fn hsl_from_rgb_black() {
+        let mut hsl = HslColor::from(RgbColor::from([0, 0, 0]));
+        assert_f32_near!(hsl.h, 0.0);
+        assert_f32_near!(hsl.s, 0.0);
+        assert_f32_near!(hsl.l, 0.0);
     }
 
 /*
@@ -175,13 +250,7 @@ mod tests {
         assert!(kw.b > 240);
     }
 
-    #[test]
-    fn rgb_to_hsl_black() {
-        let kw = KolorWheel::new().set_rgb(0, 0, 0);
-        assert_f32_near!(kw.h, 0.0);
-        assert_f32_near!(kw.s, 0.0);
-        assert_f32_near!(kw.l, 0.0);
-    }
+
 
     #[test]
     fn rgb_to_hsl_white() {

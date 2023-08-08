@@ -96,7 +96,7 @@ impl KolorWheel {
         self.g = g;
         self.b = b;
 
-        self.convert_rgb_to_hsl();
+        //self.convert_rgb_to_hsl();
         self.normalize_hsl();
 
         return self;
@@ -257,56 +257,6 @@ impl KolorWheel {
         return p;
     }
 
-    fn convert_rgb_to_hsl(&mut self) {
-        
-        let mut max = self.r;
-        if self.g > max { max = self.g; }
-        if self.b > max { max = self.b; }
-
-        let mut min = self.r;
-        if self.g < min { min = self.g; }
-        if self.b < min { min = self.b; }
-
-        self.h = (max as f32 + min as f32) / 255.0 / 2.0;
-        self.s = self.h;
-        self.l = self.h;
-    
-        if max == min {
-        
-            self.h = 0.0;
-            self.s = 0.0;
-            
-        } else {
-
-            let r = (self.r as f32) / 255.0;
-            let g = (self.g as f32) / 255.0;
-            let b = (self.b as f32) / 255.0;
-            let minf = (min as f32) / 255.0;
-            let maxf = (max as f32) / 255.0;
-
-            let d = maxf - minf;
-            self.s = if self.l > 0.5 {
-                d / (2.0 - maxf - minf)
-            } else {
-                d / (maxf + minf)
-            };
-
-            if max == self.r {
-                self.h = (g - b) / (d + (if g < b { 6.0 } else { 0.0 }));
-            } else if max == self.g {
-                self.h = ((b - r) / d) + 2.0;
-            } else {
-                self.h = ((r - g) / d) + 4.0;
-            }
-            self.h = self.h / 6.0;
-                        
-        }	
-
-        self.h *= 360.0;
-        self.s *= 100.0;
-        self.l *= 100.0;    
-        
-    }
 
     fn slice_u32_to_vec_i32(values: &[u32]) -> Vec<i32> {
 
