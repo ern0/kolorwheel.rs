@@ -27,67 +27,6 @@ impl From<&[i32; 3]> for HslColor {
     }
 }
 
-impl From<RgbColor> for HslColor {
-    fn from(rgb: RgbColor) -> HslColor {
-        HslColor::convert_rgb_to_hsl(rgb)
-    }
-}
-
-impl HslColor {
-
-    fn convert_rgb_to_hsl(rgb: RgbColor) -> HslColor {
-
-        let mut max = rgb.r;
-        if rgb.g > max { max = rgb.g; }
-        if rgb.b > max { max = rgb.b; }
-
-        let mut min = rgb.r;
-        if rgb.g < min { min = rgb.g; }
-        if rgb.b < min { min = rgb.b; }
-
-        let mut h = (max as f32 + min as f32) / 255.0 / 2.0;
-        let mut s = h;
-        let mut l = h;
-    
-        if max == min {
-        
-            h = 0.0;
-            s = 0.0;
-            
-        } else {
-
-            let r = (rgb.r as f32) / 255.0;
-            let g = (rgb.g as f32) / 255.0;
-            let b = (rgb.b as f32) / 255.0;
-            let minf = (min as f32) / 255.0;
-            let maxf = (max as f32) / 255.0;
-
-            let d = maxf - minf;
-            s = if l > 0.5 {
-                d / (2.0 - maxf - minf)
-            } else {
-                d / (maxf + minf)
-            };
-
-            if max == rgb.r {
-                h = (g - b) / (d + (if g < b { 6.0 } else { 0.0 }));
-            } else if max == rgb.g {
-                h = ((b - r) / d) + 2.0;
-            } else {
-                h = ((r - g) / d) + 4.0;
-            }
-            h /= 6.0;
-                        
-        }	
-
-        HslColor {
-            h: h * 360.0, 
-            s: s * 100.0, 
-            l: l * 100.0,
-        }
-    }
-
-}
 
 impl Into<RgbColor> for HslColor {
     fn into(self) -> RgbColor {
