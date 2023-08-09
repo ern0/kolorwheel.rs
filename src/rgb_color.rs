@@ -125,7 +125,7 @@ mod tests {
 
     #[test]
     fn rgb_hex_long_unprefixed() {
-        let rgb_result = RgbColor::try_from("1af9cc");
+        let rgb_result = RgbColor::try_from("1af9cC");
         assert!(matches!(rgb_result, Ok(_)));
         let rgb = rgb_result.unwrap();
         assert_eq!(rgb.r, 0x1A);

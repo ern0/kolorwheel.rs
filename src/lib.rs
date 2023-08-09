@@ -5,31 +5,13 @@ mod rgb_color;
 mod convert_hsl_to_rgb;
 mod convert_rgb_to_hsl;
 
+use hsl_color::HslColor;
 
-pub struct Color {
-    pub r: u8,
-    pub g: u8, 
-    pub b: u8,
-}
-
+#[derive(Default)]
 pub struct KolorWheel {
+    color: HslColor,    
     count: u32,
-    countf: f32,
-    h: f32, s: f32, l: f32,
-    saved_h: f32, saved_s: f32, saved_l: f32,
-    r: u8, g: u8, b: u8,
-    h_spin: Spin,
-    h_spin_counter: usize,
-    h_offset: Offset,
-    h_offset_counter: usize,
-    s_spin: Spin,
-    s_spin_counter: usize,
-    s_offset: Offset,
-    s_offset_counter: usize,
-    l_spin: Spin,
-    l_spin_counter: usize,
-    l_offset: Offset,
-    l_offset_counter: usize,
+
 }
 
 enum Spin {
@@ -48,32 +30,39 @@ impl KolorWheel {
 
     pub fn new() -> Self {
         Self {
+
             count: 1, 
-            countf: 1.0,
-            h: 180.0, 
-            s: 0.0, 
-            l: 50.0,
-            saved_h: 0.0,
-            saved_s: 0.0, 
-            saved_l: 0.0,
-            r: 127, 
-            g: 127, 
-            b: 127,
-            h_spin: Spin::Unchanged, 
-            h_spin_counter: 0,
-            h_offset: Offset::Zero,
-            h_offset_counter: 0,
-            s_spin: Spin::Unchanged, 
-            s_spin_counter: 0,
-            s_offset: Offset::Zero,
-            s_offset_counter: 0,
-            l_spin: Spin::Unchanged, 
-            l_spin_counter: 0,
-            l_offset: Offset::Zero,
-            l_offset_counter: 0,
+            ..Default::default()
+
+            // countf: 1.0,
+            // h: 180.0, 
+            // s: 0.0, 
+            // l: 50.0,
+            // saved_h: 0.0,
+            // saved_s: 0.0, 
+            // saved_l: 0.0,
+            // r: 127, 
+            // g: 127, 
+            // b: 127,
+            // h_spin: Spin::Unchanged, 
+            // h_spin_counter: 0,
+            // h_offset: Offset::Zero,
+            // h_offset_counter: 0,
+            // s_spin: Spin::Unchanged, 
+            // s_spin_counter: 0,
+            // s_offset: Offset::Zero,
+            // s_offset_counter: 0,
+            // l_spin: Spin::Unchanged, 
+            // l_spin_counter: 0,
+            // l_offset: Offset::Zero,
+            // l_offset_counter: 0,
         }
     }
 
+
+
+
+/*
     pub fn set_count(mut self, count: u32) -> Self {
         self.count = count;
         self.countf = count as f32;
@@ -388,6 +377,17 @@ impl Iterator for KolorWheel {
 
         return Some(color);
     }
-
+*/
 }
 
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use assert_float_eq::*;
+
+    #[test]
+    fn tst() {
+    }
+}

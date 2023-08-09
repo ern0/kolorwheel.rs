@@ -1,11 +1,17 @@
 use std::convert::{From, Into};
 use crate::rgb_color::RgbColor;
 
-#[derive(Clone, Copy, Default, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct HslColor {
     pub h: f32, 
     pub s: f32, 
     pub l: f32,
+}
+
+impl Default for HslColor {
+    fn default() -> HslColor {
+        HslColor::new(0, 0, 0)
+    }
 }
 
 impl From<(i32, i32, i32)> for HslColor {
@@ -36,18 +42,45 @@ impl HslColor {
         }
     }
 
-
-    fn normalize_hsl(h: &mut f32, s: &mut f32, l: &mut f32) {
+    fn normalize(&mut self) {
         
-        *h = *h % 360.0;
-        if *h < 0.0 { *h += 360.0 };
+        self.h %= 360.0;
+        if self.h < 0.0 { self.h += 360.0 };
 
-        if *s < 0.0 { *s = 0.0 };
-        if *s > 100.0 { *s = 100.0 };
+        if self.s < 0.0 { self.s = 0.0 };
+        if self.s > 100.0 { self.s = 100.0 };
 
-        if *l < 0.0 { *l = 0.0 };
-        if *l > 100.0 { *l = 100.0 };
+        if self.l < 0.0 { self.l = 0.0 };
+        if self.l > 100.0 { self.l = 100.0 };
     }
 
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use assert_float_eq::*;
+
+    #[test]
+    fn normalize_turnover() {
+        let mut hsl = HslColor::new(370, 0, 0);
+        hsl.normalize();
+        assert_f32_near!(hsl.h, 10.0, 99999);
+
+    }
+
+    #[test]
+    fn normalize_ceil_sat() {
+        let mut hsl = HslColor::new(0, 120, 0);
+        hsl.normalize();
+        assert_f32_near!(hsl.s, 100.0, 99999);
+    }
+
+    #[test]
+    fn normalize_floor_lit() {
+        let mut hsl = HslColor::new(0, 0, -10);
+        hsl.normalize();
+        assert_f32_near!(hsl.l, 0.0, 99999);   
+    }
+
+}
