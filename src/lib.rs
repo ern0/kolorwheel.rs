@@ -52,7 +52,8 @@ mod tests {
             .spin_color(HslColor::new(90, 100, 50))
             .spin_hue(Spin::Absolute(90))
             .spin_sat(Spin::Relative(-10))
-            .spin_lit(Spin::Values(&[0, 10])
+            .offsets_lit(&[0, 10])
+            .chain(3)
 
         ;
     }
