@@ -68,22 +68,17 @@ impl<'a> KolorWheel<'a> {
         self
     }
 
-
-    pub fn spin(&mut self, callback: Callback<HslColor>) {
+    pub fn spin<T: From<HslColor>>(&mut self, callback: &dyn Fn(T)) {
 
         for i in 0..self.count {
 
-            let result = self.color;
-            self.color.l = 100.0;
-            
+            let result: T = self.color.into();
+            //...
             if self.skip_first && i == 0 { continue };
             callback(result);
         }
     }
 }
-
-type Callback<'cb, T> = &'cb dyn Fn(T);
-
 
 #[cfg(test)]
 mod tests {
@@ -98,8 +93,8 @@ mod tests {
             // .with_saturation(Spin::RelativeIncl(-10))
             // .with_lightness(Spin::Offset(&[0, 10]))
             // .skip_first()
-            .spin(&|hsl: HslColor| {
-                println!("-------------{:?}", hsl);
+            .spin(&|res: RgbColor| {
+                println!("-------------{:?}", res);
             })
         ;
     }
