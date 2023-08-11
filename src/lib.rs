@@ -39,26 +39,26 @@ impl<'a> KolorWheel<'a> {
         }
     }
 
-    pub fn spin_hsl<T>(&mut self, target: T) -> &mut Self 
+    pub fn with_hsl<T>(&mut self, target: T) -> &mut Self 
     where T: Into<HslColor> {       
         let hsl: HslColor = target.into();
-        self.spin_hue(Spin::Absolute(hsl.h as i32));
-        self.spin_saturation(Spin::Absolute(hsl.s as i32));
-        self.spin_lightness(Spin::Absolute(hsl.l as i32));
+        self.with_hue(Spin::Absolute(hsl.h as i32));
+        self.with_saturation(Spin::Absolute(hsl.s as i32));
+        self.with_lightness(Spin::Absolute(hsl.l as i32));
         self
     }
 
-    pub fn spin_hue(&mut self, spin: Spin<'a>) -> &mut Self {
+    pub fn with_hue(&mut self, spin: Spin<'a>) -> &mut Self {
         self.spin_hue = spin;
         self
     }
 
-    pub fn spin_saturation(&mut self, spin: Spin<'a>) -> &mut Self {
+    pub fn with_saturation(&mut self, spin: Spin<'a>) -> &mut Self {
         self.spin_saturation = spin;
         self
     }
 
-    pub fn spin_lightness(&mut self, spin: Spin<'a>) -> &mut Self {
+    pub fn with_lightness(&mut self, spin: Spin<'a>) -> &mut Self {
         self.spin_lightness = spin;
         self
     }
@@ -67,7 +67,23 @@ impl<'a> KolorWheel<'a> {
         self.skip_first = true;
         self
     }
+
+
+    pub fn spin(&mut self, callback: Callback<HslColor>) {
+
+        for i in 0..self.count {
+
+            let result = self.color;
+            self.color.l = 100.0;
+            
+            if self.skip_first && i == 0 { continue };
+            callback(result);
+        }
+    }
 }
+
+type Callback<'cb, T> = &'cb dyn Fn(T);
+
 
 #[cfg(test)]
 mod tests {
@@ -76,12 +92,15 @@ mod tests {
 
     #[test]
     fn tst() {
-        let kw = KolorWheel::new(HslColor::new(0, 100, 50), 8)
-            .spin_hsl(HslColor::new(90, 100, 50))
-            .spin_hue(Spin::Absolute(90))
-            .spin_saturation(Spin::Relative(-10))
-            .spin_lightness(Spin::Offset(&[0, 10]))
-            .skip_first()
+        let kw = KolorWheel::new(HslColor::new(0, 100, 50), 4)
+            .with_hsl(HslColor::new(0, 100, 100))
+            // .with_hue(Spin::Absolute(90))
+            // .with_saturation(Spin::RelativeIncl(-10))
+            // .with_lightness(Spin::Offset(&[0, 10]))
+            // .skip_first()
+            .spin(&|hsl: HslColor| {
+                println!("-------------{:?}", hsl);
+            })
         ;
     }
 }
@@ -152,46 +171,6 @@ mod tests {
         }
     }
 
-    fn save_hsl(&mut self) {
-        self.saved_h = self.h;
-        self.saved_s = self.s;
-        self.saved_l = self.l;
-    }
-
-    fn restore_hsl(&mut self) {
-        self.h = self.saved_h;
-        self.s = self.saved_s;
-        self.l = self.saved_l;
-    }
-
 }
 
-impl Iterator for KolorWheel {
-    type Item = Color;
-
-    fn next(&mut self) -> Option<Color>{
-
-        if self.count == 0 {
-            return None;
-        }
-        self.count -= 1;
-
-        self.spin_stored_hsl();
-        self.normalize_hsl();
-        self.save_hsl();
-        self.offset_hsl();
-        self.normalize_hsl();
-        self.convert_hsl_to_rgb();
-        self.restore_hsl();
-
-        let color = Color {
-            r: self.r, g: self.g, b: self.b
-        };
-
-        if self.count > 0 {
-            self.spin_calculated_hsl();
-        }
-
-        return Some(color);
-    }
 */
