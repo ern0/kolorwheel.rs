@@ -8,37 +8,59 @@ mod convert_rgb_to_hsl;
 use hsl_color::HslColor;
 use rgb_color::RgbColor;
 
-pub struct KolorWheel {
+pub struct KolorWheel<'a> {
     color: HslColor,    
     count: usize,
-    spin: Spin,
+    spin_hue: Spin<'a>,
+    spin_saturation: Spin<'a>,
+    spin_lightness: Spin<'a>,
 }
 
-enum SpinStep {
+pub enum Spin<'a> {
     Unchanged,
-    Calculated(f32),
+    Absolute(i32),
+    Relative(i32),
+    Offset(&'a [i32]),
     Stored(Vec<i32>),
 }
 
-enum
-
-impl KolorWheel {
+impl<'a> KolorWheel<'a> {
 
     pub fn new<T>(color: T, count: usize) -> Self 
     where T: Into<HslColor> {
         Self {
             color: color.into(),
             count,
-            spin: Spin::Unchanged,
+            spin_hue: Spin::Unchanged,
+            spin_saturation: Spin::Unchanged,
+            spin_lightness: Spin::Unchanged,
         }
     }
 
-    pub fn with_color<T>(mut self, target: T) -> Self 
-    where T: Into<HslColor> {
+    pub fn spin_hsl<T>(&mut self, target: T) -> &mut Self 
+    where T: Into<HslColor> {       
+        let hsl: HslColor = target.into();
+        self.spin_hue(Spin::Absolute(hsl.h as i32));
+        self.spin_saturation(Spin::Absolute(hsl.s as i32));
+        self.spin_lightness(Spin::Absolute(hsl.l as i32));
         self
     }
 
-    //...
+    pub fn spin_hue(&mut self, spin: Spin<'a>) -> &mut Self {
+        self.spin_hue = spin;
+        self
+    }
+
+    pub fn spin_saturation(&mut self, spin: Spin<'a>) -> &mut Self {
+        self.spin_saturation = spin;
+        self
+    }
+
+    pub fn spin_lightness(&mut self, spin: Spin<'a>) -> &mut Self {
+        self.spin_lightness = spin;
+        self
+    }
+
 }
 
 #[cfg(test)]
@@ -49,32 +71,17 @@ mod tests {
     #[test]
     fn tst() {
         let kw = KolorWheel::new(HslColor::new(0, 100, 50), 8)
-            .spin_color(HslColor::new(90, 100, 50))
+            .spin_hsl(HslColor::new(90, 100, 50))
             .spin_hue(Spin::Absolute(90))
-            .spin_sat(Spin::Relative(-10))
-            .offsets_lit(&[0, 10])
-            .chain(3)
+            .spin_saturation(Spin::Relative(-10))
+            .spin_lightness(Spin::Offset(&[0, 10]))
+            //.skip_first()
 
         ;
     }
 }
 
 /*
-
-enum Offset {
-    Zero,
-    OffsetVec(Vec<i32>),
-}
-
-
-    pub fn gradient(mut self, target: KolorWheel) -> Self {
-        return self
-            .hue_abs(target.h as u32)
-            .sat_abs(target.s as u32)
-            .lit_abs(target.l as u32)
-        ;
-    }
-
 
     fn slice_u32_to_vec_i32(values: &[u32]) -> Vec<i32> {
 
@@ -86,90 +93,6 @@ enum Offset {
         };
 
         return vec_values;
-    }
-
-    pub fn hue_abs(mut self, amount: u32) -> Self {
-        let inc = (amount as f32 - self.h) / self.countf;
-        self.h_spin = Spin::Calculated(inc);
-        return self;
-    }
-
-    pub fn hue_reli(mut self, amount: i32) -> Self {
-        let inc = amount as f32 / (self.countf - 1.0);
-        self.h_spin = Spin::Calculated(inc);
-        return self;
-    }
-
-    pub fn hue_relx(mut self, amount: i32) -> Self {
-        let inc = amount as f32 / self.countf;
-        self.h_spin = Spin::Calculated(inc);
-        return self;
-    }
-
-    pub fn hue_vals(mut self, values: &[u32]) -> Self {
-        self.h_spin = Spin::Stored(Self::slice_u32_to_vec_i32(values));
-        return self;
-    }
-
-    pub fn hue_offs(mut self, offsets: &[i32]) -> Self {
-        self.h_offset = Offset::OffsetVec(offsets.to_vec());
-        return self;
-    }
-
-    pub fn sat_abs(mut self, amount: u32) -> Self {
-        let inc = (amount as f32 - self.s) / self.countf;
-        self.s_spin = Spin::Calculated(inc);
-        return self;
-    }
-
-    pub fn sat_reli(mut self, amount: i32) -> Self {
-        let inc = amount as f32 / (self.countf - 1.0);
-        self.s_spin = Spin::Calculated(inc);
-        return self;
-    }
-
-    pub fn sat_relx(mut self, amount: i32) -> Self {
-        let inc = amount as f32 / self.countf;
-        self.s_spin = Spin::Calculated(inc);
-        return self;
-    }
-
-    pub fn sat_vals(mut self, values: &[u32]) -> Self {
-        self.s_spin = Spin::Stored(Self::slice_u32_to_vec_i32(values));
-        return self;
-    }
-
-    pub fn sat_offs(mut self, offsets: &[i32]) -> Self {
-        self.s_offset = Offset::OffsetVec(offsets.to_vec());
-        return self;
-    }
-
-    pub fn lit_abs(mut self, amount: u32) -> Self {
-        let inc = (amount as f32 - self.l) / self.countf;
-        self.l_spin = Spin::Calculated(inc);
-        return self;
-    }
-
-    pub fn lit_reli(mut self, amount: i32) -> Self {
-        let inc = amount as f32 / (self.countf - 1.0);
-        self.l_spin = Spin::Calculated(inc);
-        return self;
-    }
-
-    pub fn lit_relx(mut self, amount: i32) -> Self {
-        let inc = amount as f32 / self.countf;
-        self.l_spin = Spin::Calculated(inc);
-        return self;
-    }
-
-    pub fn lit_vals(mut self, values: &[u32]) -> Self {
-        self.l_spin = Spin::Stored(Self::slice_u32_to_vec_i32(values));
-        return self;
-    }
-
-    pub fn lit_offs(mut self, offsets: &[i32]) -> Self {
-        self.l_offset = Offset::OffsetVec(offsets.to_vec());
-        return self;
     }
 
     fn next_from_vector(values: Vec<i32>, counter: &mut usize) -> f32 {
