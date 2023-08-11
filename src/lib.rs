@@ -8,19 +8,20 @@ mod convert_rgb_to_hsl;
 use hsl_color::HslColor;
 use rgb_color::RgbColor;
 
-pub struct KolorWheel<'a> {
+pub struct KolorWheel<'sp> {
     color: HslColor,    
     count: usize,
-    spin_hue: Spin<'a>,
-    spin_saturation: Spin<'a>,
-    spin_lightness: Spin<'a>,
+    skip_first: bool,
+    spin_hue: Spin<'sp>,
+    spin_saturation: Spin<'sp>,
+    spin_lightness: Spin<'sp>,
 }
 
-pub enum Spin<'a> {
+pub enum Spin<'sl> {
     Unchanged,
     Absolute(i32),
     Relative(i32),
-    Offset(&'a [i32]),
+    Offset(&'sl [i32]),
     Stored(Vec<i32>),
 }
 
@@ -31,6 +32,7 @@ impl<'a> KolorWheel<'a> {
         Self {
             color: color.into(),
             count,
+            skip_first: false,
             spin_hue: Spin::Unchanged,
             spin_saturation: Spin::Unchanged,
             spin_lightness: Spin::Unchanged,
@@ -61,6 +63,10 @@ impl<'a> KolorWheel<'a> {
         self
     }
 
+    pub fn skip_first(&mut self) -> &mut Self {
+        self.skip_first = true;
+        self
+    }
 }
 
 #[cfg(test)]
@@ -75,14 +81,12 @@ mod tests {
             .spin_hue(Spin::Absolute(90))
             .spin_saturation(Spin::Relative(-10))
             .spin_lightness(Spin::Offset(&[0, 10]))
-            //.skip_first()
-
+            .skip_first()
         ;
     }
 }
 
 /*
-
     fn slice_u32_to_vec_i32(values: &[u32]) -> Vec<i32> {
 
         let mut vec_values: Vec<i32> = Vec::new();
