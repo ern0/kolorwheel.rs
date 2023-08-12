@@ -70,14 +70,19 @@ impl<'a> KolorWheel<'a> {
 
     pub fn spin<T: From<HslColor>>(&mut self, callback: &dyn Fn(T)) {
 
+        self.color.l = if self.skip_first { 127.0 } else { 0.0 };
+
         for i in 0..self.count {
 
             let result: T = self.color.into();
-            //...
+    
+            self.color.h += 5.0;
+
             if self.skip_first && i == 0 { continue };
             callback(result);
         }
     }
+
 }
 
 #[cfg(test)]
@@ -94,7 +99,16 @@ mod tests {
             // .with_lightness(Spin::Offset(&[0, 10]))
             // .skip_first()
             .spin(&|res: RgbColor| {
+
                 println!("-------------{:?}", res);
+
+                let inner = KolorWheel::new(res, 2)
+                    .skip_first()
+                    .spin(&|ires: RgbColor| {
+                        println!("  -------------{:?}", ires);
+                    })
+                ;
+
             })
         ;
     }
