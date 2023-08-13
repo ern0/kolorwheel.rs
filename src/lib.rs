@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use std::rc::Rc;
+
 mod hsl_color;
 mod rgb_color;
 mod convert_hsl_to_rgb;
@@ -8,15 +10,18 @@ mod convert_rgb_to_hsl;
 use hsl_color::HslColor;
 use rgb_color::RgbColor;
 
+#[derive(Clone)]
 pub struct KolorWheel<'sp> {
     color: HslColor,    
     count: usize,
     skip_first: bool,
+    chain_child: Option<Box<KolorWheel<'sp>>>,
     spin_hue: Spin<'sp>,
     spin_saturation: Spin<'sp>,
     spin_lightness: Spin<'sp>,
 }
 
+#[derive(Clone)]
 pub enum Spin<'sl> {
     Unchanged,
     Absolute(i32),
@@ -33,6 +38,7 @@ impl<'a> KolorWheel<'a> {
             color: color.into(),
             count,
             skip_first: false,
+            chain_child: None,
             spin_hue: Spin::Unchanged,
             spin_saturation: Spin::Unchanged,
             spin_lightness: Spin::Unchanged,
@@ -70,17 +76,40 @@ impl<'a> KolorWheel<'a> {
 
     pub fn spin<T: From<HslColor>>(&mut self, callback: &dyn Fn(T)) {
 
-        self.color.l = if self.skip_first { 127.0 } else { 0.0 };
-
-        for i in 0..self.count {
-
-            let result: T = self.color.into();
-    
-            self.color.h += 5.0;
-
-            if self.skip_first && i == 0 { continue };
-            callback(result);
+        loop {
+            let result = self.next();
+            match result {
+                Some(color) => callback(color.into()),
+                None => break,
+            }
         }
+
+    }
+
+    fn next(&mut self) -> Option<HslColor> {
+
+        return None;
+        
+    }
+        
+        // for i in 0..self.count {     
+        //     self.color.h = i as f32; 
+        //     self.color.s = self.count as f32;
+            
+        //     let result: T = self.color.into();
+
+        //     self.color.l += 1.0;
+
+        //     if self.skip_first && i == 0 { continue };
+        // }
+
+    pub fn chain(&mut self, count: usize) -> &mut Self {
+
+        let mut child = self.clone();
+        child.count = count;        
+        self.chain_child = Some(Box::new(child));
+
+        self
     }
 
 }
@@ -92,25 +121,29 @@ mod tests {
 
     #[test]
     fn tst() {
+        println!(">>>>>>>>>>>>>>>>>>>>");
         let kw = KolorWheel::new(HslColor::new(0, 100, 50), 4)
             .with_hsl(HslColor::new(0, 100, 100))
             // .with_hue(Spin::Absolute(90))
             // .with_saturation(Spin::RelativeIncl(-10))
             // .with_lightness(Spin::Offset(&[0, 10]))
             // .skip_first()
-            .spin(&|res: RgbColor| {
+            .chain(2)
+            .spin(&|res: HslColor| {
 
                 println!("-------------{:?}", res);
 
-                let inner = KolorWheel::new(res, 2)
-                    .skip_first()
-                    .spin(&|ires: RgbColor| {
-                        println!("  -------------{:?}", ires);
-                    })
-                ;
+                // let inner = KolorWheel::new(res, 2)
+                //     .skip_first()
+                //     .spin(&|ires: RgbColor| {
+                //         println!("  -------------{:?}", ires);
+                //     })
+                // ;
 
             })
         ;
+        println!("<<<<<<<<<<<<<<<<<<<<");
+
     }
 }
 
