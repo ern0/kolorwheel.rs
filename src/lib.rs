@@ -60,16 +60,12 @@ impl<'kw> KolorWheel<'kw> {
     //     self
     // }
 
-    // pub fn skip_first(&mut self) -> &mut Self {
-    //     self.skip_first = true;
-    //     self
-    // }
-
     pub fn chain(&mut self, count: usize) -> &mut Self {
 
         let mut spinner = self.spinner_vec[self.index].clone();
         self.index += 1;
         spinner.count = count;
+        spinner.skip_first = true;
         self.spinner_vec.push(spinner);
 
         self
@@ -77,19 +73,27 @@ impl<'kw> KolorWheel<'kw> {
 
     pub fn spin<T: From<HslColor>>(&mut self, callback: &dyn Fn(T)) {
 
-        let mut last = &mut self.spinner_vec[1];  //TODO: walk
-
+        let mut level = 0;
         loop {
-            let result = &last.spin_next_result();
+
+            let result = self.spinner_vec[level].spin_next_result();
             match result {
-                Some(color) => callback((*color).into()),
-                None => break,
+
+                Some(color) => {
+                    callback(color.into());
+                    if self.spinner_vec.len() > level + 1 {
+                        level += 1;
+                        self.spinner_vec[level].counter = 0;
+                    }
+                },
+
+                None => {
+                    if level == 0 { return; }
+                    level -= 1;
+                }
             }
         }
-
     }
-
-   
 
 }
 
@@ -108,7 +112,7 @@ mod tests {
             // .with_lightness(Spin::Offset(&[0, 10]))
             //.skip_first()
             .test_value(111)
-            .chain(2)
+            .chain(3)
             .test_value(222)
             .spin(&|res: HslColor| {
 

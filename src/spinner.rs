@@ -5,10 +5,10 @@ use crate::rgb_color::RgbColor;
 
 #[derive(Clone)]
 pub struct Spinner<'sp> {
-    color: HslColor,    
+    pub color: HslColor,    
     pub count: usize,
-    counter: usize,
-    skip_first: bool,
+    pub counter: usize,
+    pub skip_first: bool,
     spin_hue: SpinMode<'sp>,
     spin_saturation: SpinMode<'sp>,
     spin_lightness: SpinMode<'sp>,
@@ -81,12 +81,6 @@ impl<'a> Spinner<'a> {
     //     self.spin_lightness = spin;
     //     self
     // }
-
-    // pub fn skip_first(&mut self) -> &mut Self {
-    //     self.skip_first = true;
-    //     self
-    // }
-
 }
 
 #[cfg(test)]
