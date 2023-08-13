@@ -14,8 +14,10 @@ use rgb_color::RgbColor;
 pub struct KolorWheel<'sp> {
     color: HslColor,    
     count: usize,
+    counter: usize,
     skip_first: bool,
     chain_child: Option<Box<KolorWheel<'sp>>>,
+    child_turn: bool,
     spin_hue: Spin<'sp>,
     spin_saturation: Spin<'sp>,
     spin_lightness: Spin<'sp>,
@@ -37,8 +39,10 @@ impl<'a> KolorWheel<'a> {
         Self {
             color: color.into(),
             count,
+            counter: 0,
             skip_first: false,
             chain_child: None,
+            child_turn: false,
             spin_hue: Spin::Unchanged,
             spin_saturation: Spin::Unchanged,
             spin_lightness: Spin::Unchanged,
@@ -76,8 +80,10 @@ impl<'a> KolorWheel<'a> {
 
     pub fn spin<T: From<HslColor>>(&mut self, callback: &dyn Fn(T)) {
 
+        self.counter = 0;
+
         loop {
-            let result = self.next();
+            let result = self.spin_next_result();
             match result {
                 Some(color) => callback(color.into()),
                 None => break,
@@ -86,22 +92,25 @@ impl<'a> KolorWheel<'a> {
 
     }
 
-    fn next(&mut self) -> Option<HslColor> {
+    fn spin_next_result(&mut self) -> Option<HslColor> {
 
-        return None;
+        if self.counter == self.count {
+            return None;
+        }
+
+        self.color.h = self.counter as f32; // TODO: tmp
         
+        let result = self.color;
+        self.color.l += 5.0;
+
+        self.counter += 1;
+
+        if self.counter == 1 && self.skip_first { 
+            return self.spin_next_result(); 
+        }
+
+        return Some(result);
     }
-        
-        // for i in 0..self.count {     
-        //     self.color.h = i as f32; 
-        //     self.color.s = self.count as f32;
-            
-        //     let result: T = self.color.into();
-
-        //     self.color.l += 1.0;
-
-        //     if self.skip_first && i == 0 { continue };
-        // }
 
     pub fn chain(&mut self, count: usize) -> &mut Self {
 
@@ -127,7 +136,7 @@ mod tests {
             // .with_hue(Spin::Absolute(90))
             // .with_saturation(Spin::RelativeIncl(-10))
             // .with_lightness(Spin::Offset(&[0, 10]))
-            // .skip_first()
+            //.skip_first()
             .chain(2)
             .spin(&|res: HslColor| {
 
