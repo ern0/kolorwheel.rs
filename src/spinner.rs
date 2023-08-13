@@ -1,61 +1,83 @@
 #![allow(unused)]
 
-mod hsl_color;
-mod rgb_color;
-mod convert_hsl_to_rgb;
-mod convert_rgb_to_hsl;
-mod spinner;
-
-use hsl_color::HslColor;
-use rgb_color::RgbColor;
-use crate::spinner::{Spinner, SpinMode};
+use crate::hsl_color::HslColor;
+use crate::rgb_color::RgbColor;
 
 #[derive(Clone)]
-pub struct KolorWheel<'kw> {
-    index: usize,
-    spinner_vec: Vec<Spinner<'kw>>,
+pub struct Spinner<'sp> {
+    color: HslColor,    
+    pub count: usize,
+    counter: usize,
+    skip_first: bool,
+    spin_hue: SpinMode<'sp>,
+    spin_saturation: SpinMode<'sp>,
+    spin_lightness: SpinMode<'sp>,
 }
 
-impl<'kw> KolorWheel<'kw> {
+#[derive(Clone)]
+pub enum SpinMode<'sl> {
+    Unchanged,
+    Absolute(i32),
+    RelativeIncl(i32),
+    RelativeExcl(i32),
+    Offset(&'sl [i32]),
+}
+
+impl<'a> Spinner<'a> {
 
     pub fn new<T>(color: T, count: usize) -> Self 
     where T: Into<HslColor> {
-
-        let mut vec = Vec::new();
-        let mut spinner = Spinner::new(color, count);
-        vec.push(spinner);
         Self {
-            index: 0,
-            spinner_vec: vec,
+            color: color.into(),
+            count,
+            counter: 0,
+            skip_first: false,
+            spin_hue: SpinMode::Unchanged,
+            spin_saturation: SpinMode::Unchanged,
+            spin_lightness: SpinMode::Unchanged,
         }
     }
 
-    // pub fn with_hsl<T>(&mut self, target: T) -> &mut Self 
-    // where T: Into<HslColor> {       
-    //     let hsl: HslColor = target.into();
-    //     self.with_hue(Spin::Absolute(hsl.h as i32));
-    //     self.with_saturation(Spin::Absolute(hsl.s as i32));
-    //     self.with_lightness(Spin::Absolute(hsl.l as i32));
-    //     self
-    // }
+    pub fn test_value(&mut self, value: i32) {
 
-    pub fn test_value(&mut self, value: i32) -> &mut Self {
+        self.color.h = value as f32;
+        self.color.s = value as f32;
+        self.color.l = value as f32;
 
-        self.spinner_vec[self.index].test_value(value);
-        self
     }
 
-    // pub fn with_hue(&mut self, spin: Spin<'a>) -> &mut Self {
+    pub fn spin_next_result(&mut self) -> Option<HslColor> {
+
+        if self.counter == self.count {
+            return None;
+        }
+
+        self.color.h = self.counter as f32; // TODO: tmp
+        
+        let result = self.color;
+        self.color.l += 5.0;
+
+        self.counter += 1;
+
+        if self.counter == 1 && self.skip_first { 
+            return self.spin_next_result(); 
+        }
+
+        return Some(result);
+    }
+
+
+    // pub fn with_hue(&mut self, spin: SpinMode<'a>) -> &mut Self {
     //     self.spin_hue = spin;
     //     self
     // }
 
-    // pub fn with_saturation(&mut self, spin: Spin<'a>) -> &mut Self {
+    // pub fn with_saturation(&mut self, spin: SpinMode<'a>) -> &mut Self {
     //     self.spin_saturation = spin;
     //     self
     // }
 
-    // pub fn with_lightness(&mut self, spin: Spin<'a>) -> &mut Self {
+    // pub fn with_lightness(&mut self, spin: SpinMode<'a>) -> &mut Self {
     //     self.spin_lightness = spin;
     //     self
     // }
@@ -65,32 +87,6 @@ impl<'kw> KolorWheel<'kw> {
     //     self
     // }
 
-    pub fn chain(&mut self, count: usize) -> &mut Self {
-
-        let mut spinner = self.spinner_vec[self.index].clone();
-        self.index += 1;
-        spinner.count = count;
-        self.spinner_vec.push(spinner);
-
-        self
-    }
-
-    pub fn spin<T: From<HslColor>>(&mut self, callback: &dyn Fn(T)) {
-
-        let mut last = &mut self.spinner_vec[1];  //TODO: walk
-
-        loop {
-            let result = &last.spin_next_result();
-            match result {
-                Some(color) => callback((*color).into()),
-                None => break,
-            }
-        }
-
-    }
-
-   
-
 }
 
 #[cfg(test)]
@@ -98,34 +94,7 @@ mod tests {
     use super::*;
     use assert_float_eq::*;
 
-    #[test]
-    fn tst() {
-        println!(">>>>>>>>>>>>>>>>>>>>");
-        let kw = KolorWheel::new(HslColor::new(0, 100, 50), 4)
-            // .with_hsl(HslColor::new(0, 100, 100))
-            // .with_hue(Spin::Absolute(90))
-            // .with_saturation(Spin::RelativeIncl(-10))
-            // .with_lightness(Spin::Offset(&[0, 10]))
-            //.skip_first()
-            .test_value(111)
-            .chain(2)
-            .test_value(222)
-            .spin(&|res: HslColor| {
 
-                println!("-------------{:?}", res);
-
-                // let inner = KolorWheel::new(res, 2)
-                //     .skip_first()
-                //     .spin(&|ires: RgbColor| {
-                //         println!("  -------------{:?}", ires);
-                //     })
-                // ;
-
-            })
-        ;
-        println!("<<<<<<<<<<<<<<<<<<<<");
-
-    }
 }
 
 /*
