@@ -2,4 +2,4 @@
 cls
 
 rem cargo test --example main
-cargo test --lib -- --nocapture
+cargo test --lib -- --nocapture tst

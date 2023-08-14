@@ -4,23 +4,30 @@ use crate::hsl_color::HslColor;
 use crate::rgb_color::RgbColor;
 
 #[derive(Clone)]
-pub struct Spinner<'sp> {
-    pub color: HslColor,    
-    pub count: usize,
-    pub counter: usize,
-    pub skip_first: bool,
-    spin_hue: SpinMode<'sp>,
-    spin_saturation: SpinMode<'sp>,
-    spin_lightness: SpinMode<'sp>,
+pub struct Spinner<'s> {
+    pub(crate) color: HslColor,    
+    pub(crate) count: usize,
+    pub(crate) counter: usize,
+    pub(crate) skip_first: bool,
+    pub(crate) spin_hue: SpinMode<'s>,
+    pub(crate) spin_saturation: SpinMode<'s>,
+    pub(crate) spin_lightness: SpinMode<'s>,
 }
 
 #[derive(Clone)]
-pub enum SpinMode<'sl> {
+pub enum SpinMode<'m> {
     Unchanged,
     Absolute(i32),
     RelativeIncl(i32),
     RelativeExcl(i32),
-    Offset(&'sl [i32]),
+    Offset(&'m [i32]),
+}
+
+pub enum FadeMode {
+    Color(HslColor),
+    Gray(i32),
+    Black,
+    White,
 }
 
 impl<'a> Spinner<'a> {
@@ -36,14 +43,6 @@ impl<'a> Spinner<'a> {
             spin_saturation: SpinMode::Unchanged,
             spin_lightness: SpinMode::Unchanged,
         }
-    }
-
-    pub fn test_value(&mut self, value: i32) {
-
-        self.color.h = value as f32;
-        self.color.s = value as f32;
-        self.color.l = value as f32;
-
     }
 
     pub fn spin_next_result(&mut self) -> Option<HslColor> {
@@ -66,21 +65,6 @@ impl<'a> Spinner<'a> {
         return Some(result);
     }
 
-
-    // pub fn with_hue(&mut self, spin: SpinMode<'a>) -> &mut Self {
-    //     self.spin_hue = spin;
-    //     self
-    // }
-
-    // pub fn with_saturation(&mut self, spin: SpinMode<'a>) -> &mut Self {
-    //     self.spin_saturation = spin;
-    //     self
-    // }
-
-    // pub fn with_lightness(&mut self, spin: SpinMode<'a>) -> &mut Self {
-    //     self.spin_lightness = spin;
-    //     self
-    // }
 }
 
 #[cfg(test)]
