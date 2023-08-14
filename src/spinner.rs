@@ -4,23 +4,23 @@ use crate::hsl_color::HslColor;
 use crate::rgb_color::RgbColor;
 use crate::{SpinMode, FadeMode};
 
-pub(crate) struct Spinner<'s> {
+pub(crate) struct Spinner<'sr> {
     color: HslColor,    
     count: usize,
     counter: usize,
-    spin_mode_hue: SpinMode<'s>,
-    spin_mode_saturation: SpinMode<'s>,
-    spin_mode_lightness: SpinMode<'s>,
+    spin_mode_hue: SpinMode<'sr>,
+    spin_mode_saturation: SpinMode<'sr>,
+    spin_mode_lightness: SpinMode<'sr>,
     recalc_request: bool,
-    spin_hue: Spin<'s>,
-    spin_saturation: Spin<'s>,
-    spin_lightness: Spin<'s>,
+    spin_hue: Spin<'sr>,
+    spin_saturation: Spin<'sr>,
+    spin_lightness: Spin<'sr>,
 }
 
-enum Spin<'x> {
+enum Spin<'sp> {
     Still,
     Calculated(f32, Boundary),
-    Stored(&'x [f32]),
+    Stored(&'sp [f32]),
 }
 
 enum Boundary {
@@ -28,7 +28,7 @@ enum Boundary {
     Percent,
 }
 
-impl<'a> Spinner<'a> {
+impl<'i> Spinner<'i> {
 
     pub(crate) fn new<T>(color: T, count: usize) -> Self 
     where T: Into<HslColor> {
@@ -60,17 +60,17 @@ impl<'a> Spinner<'a> {
         self.recalc_request = true;      
     }
 
-    pub(crate) fn with_hue(&mut self, spin_mode: SpinMode<'a>) {
+    pub(crate) fn with_hue(&mut self, spin_mode: SpinMode<'i>) {
         self.spin_mode_hue = spin_mode;
         self.recalc_request = true;      
     }
 
-    pub(crate) fn with_saturation(&mut self, spin_mode: SpinMode<'a>) {
+    pub(crate) fn with_saturation(&mut self, spin_mode: SpinMode<'i>) {
         self.spin_mode_saturation = spin_mode;
         self.recalc_request = true;      
     }
 
-    pub(crate) fn with_lightness(&mut self, spin_mode: SpinMode<'a>) {
+    pub(crate) fn with_lightness(&mut self, spin_mode: SpinMode<'i>) {
         self.spin_mode_lightness = spin_mode;
         self.recalc_request = true;      
     }
@@ -79,25 +79,27 @@ impl<'a> Spinner<'a> {
         
         self.recalc_request = false;
 
-        self.spin_hue = self.recalculate_channel(
+        self.spin_hue = Self::recalculate_channel(
             self.color.h, 
-            self.spin_mode_hue,
+            &self.spin_mode_hue,
             Boundary::Circular,
         );
-        // self.spin_saturation = self.recalculate_channel(
-        //     self.color.s, 
-        //     self.spin_mode_saturation,
-        //     Boundary::Percent,
-        // );
-        // self.spin_lightness = self.recalculate_channel(
-        //     self.color.l, 
-        //     self.spin_mode_lightness,
-        //     Boundary::Percent,
-        // );
+
+        self.spin_saturation = Self::recalculate_channel(
+            self.color.s, 
+            &self.spin_mode_saturation,
+            Boundary::Percent,
+        );
+
+        self.spin_lightness = Self::recalculate_channel(
+            self.color.l, 
+            &self.spin_mode_lightness,
+            Boundary::Percent,
+        );
 
     }
-
-    fn recalculate_channel(&mut self, value: f32, spin_mode: SpinMode<'a>, boudary: Boundary) -> Spin {
+    
+    fn recalculate_channel(value: f32, spin_mode: &SpinMode, boundary: Boundary) -> Spin<'i> {
 
         match spin_mode {
 
