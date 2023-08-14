@@ -87,7 +87,6 @@ impl<'kw> KolorWheel<'kw> {
         self.index += 1;
 
         spinner.count = count;
-        spinner.skip_first = true;
         self.spinner_vec.push(spinner);
 
         self
@@ -96,29 +95,35 @@ impl<'kw> KolorWheel<'kw> {
     pub fn spin<T: From<HslColor>>(&mut self, callback: &mut dyn FnMut(T)) {
 
         let mut level = 0;
+        self.spinner_vec[0].counter = 0;
+
         loop {
 
-            let result = self.spinner_vec[level].spin_next_result();
-            match result {
+            let spinner = &mut self.spinner_vec[level];
 
-                Some(color) => {
+            if spinner.counter == spinner.count {
+                if level == 0 { return; }
+                level -= 1;
+                
+            } else {
 
+                let color = spinner.color;
+                
+                if level == 0 || spinner.counter > 0 {
                     callback(color.into());
+                }
 
-                    if self.spinner_vec.len() > level + 1 {
+                if spinner.counter < spinner.count {
+                    spinner.spin_next();
+                    spinner.counter += 1;
+                }
 
-                        level += 1;
-
-                        let mut spinner = &mut self.spinner_vec[level];                        
-                        spinner.counter = 0;                        
-                        spinner.color = color;
-                    }
-                },
-
-                None => {
-                    if level == 0 { return; }
-                    level -= 1;
-                },
+                if self.spinner_vec.len() > level + 1 {
+                    level += 1;
+                    let mut child = &mut self.spinner_vec[level];                        
+                    child.counter = 0;                        
+                    child.color = color;
+                }
             }
 
         } // loop
@@ -161,8 +166,28 @@ mod tests {
         assert_eq!(count, 6);
     }
 
-}
+    #[test]
+    fn spin_count_1x1() {
+        let mut count = 0;
+        let kw = KolorWheel::new(HslColor::new(0, 0, 0), 1)
+            .fork(1)
+            .spin(&mut|res: HslColor| { count += 1 })
+        ;
+        assert_eq!(count, 1);
+    }
 
+    #[test]
+    fn spin_count_2x3x4x5() {
+        let mut count = 0;
+        let kw = KolorWheel::new(HslColor::new(0, 0, 0), 2)
+            .fork(3)
+            .fork(4)
+            .fork(5)
+            .spin(&mut|res: HslColor| { count += 1 })
+        ;
+        assert_eq!(count, 120);
+    }
+}
 
     // #[test]
     // fn tst() {

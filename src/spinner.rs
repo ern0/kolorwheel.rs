@@ -8,7 +8,6 @@ pub struct Spinner<'s> {
     pub(crate) color: HslColor,    
     pub(crate) count: usize,
     pub(crate) counter: usize,
-    pub(crate) skip_first: bool,
     pub(crate) spin_hue: SpinMode<'s>,
     pub(crate) spin_saturation: SpinMode<'s>,
     pub(crate) spin_lightness: SpinMode<'s>,
@@ -38,31 +37,17 @@ impl<'a> Spinner<'a> {
             color: color.into(),
             count,
             counter: 0,
-            skip_first: false,
             spin_hue: SpinMode::Unchanged,
             spin_saturation: SpinMode::Unchanged,
             spin_lightness: SpinMode::Unchanged,
         }
     }
 
-    pub fn spin_next_result(&mut self) -> Option<HslColor> {
+    pub fn spin_next(&mut self) {
 
-        if self.counter == self.count {
-            return None;
-        }
-
-        self.color.h = self.counter as f32; // TODO: tmp
-        
-        let result = self.color;
+        self.color.h = self.counter as f32; // TODO: tmp        
         self.color.l += 5.0;
 
-        self.counter += 1;
-
-        if self.counter == 1 && self.skip_first { 
-            return self.spin_next_result(); 
-        }
-
-        return Some(result);
     }
 
 }
