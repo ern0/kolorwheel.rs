@@ -8,11 +8,27 @@ mod spinner;
 
 use hsl_color::HslColor;
 use rgb_color::RgbColor;
-use crate::spinner::{Spinner, SpinMode, FadeMode};
+use crate::spinner::{Spinner};
 
 pub struct KolorWheel<'kw> {
     index: usize,
     spinner_vec: Vec<Spinner<'kw>>,
+}
+
+#[derive(Clone)]
+pub enum SpinMode<'m> {
+    Unchanged,
+    Absolute(i32),
+    RelativeIncl(i32),
+    RelativeExcl(i32),
+    Offset(&'m [i32]),
+}
+
+pub enum FadeMode {
+    Color(HslColor),
+    Gray(i32),
+    Black,
+    White,
 }
 
 impl<'kw> KolorWheel<'kw> {
@@ -35,22 +51,22 @@ impl<'kw> KolorWheel<'kw> {
 
     pub fn color<T>(&mut self, target: T) -> &mut Self 
     where T: Into<HslColor> {       
-        self.actual_spinner().color = target.into();
+        self.actual_spinner().with_color(target.into());
         self
     }
 
     pub fn with_hue(&mut self, spin_mode: SpinMode<'kw>) -> &mut KolorWheel<'kw> {
-        self.actual_spinner().spin_hue = spin_mode;
+        self.actual_spinner().with_hue(spin_mode);
         self
     }
 
     pub fn with_saturation(&mut self, spin_mode: SpinMode<'kw>) -> &mut KolorWheel<'kw> {
-        self.actual_spinner().spin_saturation = spin_mode;
+        self.actual_spinner().with_saturation(spin_mode);
         self
     }
 
     pub fn with_lightness(&mut self, spin_mode: SpinMode<'kw>) -> &mut Self {
-        self.actual_spinner().spin_lightness = spin_mode;
+        self.actual_spinner().with_lightness(spin_mode);
         self
     }
 
@@ -60,21 +76,21 @@ impl<'kw> KolorWheel<'kw> {
 
         match fade_mode {
             FadeMode::Color(hsl_color) => {
-                spinner.spin_hue = SpinMode::Absolute(hsl_color.h as i32);
-                spinner.spin_saturation = SpinMode::Absolute(hsl_color.s as i32);
-                spinner.spin_lightness = SpinMode::Absolute(hsl_color.l as i32);
+                self.with_hue(SpinMode::Absolute(hsl_color.h as i32));
+                self.with_saturation(SpinMode::Absolute(hsl_color.s as i32));
+                self.with_lightness(SpinMode::Absolute(hsl_color.l as i32));
             },
             FadeMode::Gray(percent) => {
-                spinner.spin_saturation = SpinMode::Absolute(0);
-                spinner.spin_lightness = SpinMode::Absolute(percent);
+                self.with_saturation(SpinMode::Absolute(0));
+                self.with_lightness(SpinMode::Absolute(percent));
             },
             FadeMode::Black => {
-                spinner.spin_saturation = SpinMode::Absolute(0);
-                spinner.spin_lightness = SpinMode::Absolute(0);
+                self.with_saturation(SpinMode::Absolute(0));
+                self.with_lightness(SpinMode::Absolute(0));
             },
             FadeMode::White => {
-                spinner.spin_saturation = SpinMode::Absolute(0);
-                spinner.spin_lightness = SpinMode::Absolute(100);
+                self.with_saturation(SpinMode::Absolute(0));
+                self.with_lightness(SpinMode::Absolute(100));
             },
         };
 
@@ -83,11 +99,11 @@ impl<'kw> KolorWheel<'kw> {
 
     pub fn fork(&mut self, count: usize) -> &mut Self {
 
-        let mut spinner = self.actual_spinner().clone();
-        self.index += 1;
+        let color = self.actual_spinner().color();
 
-        spinner.count = count;
+        let mut spinner = Spinner::new(color, count);
         self.spinner_vec.push(spinner);
+        self.index += 1;
 
         self
     }
@@ -96,21 +112,19 @@ impl<'kw> KolorWheel<'kw> {
 
         let mut level = 0;
         let top_level = self.spinner_vec.len() - 1;
-        self.spinner_vec[0].counter = 0;
+        self.spinner_vec[0].rewind();
 
         loop {
 
             let spinner = &mut self.spinner_vec[level];
 
-            if spinner.counter == spinner.count {
+            if spinner.spin_finished() {
                 if level == 0 { return; }
                 level -= 1;
                 continue;
             }
                 
-            spinner.spin_next();
-            let color = spinner.color;
-            spinner.counter += 1;
+            let color = spinner.spin_next();
 
             if level == top_level {  // render only top level
                 callback(color.into());
@@ -118,9 +132,8 @@ impl<'kw> KolorWheel<'kw> {
             }
 
             level += 1;
-            let mut child = &mut self.spinner_vec[level];                        
-            child.counter = 0;                        
-            child.color = color;
+            let mut child = &mut self.spinner_vec[level];    
+            child.rewind().with_color(color);                    
 
         } // loop
     }

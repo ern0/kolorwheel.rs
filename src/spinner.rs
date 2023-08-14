@@ -2,52 +2,79 @@
 
 use crate::hsl_color::HslColor;
 use crate::rgb_color::RgbColor;
+use crate::{SpinMode, FadeMode};
 
-#[derive(Clone)]
 pub struct Spinner<'s> {
-    pub(crate) color: HslColor,    
-    pub(crate) count: usize,
-    pub(crate) counter: usize,
-    pub(crate) spin_hue: SpinMode<'s>,
-    pub(crate) spin_saturation: SpinMode<'s>,
-    pub(crate) spin_lightness: SpinMode<'s>,
-}
-
-#[derive(Clone)]
-pub enum SpinMode<'m> {
-    Unchanged,
-    Absolute(i32),
-    RelativeIncl(i32),
-    RelativeExcl(i32),
-    Offset(&'m [i32]),
-}
-
-pub enum FadeMode {
-    Color(HslColor),
-    Gray(i32),
-    Black,
-    White,
+    color: HslColor,    
+    count: usize,
+    counter: usize,
+    spin_mode_hue: SpinMode<'s>,
+    spin_mode_saturation: SpinMode<'s>,
+    spin_mode_lightness: SpinMode<'s>,
+    recalc_request: bool,
 }
 
 impl<'a> Spinner<'a> {
 
-    pub fn new<T>(color: T, count: usize) -> Self 
+    pub(crate) fn new<T>(color: T, count: usize) -> Self 
     where T: Into<HslColor> {
         Self {
             color: color.into(),
             count,
             counter: 0,
-            spin_hue: SpinMode::Unchanged,
-            spin_saturation: SpinMode::Unchanged,
-            spin_lightness: SpinMode::Unchanged,
+            spin_mode_hue: SpinMode::Unchanged,
+            spin_mode_saturation: SpinMode::Unchanged,
+            spin_mode_lightness: SpinMode::Unchanged,
+            recalc_request: true,
         }
     }
 
-    pub fn spin_next(&mut self) {
+    pub(crate) fn color(&self) ->  HslColor {
+        self.color
+    }
+
+    pub(crate) fn rewind(&mut self) -> &mut Self {
+        self.counter = 0;
+        self
+    }
+
+    pub(crate) fn with_color(&mut self, hsl: HslColor) { 
+        self.color = hsl;
+        self.recalc_request = true;      
+    }
+
+    pub(crate) fn with_hue(&mut self, spin_mode: SpinMode<'a>) {
+        self.spin_mode_hue = spin_mode;
+        self.recalc_request = true;      
+    }
+
+    pub(crate) fn with_saturation(&mut self, spin_mode: SpinMode<'a>) {
+        self.spin_mode_saturation = spin_mode;
+        self.recalc_request = true;      
+    }
+
+    pub(crate) fn with_lightness(&mut self, spin_mode: SpinMode<'a>) {
+        self.spin_mode_lightness = spin_mode;
+        self.recalc_request = true;      
+    }
+
+    fn recalculate(&mut self) {
+        self.recalc_request = false;
+    }
+
+    pub(crate) fn spin_next(&mut self) ->  HslColor {
+
+        if self.recalc_request { self.recalculate(); }
 
         self.color.h = self.counter as f32; // TODO: tmp        
         self.color.l += 5.0;
 
+        self.counter += 1;
+        self.color
+    }
+
+    pub(crate) fn spin_finished(&self) -> bool {
+        self.counter >= self.count
     }
 
 }
