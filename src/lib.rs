@@ -95,6 +95,7 @@ impl<'kw> KolorWheel<'kw> {
     pub fn spin<T: From<HslColor>>(&mut self, callback: &mut dyn FnMut(T)) {
 
         let mut level = 0;
+        let top_level = self.spinner_vec.len() - 1;
         self.spinner_vec[0].counter = 0;
 
         loop {
@@ -104,28 +105,22 @@ impl<'kw> KolorWheel<'kw> {
             if spinner.counter == spinner.count {
                 if level == 0 { return; }
                 level -= 1;
-                
-            } else {
-                let color = spinner.color;
-
-                // skip first item of forks, already reported by base
-                if !(level > 0 && spinner.counter == 0) {  
-                    callback(color.into());
-                }
-
-                // skip unnecessary calculation after last item
-                if !(spinner.counter >= spinner.count) {
-                    spinner.spin_next();
-                    spinner.counter += 1;
-                }
-
-                if self.spinner_vec.len() > level + 1 {
-                    level += 1;
-                    let mut child = &mut self.spinner_vec[level];                        
-                    child.counter = 0;                        
-                    child.color = color;
-                }
+                continue;
             }
+                
+            spinner.spin_next();
+            let color = spinner.color;
+            spinner.counter += 1;
+
+            if level == top_level {  // render only top level
+                callback(color.into());
+                continue;
+            }
+
+            level += 1;
+            let mut child = &mut self.spinner_vec[level];                        
+            child.counter = 0;                        
+            child.color = color;
 
         } // loop
     }
