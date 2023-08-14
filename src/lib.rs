@@ -106,14 +106,15 @@ impl<'kw> KolorWheel<'kw> {
                 level -= 1;
                 
             } else {
-
                 let color = spinner.color;
-                
-                if level == 0 || spinner.counter > 0 {
+
+                // skip first item of forks, already reported by base
+                if !(level > 0 && spinner.counter == 0) {  
                     callback(color.into());
                 }
 
-                if spinner.counter < spinner.count {
+                // skip unnecessary calculation after last item
+                if !(spinner.counter >= spinner.count) {
                     spinner.spin_next();
                     spinner.counter += 1;
                 }
