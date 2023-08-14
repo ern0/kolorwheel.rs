@@ -4,7 +4,7 @@ use crate::hsl_color::HslColor;
 use crate::rgb_color::RgbColor;
 use crate::{SpinMode, FadeMode};
 
-pub struct Spinner<'s> {
+pub(crate) struct Spinner<'s> {
     color: HslColor,    
     count: usize,
     counter: usize,
@@ -12,6 +12,20 @@ pub struct Spinner<'s> {
     spin_mode_saturation: SpinMode<'s>,
     spin_mode_lightness: SpinMode<'s>,
     recalc_request: bool,
+    spin_hue: Spin<'s>,
+    spin_saturation: Spin<'s>,
+    spin_lightness: Spin<'s>,
+}
+
+enum Spin<'x> {
+    Still,
+    Calculated(f32, Boundary),
+    Stored(&'x [f32]),
+}
+
+enum Boundary {
+    Circular,
+    Percent,
 }
 
 impl<'a> Spinner<'a> {
@@ -26,6 +40,9 @@ impl<'a> Spinner<'a> {
             spin_mode_saturation: SpinMode::Unchanged,
             spin_mode_lightness: SpinMode::Unchanged,
             recalc_request: true,
+            spin_hue: Spin::Still,
+            spin_saturation: Spin::Still,
+            spin_lightness: Spin::Still,
         }
     }
 
@@ -59,7 +76,52 @@ impl<'a> Spinner<'a> {
     }
 
     fn recalculate(&mut self) {
+        
         self.recalc_request = false;
+
+        self.spin_hue = self.recalculate_channel(
+            self.color.h, 
+            self.spin_mode_hue,
+            Boundary::Circular,
+        );
+        // self.spin_saturation = self.recalculate_channel(
+        //     self.color.s, 
+        //     self.spin_mode_saturation,
+        //     Boundary::Percent,
+        // );
+        // self.spin_lightness = self.recalculate_channel(
+        //     self.color.l, 
+        //     self.spin_mode_lightness,
+        //     Boundary::Percent,
+        // );
+
+    }
+
+    fn recalculate_channel(&mut self, value: f32, spin_mode: SpinMode<'a>, boudary: Boundary) -> Spin {
+
+        match spin_mode {
+
+            SpinMode::Unchanged => {
+                return Spin::Still;
+            },
+
+            SpinMode::Absolute(target) => {
+                return Spin::Still;  // TODO: calc
+            },
+
+            SpinMode::RelativeIncl(value) => {
+                return Spin::Still;  // TODO: calc
+            },
+
+            SpinMode::RelativeExcl(value) => {
+                return Spin::Still;  // TODO: calc
+            },
+
+            SpinMode::Offset(offsets) => {
+                return Spin::Still;  // TODO: calc
+            },
+
+        }
     }
 
     pub(crate) fn spin_next(&mut self) ->  HslColor {

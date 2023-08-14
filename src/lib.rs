@@ -8,14 +8,13 @@ mod spinner;
 
 use hsl_color::HslColor;
 use rgb_color::RgbColor;
-use crate::spinner::{Spinner};
+use crate::spinner::Spinner;
 
 pub struct KolorWheel<'kw> {
     index: usize,
     spinner_vec: Vec<Spinner<'kw>>,
 }
 
-#[derive(Clone)]
 pub enum SpinMode<'m> {
     Unchanged,
     Absolute(i32),
