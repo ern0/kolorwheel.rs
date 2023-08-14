@@ -108,6 +108,7 @@ impl<'i> Spinner<'i> {
             },
 
             SpinMode::Absolute(target) => {
+                println!("---------------- {} -> {}", value, target);
                 return Spin::Still;  // TODO: calc
             },
 

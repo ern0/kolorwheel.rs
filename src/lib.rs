@@ -197,26 +197,27 @@ mod tests {
     }
 }
 
-    // #[test]
-    // fn tst() {
+    #[test]
+    fn tst() {
 
-    //     println!(">>>>>>>>>>>>>>>>>>>>");
+        println!(">>>>>>>>>>>>>>>>>>>>");
 
-    //     let kw = KolorWheel::new(HslColor::new(0, 100, 50), 4)
-    //         .fade(FadeMode::Color(HslColor::new(0, 100, 100)))
-    //         .fade(FadeMode::Gray(50))
-    //         .fade(FadeMode::Black)
-    //         .fade(FadeMode::White)
-    //         .with_hue(SpinMode::Absolute(90))
-    //         .with_saturation(SpinMode::RelativeIncl(-10))
-    //         .with_lightness(SpinMode::Offset(&[0, 10]))
-    //         .fork(3)
-    //         .spin(&|res: HslColor| {
-    //             println!("-------------{:?}", res);
-    //         })
-    //     ;
-    //     println!("<<<<<<<<<<<<<<<<<<<<");
+        let kw = KolorWheel::new(HslColor::new(0, 100, 50), 4)
+            .with_hue(SpinMode::Absolute(90))
+            // .fade(FadeMode::Color(HslColor::new(0, 100, 100)))
+            // .fade(FadeMode::Gray(50))
+            // .fade(FadeMode::Black)
+            // .fade(FadeMode::White)
+            // .with_hue(SpinMode::Absolute(90))
+            // .with_saturation(SpinMode::RelativeIncl(-10))
+            // .with_lightness(SpinMode::Offset(&[0, 10]))
+            // .fork(3)
+            .spin(&mut |res: HslColor| {
+                println!("-------------{:?}", res);
+            })
+        ;
+        println!("<<<<<<<<<<<<<<<<<<<<");
 
-    // }
+    }
 
 
