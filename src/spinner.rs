@@ -185,7 +185,7 @@ impl<'i> Spinner<'i> {
         let mut channel_result = channel_value;
 
         if let Spin::Stored(offsets) = channel_spin {
-            let index = offsets.len() % counter;
+            let index = counter % offsets.len();
             channel_result += offsets[index] as f32;
         }
 
@@ -305,7 +305,8 @@ mod tests {
         assert_f32_near!(result.h, 400.0 - 360.0, 99999);
     }
 
-    fn spinner_circular_underflow() {
+    #[test]
+    fn spinner_circular_underflow_hue() {
 
         let color = HslColor::new(0, 100, 50);
         let mut spinner = Spinner::new(color, 5);
@@ -318,7 +319,8 @@ mod tests {
         assert_f32_near!(result.h, -100.0 + 360.0, 99999);        
     }
 
-    fn spinner_percent_overflow() {
+    #[test]
+    fn spinner_percent_overflow_sat() {
 
         let color = HslColor::new(0, 90, 50);
         let mut spinner = Spinner::new(color, 5);
@@ -334,14 +336,15 @@ mod tests {
         assert_f32_near!(result.s, 100.0, 99999);        
     }
 
-    fn spinner_percent_underflow() {
+    #[test]
+    fn spinner_percent_underflow_lit() {
 
         let color = HslColor::new(0, 100, 10);
         let mut spinner = Spinner::new(color, 5);
-        spinner.with_saturation(SpinMode::RelativeExcl(-100));
+        spinner.with_lightness(SpinMode::RelativeExcl(-200));
 
         let result = spinner.spin_next();
-        assert_f32_near!(result.l, 10.0, 99999);        
+        assert_f32_near!(result.l, 10.0, 99999);
 
         let result = spinner.spin_next();
         assert_f32_near!(result.l, 0.0, 99999);        
@@ -350,6 +353,38 @@ mod tests {
         assert_f32_near!(result.l, 0.0, 99999);        
     }
 
+    #[test]
+    fn spinner_stored_normal() {
+
+        let color = HslColor::new(0, 100, 50);
+        let mut spinner = Spinner::new(color, 5);
+        spinner.with_lightness(SpinMode::Offset(&[-10, 10]));
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 40.0, 99999);        
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 60.0, 99999);        
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 40.0, 99999);        
+    }
+
+    #[test]
+    fn spinner_stored_overflow() {
+
+        let color = HslColor::new(0, 100, 95);
+        let mut spinner = Spinner::new(color, 5);
+        spinner.with_lightness(SpinMode::Offset(&[-10, 10]));
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 85.0, 99999);        
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 100.0, 99999);        
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 85.0, 99999);        
+    }
 
 }
-
