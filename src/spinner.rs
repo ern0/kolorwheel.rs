@@ -257,11 +257,99 @@ mod tests {
 
         let result = spinner.spin_next();
         assert_f32_near!(result.s, 20.0, 99999);
+
         let result = spinner.spin_next();
         assert_f32_near!(result.s, 25.0, 99999);
+
         let result = spinner.spin_next();
         assert_f32_near!(result.s, 30.0, 99999);
     }
+
+    #[test]
+    fn spinner_lit_rel_excl() {
+
+        let color = HslColor::new(0, 20, 50);
+        let mut spinner = Spinner::new(color, 3);
+        spinner.with_lightness(SpinMode::RelativeExcl(10));
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 50.0, 99999);
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 53.333, 99999);
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 56.667, 99999);
+    }
+
+    #[test]
+    fn spinner_circular_overflow() {
+
+        let color = HslColor::new(0, 100, 50);
+        let mut spinner = Spinner::new(color, 5);
+        spinner.with_hue(SpinMode::RelativeIncl(400));
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, 0.0, 99999);
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, 100.0, 99999);
+        
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, 200.0, 99999);
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, 300.0, 99999);
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, 400.0 - 360.0, 99999);
+    }
+
+    fn spinner_circular_underflow() {
+
+        let color = HslColor::new(0, 100, 50);
+        let mut spinner = Spinner::new(color, 5);
+        spinner.with_hue(SpinMode::RelativeIncl(-400));
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, 0.0, 99999);
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, -100.0 + 360.0, 99999);        
+    }
+
+    fn spinner_percent_overflow() {
+
+        let color = HslColor::new(0, 90, 50);
+        let mut spinner = Spinner::new(color, 5);
+        spinner.with_saturation(SpinMode::RelativeIncl(100));
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.s, 90.0, 99999);        
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.s, 100.0, 99999);        
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.s, 100.0, 99999);        
+    }
+
+    fn spinner_percent_underflow() {
+
+        let color = HslColor::new(0, 100, 10);
+        let mut spinner = Spinner::new(color, 5);
+        spinner.with_saturation(SpinMode::RelativeExcl(-100));
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 10.0, 99999);        
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 0.0, 99999);        
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.l, 0.0, 99999);        
+    }
+
 
 }
 
