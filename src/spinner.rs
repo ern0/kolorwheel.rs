@@ -2,7 +2,7 @@
 
 use crate::hsl_color::HslColor;
 use crate::rgb_color::RgbColor;
-use crate::{SpinMode, FadeMode};
+use crate::SpinMode;
 
 pub(crate) struct Spinner<'sr> {
     color: HslColor,    

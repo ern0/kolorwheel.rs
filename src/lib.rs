@@ -6,6 +6,7 @@ mod convert_hsl_to_rgb;
 mod convert_rgb_to_hsl;
 mod spinner;
 
+use std::vec::Vec;
 use hsl_color::HslColor;
 use rgb_color::RgbColor;
 use crate::spinner::Spinner;
@@ -137,6 +138,17 @@ impl<'kw> KolorWheel<'kw> {
         } // loop
     }
 
+    pub fn spin_vec<T: From<HslColor>>(&mut self) -> Vec<T> 
+    where T: Into<HslColor> {
+
+        let mut result = Vec::<T>::new();
+        self.spin(&mut|item| {
+            result.push(item);
+        });
+
+        result
+    }
+
 }
 
 #[cfg(test)]
@@ -145,65 +157,65 @@ mod tests {
     use assert_float_eq::*;
 
     #[test]
-    fn spin_count_4x3() {
+    fn spin_cb_count_4x3() {
         let mut count = 0;
         let kw = KolorWheel::new(HslColor::new(0, 0, 0), 4)
             .fork(3)
-            .spin(&mut|res: HslColor| { count += 1 })
+            .spin(&mut|color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 12);
     }
 
     #[test]
-    fn spin_count_1x5() {
+    fn spin_cb_count_1x5() {
         let mut count = 0;
         let kw = KolorWheel::new(HslColor::new(0, 0, 0), 1)
             .fork(5)
-            .spin(&mut|res: HslColor| { count += 1 })
+            .spin(&mut|color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 5);
     }
 
     #[test]
-    fn spin_count_6x1() {
+    fn spin_cb_count_6x1() {
         let mut count = 0;
         let kw = KolorWheel::new(HslColor::new(0, 0, 0), 6)
             .fork(1)
-            .spin(&mut|res: HslColor| { count += 1 })
+            .spin(&mut|color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 6);
     }
 
     #[test]
-    fn spin_count_1x1() {
+    fn spin_cb_count_1x1() {
         let mut count = 0;
         let kw = KolorWheel::new(HslColor::new(0, 0, 0), 1)
             .fork(1)
-            .spin(&mut|res: HslColor| { count += 1 })
+            .spin(&mut|color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 1);
     }
 
     #[test]
-    fn spin_count_2x3x4x5() {
+    fn spin_cb_count_2x3x4x5() {
         let mut count = 0;
         let kw = KolorWheel::new(HslColor::new(0, 0, 0), 2)
             .fork(3)
             .fork(4)
             .fork(5)
-            .spin(&mut|res: HslColor| { count += 1 })
+            .spin(&mut|color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 120);
     }
 
     #[test]
-    fn spin_hue_abs_simple() {
+    fn spin_cb_hue_abs_simple() {
         let mut result: Vec<HslColor> = Vec::new();
-        let color = HslColor::new(0, 100, 50);
-        let mut kw = KolorWheel::new(color, 3)
+        let base = HslColor::new(0, 100, 50);
+        let mut kw = KolorWheel::new(base, 3)
             .with_hue(SpinMode::Absolute(10))
-            .spin(&mut|res: HslColor| { 
-                result.push(res); 
+            .spin(&mut|color: HslColor| { 
+                result.push(color); 
             });
         ;
         assert_f32_near!(result[0].h, 0.0, 99999);
@@ -211,44 +223,42 @@ mod tests {
         assert_f32_near!(result[2].h, 10.0, 99999);
     }
 
-    fn spin_hue_abs_negative() {
-        let mut result: Vec<HslColor> = Vec::new();
-        let color = HslColor::new(120, 100, 50);
-        let mut kw = KolorWheel::new(color, 3)
-            .with_hue(SpinMode::Absolute(-10))
-            .spin(&mut|res: HslColor| { 
-                result.push(res); 
-            });
+    #[test]
+    fn spin_vec_hue_abs_negative() {
+        let base = HslColor::new(120, 100, 50);
+        let mut result = KolorWheel::new(base, 3)
+            .with_hue(SpinMode::Absolute(100))
+            .spin_vec::<HslColor>()
         ;
         assert_f32_near!(result[0].h, 120.0, 99999);
         assert_f32_near!(result[1].h, 110.0, 99999);
         assert_f32_near!(result[2].h, 100.0, 99999);
     }
 
+    #[test]
+    fn spin_vec_fade_to_black() {
+        let base = HslColor::new(180, 100, 50);
+        let mut result = KolorWheel::new(base, 5)
+            .fade(FadeMode::Black)
+            .spin_vec::<HslColor>()
+        ;
+        assert!(result[3].s > 5.0);
+        assert!(result[3].l > 2.5);
+        assert_f32_near!(result[4].s, 0.0, 99999);
+        assert_f32_near!(result[4].l, 0.0, 99999);
+    }
+
+    #[test]
+    fn spin_vec_fade_to_white() {
+        let base = HslColor::new(90, 80, 10);
+        let mut result = KolorWheel::new(base, 5)
+            .fade(FadeMode::White)
+            .spin_vec::<HslColor>()
+        ;
+        assert!(result[3].s > 5.0);
+        assert!(result[3].l < 98.3);
+        assert_f32_near!(result[4].s, 0.0, 99999);
+        assert_f32_near!(result[4].l, 100.0, 99999);
+    }
+
 }
-
-    // #[test]
-    // fn tst() {
-
-    //     println!(">>>>>>>>>>>>>>>>>>>>");
-
-    //     let kw = KolorWheel::new(HslColor::new(0, 100, 50), 3)
-    //         .with_hue(SpinMode::Absolute(100))
-    //         // .fade(FadeMode::Color(HslColor::new(0, 100, 100)))
-    //         // .fade(FadeMode::Gray(50))
-    //         // .fade(FadeMode::Black)
-    //         // .fade(FadeMode::White)
-    //         // .with_hue(SpinMode::Absolute(90))
-    //         //.with_saturation(SpinMode::RelativeIncl(3))
-    //         .with_saturation(SpinMode::RelativeExcl(3))
-    //         // .with_lightness(SpinMode::Offset(&[0, 10]))
-    //         // .fork(3)
-    //         .spin(&mut |res: HslColor| {
-    //             println!("-------------{:?}", res);
-    //         })
-    //     ;
-    //     println!("<<<<<<<<<<<<<<<<<<<<");
-
-    // }
-
-
