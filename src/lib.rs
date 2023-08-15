@@ -195,30 +195,60 @@ mod tests {
         ;
         assert_eq!(count, 120);
     }
-}
 
     #[test]
-    fn tst() {
-
-        println!(">>>>>>>>>>>>>>>>>>>>");
-
-        let kw = KolorWheel::new(HslColor::new(0, 100, 50), 3)
-            .with_hue(SpinMode::Absolute(100))
-            // .fade(FadeMode::Color(HslColor::new(0, 100, 100)))
-            // .fade(FadeMode::Gray(50))
-            // .fade(FadeMode::Black)
-            // .fade(FadeMode::White)
-            // .with_hue(SpinMode::Absolute(90))
-            //.with_saturation(SpinMode::RelativeIncl(3))
-            .with_saturation(SpinMode::RelativeExcl(3))
-            // .with_lightness(SpinMode::Offset(&[0, 10]))
-            // .fork(3)
-            .spin(&mut |res: HslColor| {
-                println!("-------------{:?}", res);
-            })
+    fn spin_hue_abs_simple() {
+        let mut result: Vec<HslColor> = Vec::new();
+        let color = HslColor::new(0, 100, 50);
+        let mut kw = KolorWheel::new(color, 3)
+            .with_hue(SpinMode::Absolute(10))
+            .spin(&mut|res: HslColor| { 
+                result.push(res); 
+            });
         ;
-        println!("<<<<<<<<<<<<<<<<<<<<");
-
+        assert_f32_near!(result[0].h, 0.0, 99999);
+        assert_f32_near!(result[1].h, 5.0, 99999);
+        assert_f32_near!(result[2].h, 10.0, 99999);
     }
+
+    fn spin_hue_abs_negative() {
+        let mut result: Vec<HslColor> = Vec::new();
+        let color = HslColor::new(120, 100, 50);
+        let mut kw = KolorWheel::new(color, 3)
+            .with_hue(SpinMode::Absolute(-10))
+            .spin(&mut|res: HslColor| { 
+                result.push(res); 
+            });
+        ;
+        assert_f32_near!(result[0].h, 120.0, 99999);
+        assert_f32_near!(result[1].h, 110.0, 99999);
+        assert_f32_near!(result[2].h, 100.0, 99999);
+    }
+
+}
+
+    // #[test]
+    // fn tst() {
+
+    //     println!(">>>>>>>>>>>>>>>>>>>>");
+
+    //     let kw = KolorWheel::new(HslColor::new(0, 100, 50), 3)
+    //         .with_hue(SpinMode::Absolute(100))
+    //         // .fade(FadeMode::Color(HslColor::new(0, 100, 100)))
+    //         // .fade(FadeMode::Gray(50))
+    //         // .fade(FadeMode::Black)
+    //         // .fade(FadeMode::White)
+    //         // .with_hue(SpinMode::Absolute(90))
+    //         //.with_saturation(SpinMode::RelativeIncl(3))
+    //         .with_saturation(SpinMode::RelativeExcl(3))
+    //         // .with_lightness(SpinMode::Offset(&[0, 10]))
+    //         // .fork(3)
+    //         .spin(&mut |res: HslColor| {
+    //             println!("-------------{:?}", res);
+    //         })
+    //     ;
+    //     println!("<<<<<<<<<<<<<<<<<<<<");
+
+    // }
 
 

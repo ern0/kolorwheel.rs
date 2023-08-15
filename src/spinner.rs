@@ -147,7 +147,9 @@ impl<'i> Spinner<'i> {
 
         if self.recalc_request { self.recalculate(); }
 
-        self.spin_calculated_hsl();
+        if self.counter > 0 {
+            self.spin_calculated_hsl();
+        }
         let mut offseted_color = self.spin_stored_hsl();
         Self::spin_apply_boundaries(&mut offseted_color);
 
@@ -220,8 +222,46 @@ impl<'i> Spinner<'i> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use all_asserts::*;
     use assert_float_eq::*;
 
+    #[test]
+    fn spinner_hue_abs_simple() {
+
+        let color = HslColor::new(0, 100, 50);
+        let mut spinner = Spinner::new(color, 3);
+        spinner.with_hue(SpinMode::Absolute(2));
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, 0.0, 99999);
+        let finished = spinner.spin_finished();
+        assert_false!(finished);
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, 1.0, 99999);
+        let finished = spinner.spin_finished();
+        assert_false!(finished);
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.h, 2.0, 99999);
+        let finished = spinner.spin_finished();
+        assert_true!(finished);
+    }
+
+    #[test]
+    fn spinner_sat_rel_incl() {
+
+        let color = HslColor::new(0, 20, 50);
+        let mut spinner = Spinner::new(color, 3);
+        spinner.with_saturation(SpinMode::RelativeIncl(10));
+
+        let result = spinner.spin_next();
+        assert_f32_near!(result.s, 20.0, 99999);
+        let result = spinner.spin_next();
+        assert_f32_near!(result.s, 25.0, 99999);
+        let result = spinner.spin_next();
+        assert_f32_near!(result.s, 30.0, 99999);
+    }
 
 }
 
