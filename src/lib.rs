@@ -202,14 +202,15 @@ mod tests {
 
         println!(">>>>>>>>>>>>>>>>>>>>");
 
-        let kw = KolorWheel::new(HslColor::new(0, 100, 50), 4)
-            .with_hue(SpinMode::Absolute(90))
+        let kw = KolorWheel::new(HslColor::new(0, 100, 50), 3)
+            .with_hue(SpinMode::Absolute(100))
             // .fade(FadeMode::Color(HslColor::new(0, 100, 100)))
             // .fade(FadeMode::Gray(50))
             // .fade(FadeMode::Black)
             // .fade(FadeMode::White)
             // .with_hue(SpinMode::Absolute(90))
-            // .with_saturation(SpinMode::RelativeIncl(-10))
+            //.with_saturation(SpinMode::RelativeIncl(3))
+            .with_saturation(SpinMode::RelativeExcl(3))
             // .with_lightness(SpinMode::Offset(&[0, 10]))
             // .fork(3)
             .spin(&mut |res: HslColor| {

@@ -14,6 +14,12 @@ impl Default for HslColor {
     }
 }
 
+impl From<(f32, f32, f32)> for HslColor {
+    fn from((h, s, l): (f32, f32, f32)) -> HslColor {
+        HslColor { h, s, l }
+    }
+}
+
 impl From<(i32, i32, i32)> for HslColor {
     fn from((h, s, l): (i32, i32, i32)) -> HslColor {
         HslColor::new(h, s, l)
