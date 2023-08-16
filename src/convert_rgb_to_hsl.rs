@@ -1,4 +1,4 @@
-use std::convert::{From, Into};
+use std::convert::From;
 use crate::hsl_color::HslColor;
 use crate::rgb_color::RgbColor;
 
@@ -57,6 +57,7 @@ mod tests {
         assert_f32_near!(hsl.l, 50.0, 99999);
     }
 
+    #[test]
     fn rgb_to_hsl_gray_128() {
         let rgb = RgbColor::new(128, 128, 128);
         let hsl = HslColor::from(rgb);

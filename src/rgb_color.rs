@@ -1,6 +1,5 @@
 use std::convert::{From, TryFrom};
 use thiserror::Error;
-use crate::hsl_color::HslColor;
 
 #[derive(Clone, Copy, Default, PartialEq, Debug)]
 pub struct RgbColor {

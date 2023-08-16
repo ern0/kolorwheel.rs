@@ -1,5 +1,4 @@
-use std::convert::{From, Into};
-use crate::rgb_color::RgbColor;
+use std::convert::From;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct HslColor {
