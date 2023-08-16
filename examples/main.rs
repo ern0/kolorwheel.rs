@@ -1,6 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(unused)]
 
+use std::rc::Rc;
+use std::ops::Deref;
+
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
 use kolorwheel::SpinMode;
@@ -52,7 +55,7 @@ struct App {
     window: Window,
     active_panel: PanelSelector,   
 
-    p1: panel1_gradient::Gradient,
+    p1: Rc<dyn Panel>,
     // p2: panel2_hue_abs::HueAbs,
     // p3: panel3_sat_abs::SatAbs,
     // p4: panel4_lit_abs::LitAbs,
@@ -87,7 +90,7 @@ impl App {
         Self { 
             window,
             active_panel: PanelSelector::Gradient,   
-            p1: panel1_gradient::Gradient::new(), 
+            p1: Rc::new(panel1_gradient::Gradient::new()), 
             // p2: panel2_hue_abs::HueAbs::new(), 
             // p3: panel3_sat_abs::SatAbs::new(), 
             // p4: panel4_lit_abs::LitAbs::new(),
@@ -125,7 +128,7 @@ impl App {
         ui.separator();
 
         let panel: &mut dyn Panel = match self.active_panel {
-            PanelSelector::Gradient => &mut self.p1,
+            PanelSelector::Gradient => self.p1.deref(),
             // PanelSelector::HueAbs => &mut self.p2,
             // PanelSelector::SatAbs => &mut self.p3,
             // PanelSelector::LitAbs => &mut self.p4,
