@@ -148,7 +148,16 @@ impl<'kw> KolorWheel<'kw> {
 
         result
     }
+        
+}
 
+impl<'i> Iterator for KolorWheel<'i> {
+    type Item = HslColor;
+
+    fn next(&mut self) -> Option<HslColor> {
+        None
+    }
+    
 }
 
 #[cfg(test)]
@@ -260,5 +269,24 @@ mod tests {
         assert_f32_near!(result[4].s, 0.0, 99999);
         assert_f32_near!(result[4].l, 100.0, 99999);
     }
+
+    #[test]
+    fn spin_vec_fade_to_gray() {
+
+        let base = HslColor::new(90, 80, 10);
+        let mut kw = KolorWheel::new(base, 5);
+        kw.fade(FadeMode::Gray(40));
+
+        for color in kw {
+            println!("-----------------------{}.{}.{}", color.h, color.s, color.l);
+        }
+
+
+        // assert!(result[3].s > 5.0);
+        // assert!(result[3].l < 98.3);
+        // assert_f32_near!(result[4].s, 0.0, 99999);
+        // assert_f32_near!(result[4].l, 40.0, 99999);
+    }
+
 
 }
