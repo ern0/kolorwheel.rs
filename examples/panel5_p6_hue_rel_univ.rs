@@ -1,8 +1,10 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
+use kolorwheel::SpinMode;
+use kolorwheel::FadeMode;
+use kolorwheel::hsl_color::HslColor;
 
 use egui;
-use crate::hsl::Hsl;
 use crate::App;
 use crate::Panel;
 
@@ -10,7 +12,7 @@ pub struct HueRelUniv {
     include: bool,
     cols: u32,
     rows: u32,
-    color: Hsl,
+    color: HslColor,
     hue: i32,
 }
 
@@ -21,7 +23,7 @@ impl HueRelUniv {
             include,
             cols: 3,
             rows: 2,
-            color: Hsl { h: 0, s: 100, l: 50 },
+            color: HslColor { h: 0, s: 100, l: 50 },
             hue: 360,
         }
     }

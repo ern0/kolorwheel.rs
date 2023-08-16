@@ -47,7 +47,7 @@ impl HslColor {
         }
     }
 
-    fn normalize(&mut self) {
+    pub(crate) fn normalize(&mut self) {
         
         self.h %= 360.0;
         if self.h < 0.0 { self.h += 360.0 };

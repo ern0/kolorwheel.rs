@@ -1,15 +1,17 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
+use kolorwheel::SpinMode;
+use kolorwheel::FadeMode;
+use kolorwheel::hsl_color::HslColor;
 
 use egui;
-use crate::hsl::Hsl;
 use crate::App;
 use crate::Panel;
 
 pub struct SatLitRel {
     cols: u32,
     rows: u32,
-    color: Hsl,
+    color: HslColor,
     sat: i32,
     lit: i32,
 }
@@ -20,7 +22,7 @@ impl SatLitRel {
         Self {
             cols: 8,
             rows: 6,
-            color: Hsl { h: 60, s: 70, l: 50 },
+            color: HslColor { h: 60, s: 70, l: 50 },
             sat: -50,
             lit: -15,
         }

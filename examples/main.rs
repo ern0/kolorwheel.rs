@@ -1,20 +1,22 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![allow(unused)]
 
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
-
-mod hsl;
-use crate::hsl::Hsl;
+use kolorwheel::SpinMode;
+use kolorwheel::FadeMode;
+use kolorwheel::hsl_color::HslColor;
+use kolorwheel::rgb_color::RgbColor;
 
 mod panel1_gradient;
-mod panel2_hue_abs;
-mod panel3_sat_abs;
-mod panel4_lit_abs;
-mod panel5_p6_hue_rel_univ;
-mod panel7_sat_lit_rel;
-mod panel8_hue_offsets;
-mod panel9_palette1;
-mod panel10_palette2;
+// mod panel2_hue_abs;
+// mod panel3_sat_abs;
+// mod panel4_lit_abs;
+// mod panel5_p6_hue_rel_univ;
+// mod panel7_sat_lit_rel;
+// mod panel8_hue_offsets;
+// mod panel9_palette1;
+// mod panel10_palette2;
 
 fn main() -> Result<(), eframe::Error> {
 
@@ -51,24 +53,24 @@ struct App {
     active_panel: PanelSelector,   
 
     p1: panel1_gradient::Gradient,
-    p2: panel2_hue_abs::HueAbs,
-    p3: panel3_sat_abs::SatAbs,
-    p4: panel4_lit_abs::LitAbs,
-    p5: panel5_p6_hue_rel_univ::HueRelUniv,
-    p6: panel5_p6_hue_rel_univ::HueRelUniv,
-    p7: panel7_sat_lit_rel::SatLitRel,
-    p8: panel8_hue_offsets::HueOffsets,
-    p9: panel9_palette1::Palette1,
-    p10: panel10_palette2::Palette2,
+    // p2: panel2_hue_abs::HueAbs,
+    // p3: panel3_sat_abs::SatAbs,
+    // p4: panel4_lit_abs::LitAbs,
+    // p5: panel5_p6_hue_rel_univ::HueRelUniv,
+    // p6: panel5_p6_hue_rel_univ::HueRelUniv,
+    // p7: panel7_sat_lit_rel::SatLitRel,
+    // p8: panel8_hue_offsets::HueOffsets,
+    // p9: panel9_palette1::Palette1,
+    // p10: panel10_palette2::Palette2,
 }
 
 #[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
     Gradient, 
-    HueAbs, SatAbs, LitAbs,
-    HueReli, HueRelx,
-    SatLitRel, HueOffsets,
-    Palette1, Palette2,
+    // HueAbs, SatAbs, LitAbs,
+    // HueReli, HueRelx,
+    // SatLitRel, HueOffsets,
+    // Palette1, Palette2,
 }
 
 impl App {
@@ -86,15 +88,15 @@ impl App {
             window,
             active_panel: PanelSelector::Gradient,   
             p1: panel1_gradient::Gradient::new(), 
-            p2: panel2_hue_abs::HueAbs::new(), 
-            p3: panel3_sat_abs::SatAbs::new(), 
-            p4: panel4_lit_abs::LitAbs::new(),
-            p5: panel5_p6_hue_rel_univ::HueRelUniv::new(true),
-            p6: panel5_p6_hue_rel_univ::HueRelUniv::new(false),
-            p7: panel7_sat_lit_rel::SatLitRel::new(),
-            p8: panel8_hue_offsets::HueOffsets::new(),
-            p9: panel9_palette1::Palette1::new(),
-            p10: panel10_palette2::Palette2::new(),
+            // p2: panel2_hue_abs::HueAbs::new(), 
+            // p3: panel3_sat_abs::SatAbs::new(), 
+            // p4: panel4_lit_abs::LitAbs::new(),
+            // p5: panel5_p6_hue_rel_univ::HueRelUniv::new(true),
+            // p6: panel5_p6_hue_rel_univ::HueRelUniv::new(false),
+            // p7: panel7_sat_lit_rel::SatLitRel::new(),
+            // p8: panel8_hue_offsets::HueOffsets::new(),
+            // p9: panel9_palette1::Palette1::new(),
+            // p10: panel10_palette2::Palette2::new(),
         }
     }
 
@@ -109,30 +111,30 @@ impl App {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
             ui.selectable_value(&mut self.active_panel, PanelSelector::Gradient, "Gradient");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::HueAbs, "Hue/abs");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::SatAbs, "Sat/abs");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::LitAbs, "Lit/abs");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::HueReli, "Hue/reli");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::HueRelx, "Hue/relx");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::SatLitRel, "Sat+Lit/reli");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::HueOffsets, "HueOffsets");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::Palette1, "Palette1");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::Palette2, "Palette2");
+            // ui.selectable_value(&mut self.active_panel, PanelSelector::HueAbs, "Hue/abs");
+            // ui.selectable_value(&mut self.active_panel, PanelSelector::SatAbs, "Sat/abs");
+            // ui.selectable_value(&mut self.active_panel, PanelSelector::LitAbs, "Lit/abs");
+            // ui.selectable_value(&mut self.active_panel, PanelSelector::HueReli, "Hue/reli");
+            // ui.selectable_value(&mut self.active_panel, PanelSelector::HueRelx, "Hue/relx");
+            // ui.selectable_value(&mut self.active_panel, PanelSelector::SatLitRel, "Sat+Lit/reli");
+            // ui.selectable_value(&mut self.active_panel, PanelSelector::HueOffsets, "HueOffsets");
+            // ui.selectable_value(&mut self.active_panel, PanelSelector::Palette1, "Palette1");
+            // ui.selectable_value(&mut self.active_panel, PanelSelector::Palette2, "Palette2");
         });
 
         ui.separator();
 
         let panel: &mut dyn Panel = match self.active_panel {
             PanelSelector::Gradient => &mut self.p1,
-            PanelSelector::HueAbs => &mut self.p2,
-            PanelSelector::SatAbs => &mut self.p3,
-            PanelSelector::LitAbs => &mut self.p4,
-            PanelSelector::HueReli => &mut self.p5,
-            PanelSelector::HueRelx => &mut self.p6,
-            PanelSelector::SatLitRel => &mut self.p7,
-            PanelSelector::HueOffsets => &mut self.p8,
-            PanelSelector::Palette1 => &mut self.p9,
-            PanelSelector::Palette2 => &mut self.p10,
+            // PanelSelector::HueAbs => &mut self.p2,
+            // PanelSelector::SatAbs => &mut self.p3,
+            // PanelSelector::LitAbs => &mut self.p4,
+            // PanelSelector::HueReli => &mut self.p5,
+            // PanelSelector::HueRelx => &mut self.p6,
+            // PanelSelector::SatLitRel => &mut self.p7,
+            // PanelSelector::HueOffsets => &mut self.p8,
+            // PanelSelector::Palette1 => &mut self.p9,
+            // PanelSelector::Palette2 => &mut self.p10,
         };
 
         let (kw, cols, rows) = panel.paint(ui);
@@ -140,9 +142,13 @@ impl App {
 
     }
 
-    fn paint_hsl_sliders(ui: &mut egui::Ui, color: &mut Hsl) {
+    fn paint_hsl_sliders(ui: &mut egui::Ui, color: &mut HslColor) {
 
-        let slider_hue = egui::widgets::Slider::new(&mut color.h, 0..=359)
+        let mut h: i32 = color.h as i32;
+        let mut s: i32 = color.s as i32;
+        let mut l: i32 = color.l as i32;
+
+        let slider_hue = egui::widgets::Slider::new(&mut h, 0..=359)
             .orientation(egui::SliderOrientation::Vertical)
             .trailing_fill(true)
             .text("Hue")
@@ -150,7 +156,7 @@ impl App {
         ;
         ui.add(slider_hue);
 
-        let slider_sat = egui::widgets::Slider::new(&mut color.s, 0..=100)
+        let slider_sat = egui::widgets::Slider::new(&mut s, 0..=100)
             .orientation(egui::SliderOrientation::Vertical)
             .trailing_fill(true)
             .text("Sat")
@@ -158,13 +164,17 @@ impl App {
         ;
         ui.add(slider_sat);
 
-        let slider_lit = egui::widgets::Slider::new(&mut color.l, 0..=100)
+        let slider_lit = egui::widgets::Slider::new(&mut l, 0..=100)
             .orientation(egui::SliderOrientation::Vertical)
             .trailing_fill(true)
             .text("Lit")
             .suffix("%")
         ;
         ui.add(slider_lit);
+
+        color.h = h as f32;
+        color.s = s as f32;
+        color.l = l as f32;
 
     }
 
@@ -213,9 +223,10 @@ impl App {
         }        
     }
 
-    fn paint_box(&self, painter: &egui::Painter, rect: egui::Rect, color: kolorwheel::Color) {
+    fn paint_box(&self, painter: &egui::Painter, rect: egui::Rect, hsl_color: HslColor) {
         
-        let fill = egui::Color32::from_rgb(color.r, color.g, color.b);
+        let rgb_color: RgbColor = hsl_color.into();
+        let fill = egui::Color32::from_rgb(rgb_color.r, rgb_color.g, rgb_color.b);
 
         let stroke = egui::epaint::Stroke{
             width: 1.0,

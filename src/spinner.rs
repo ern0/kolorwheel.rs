@@ -1,7 +1,4 @@
-#![allow(unused)]
-
 use crate::hsl_color::HslColor;
-use crate::rgb_color::RgbColor;
 use crate::SpinMode;
 
 pub(crate) struct Spinner<'sr> {
@@ -21,11 +18,6 @@ enum Spin<'sp> {
     Still,
     Calculated(f32),
     Stored(&'sp [i32]),
-}
-
-enum Boundary {
-    Circular,
-    Percent,
 }
 
 impl<'i> Spinner<'i> {
@@ -151,7 +143,7 @@ impl<'i> Spinner<'i> {
             self.spin_calculated_hsl();
         }
         let mut offseted_color = self.spin_stored_hsl();
-        Self::spin_apply_boundaries(&mut offseted_color);
+        offseted_color.normalize();
 
         self.counter += 1;
         offseted_color
@@ -190,31 +182,6 @@ impl<'i> Spinner<'i> {
         }
 
         channel_result
-    }
-
-    fn spin_apply_boundaries(color: &mut HslColor) {
-
-        Spinner::spin_apply_boundary_channel(&mut color.h, Boundary::Circular);
-        Spinner::spin_apply_boundary_channel(&mut color.s, Boundary::Percent);
-        Spinner::spin_apply_boundary_channel(&mut color.l, Boundary::Percent);
-
-    }
-    
-    fn spin_apply_boundary_channel(channel_value: &mut f32, boundary: Boundary) {
-
-        match boundary {
-        
-            Boundary::Circular => {
-                if *channel_value >= 360.0 { *channel_value -= 360.0; }
-                if *channel_value < 0.0 { *channel_value += 360.0; }
-            },
-        
-            Boundary::Percent => {
-                if *channel_value > 100.0 { *channel_value = 100.0; }
-                if *channel_value < 0.0 { *channel_value = 0.0; }
-            },
-
-        }
     }
 
 }

@@ -1,4 +1,4 @@
-use std::convert::{From, Into};
+use std::convert::From;
 use crate::hsl_color::HslColor;
 use crate::rgb_color::RgbColor;
 

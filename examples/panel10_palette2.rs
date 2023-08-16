@@ -1,14 +1,16 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
+use kolorwheel::SpinMode;
+use kolorwheel::FadeMode;
+use kolorwheel::hsl_color::HslColor;
 
 use egui;
-use crate::hsl::Hsl;
 use crate::Panel;
 
 pub struct Palette2 {
     cols: u32,
     rows: u32,
-    color: Hsl,
+    color: HslColor,
     sat_offsets: [i32; 6],
     lit_offsets: [i32; 3],
 }
@@ -19,7 +21,7 @@ impl Palette2 {
         Self {
             cols: 3,
             rows: 2,
-            color: Hsl { h: 240, s: 80, l: 70 },
+            color: HslColor { h: 240, s: 80, l: 70 },
             sat_offsets: [60, 0, 0, 70, 0, 0],
             lit_offsets: [-40, 0, 0],
         }

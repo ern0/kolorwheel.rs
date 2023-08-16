@@ -1,15 +1,17 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
+use kolorwheel::SpinMode;
+use kolorwheel::FadeMode;
+use kolorwheel::hsl_color::HslColor;
 
 use egui;
-use crate::hsl::Hsl;
 use crate::App;
 use crate::Panel;
 
 pub struct LitAbs {
     cols: u32,
     rows: u32,
-    color: Hsl,
+    color: HslColor,
     lit: i32,
 }
 
@@ -19,7 +21,7 @@ impl LitAbs {
         Self {
             cols: 4,
             rows: 4,
-            color: Hsl { h: 140, s: 70, l: 60 },
+            color: HslColor { h: 140, s: 70, l: 60 },
             lit: 40,
         }
     }

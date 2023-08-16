@@ -1,7 +1,7 @@
 //#![allow(unused)]
 
-mod hsl_color;
-mod rgb_color;
+pub mod hsl_color;
+pub mod rgb_color;
 mod convert_hsl_to_rgb;
 mod convert_rgb_to_hsl;
 mod spinner;

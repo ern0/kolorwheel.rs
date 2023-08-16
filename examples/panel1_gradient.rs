@@ -1,16 +1,18 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
+use kolorwheel::SpinMode;
+use kolorwheel::FadeMode;
+use kolorwheel::hsl_color::HslColor;
 
 use egui;
-use crate::hsl::Hsl;
 use crate::App;
 use crate::Panel;
 
 pub struct Gradient {
     cols: u32,
     rows: u32,
-    color1: Hsl,
-    color2: Hsl,
+    color1: HslColor,
+    color2: HslColor,
 }
 
 impl Gradient {
@@ -19,8 +21,8 @@ impl Gradient {
         Self {
             cols: 5,
             rows: 5,
-            color1: Hsl { h: 0, s: 100, l: 50 },
-            color2: Hsl { h: 270, s: 70, l: 30 },
+            color1: HslColor::new(0, 100, 50),
+            color2: HslColor::new(270, 70, 30),
         }
     }
 }
@@ -36,11 +38,8 @@ impl Panel for Gradient {
             App::paint_hsl_sliders(ui, &mut self.color2);
         });
 
-        let kw = KolorWheel::new()
-            .set_count(self.cols * self.rows)
-            .set_hsl(self.color1.h, self.color1.s, self.color1.l)
-            .gradient(KolorWheel::new().set_hsl(self.color2.h, self.color2.s, self.color2.l))
-        ;
+        let mut kw = KolorWheel::new(self.color1, (self.cols * self.rows) as usize);
+        kw.color(self.color2);
 
         return (kw, self.cols, self.rows);
     }

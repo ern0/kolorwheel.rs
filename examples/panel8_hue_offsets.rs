@@ -1,15 +1,17 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
+use kolorwheel::SpinMode;
+use kolorwheel::FadeMode;
+use kolorwheel::hsl_color::HslColor;
 
 use egui;
-use crate::hsl::Hsl;
 use crate::Panel;
 
 pub struct HueOffsets {
     cols: u32,
     rows: u32,
-    color1: Hsl,
-    color2: Hsl,
+    color1: HslColor,
+    color2: HslColor,
     count: usize,
     values: [i32; 8],
 }
@@ -20,8 +22,8 @@ impl HueOffsets {
         Self {
             cols: 8,
             rows: 6,
-            color1: Hsl { h: 270, s: 70, l: 70 },
-            color2: Hsl { h: 270, s: 80, l: 30 },
+            color1: HslColor { h: 270, s: 70, l: 70 },
+            color2: HslColor { h: 270, s: 80, l: 30 },
             count: 4,
             values: [ 0, -150, 120, -210, 95, -90, 325, -330 ],
         }
