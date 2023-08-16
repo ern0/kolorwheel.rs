@@ -31,6 +31,14 @@ pub enum FadeMode {
     White,
 }
 
+impl<'i> Iterator for KolorWheel<'i> {
+    type Item = HslColor;
+
+    fn next(&mut self) -> Option<HslColor> {
+        self.spin_iter()
+    }
+}
+
 impl<'kw> KolorWheel<'kw> {
 
     pub fn new<T>(color: T, count: usize) -> Self 
@@ -138,6 +146,10 @@ impl<'kw> KolorWheel<'kw> {
         } // loop
     }
 
+    pub fn spin_iter(&mut self) -> Option<HslColor> {
+        None
+    }
+
     pub fn spin_vec<T: From<HslColor>>(&mut self) -> Vec<T> 
     where T: Into<HslColor> {
 
@@ -149,15 +161,6 @@ impl<'kw> KolorWheel<'kw> {
         result
     }
         
-}
-
-impl<'i> Iterator for KolorWheel<'i> {
-    type Item = HslColor;
-
-    fn next(&mut self) -> Option<HslColor> {
-        None
-    }
-    
 }
 
 #[cfg(test)]
