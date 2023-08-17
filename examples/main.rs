@@ -1,8 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(unused)]
 
-use std::rc::Rc;
-use std::ops::Deref;
+use std::boxed::Box;
 
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
@@ -23,17 +22,17 @@ mod panel1_gradient;
 
 fn main() -> Result<(), eframe::Error> {
 
-    let window_width = 720.0;
-    let min_width = 320.0;
-    let window_height = 512.0;
-    let min_height = 256.0;
-    let cell_padding = 30;
+    const WINDOW_WIDTH: f32 = 720.0;
+    const MIN_WIDTH: f32 = 320.0;
+    const WINDOW_HEIGHT: f32 = 512.0;
+    const MIN_HEIGHT: f32 = 256.0;
+    const CELL_PADDING: u32 = 30;
 
-    let mut app = App::new(window_width, window_height, cell_padding);
+    let mut app = App::new(WINDOW_WIDTH, WINDOW_HEIGHT, CELL_PADDING);
 
     let eframe_options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(window_width, window_height)),
-        min_window_size: Some(egui::vec2(min_width, min_height)),
+        initial_window_size: Some(egui::vec2(WINDOW_WIDTH, WINDOW_HEIGHT)),
+        min_window_size: Some(egui::vec2(MIN_WIDTH, MIN_HEIGHT)),
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
@@ -51,11 +50,8 @@ trait Panel {
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32);
 }
 
-struct App {
-    window: Window,
-    active_panel: PanelSelector,   
-
-    p1: Rc<dyn Panel>,
+struct PanelList {
+    p1: panel1_gradient::Gradient,
     // p2: panel2_hue_abs::HueAbs,
     // p3: panel3_sat_abs::SatAbs,
     // p4: panel4_lit_abs::LitAbs,
@@ -76,6 +72,47 @@ enum PanelSelector {
     // Palette1, Palette2,
 }
 
+impl PanelList {
+
+    pub fn new() -> Self {
+        Self {
+            p1: panel1_gradient::Gradient::new(), 
+            // p2: panel2_hue_abs::HueAbs::new(), 
+            // p3: panel3_sat_abs::SatAbs::new(), 
+            // p4: panel4_lit_abs::LitAbs::new(),
+            // p5: panel5_p6_hue_rel_univ::HueRelUniv::new(true),
+            // p6: panel5_p6_hue_rel_univ::HueRelUniv::new(false),
+            // p7: panel7_sat_lit_rel::SatLitRel::new(),
+            // p8: panel8_hue_offsets::HueOffsets::new(),
+            // p9: panel9_palette1::Palette1::new(),
+            // p10: panel10_palette2::Palette2::new(),
+        }
+    }
+
+    pub fn select_panel(self, active_panel: PanelSelector) -> &dyn Panel {
+
+        match active_panel {
+            PanelSelector::Gradient => &self.p1,
+            // PanelSelector::HueAbs => &mut self.p2,
+            // PanelSelector::SatAbs => &mut self.p3,
+            // PanelSelector::LitAbs => &mut self.p4,
+            // PanelSelector::HueReli => &mut self.p5,
+            // PanelSelector::HueRelx => &mut self.p6,
+            // PanelSelector::SatLitRel => &mut self.p7,
+            // PanelSelector::HueOffsets => &mut self.p8,
+            // PanelSelector::Palette1 => &mut self.p9,
+            // PanelSelector::Palette2 => &mut self.p10,
+        }
+    }
+
+}
+
+struct App {
+    window: Window,
+    active_panel: PanelSelector,   
+    panel_list: PanelList,
+}
+
 impl App {
 
     pub fn new(window_width: f32, window_height: f32, cell_padding: u32) -> Self {
@@ -89,17 +126,8 @@ impl App {
 
         Self { 
             window,
-            active_panel: PanelSelector::Gradient,   
-            p1: Rc::new(panel1_gradient::Gradient::new()), 
-            // p2: panel2_hue_abs::HueAbs::new(), 
-            // p3: panel3_sat_abs::SatAbs::new(), 
-            // p4: panel4_lit_abs::LitAbs::new(),
-            // p5: panel5_p6_hue_rel_univ::HueRelUniv::new(true),
-            // p6: panel5_p6_hue_rel_univ::HueRelUniv::new(false),
-            // p7: panel7_sat_lit_rel::SatLitRel::new(),
-            // p8: panel8_hue_offsets::HueOffsets::new(),
-            // p9: panel9_palette1::Palette1::new(),
-            // p10: panel10_palette2::Palette2::new(),
+            active_panel: PanelSelector::Gradient,
+            panel_list: PanelList::new(),
         }
     }
 
@@ -127,19 +155,7 @@ impl App {
 
         ui.separator();
 
-        let panel: &mut dyn Panel = match self.active_panel {
-            PanelSelector::Gradient => self.p1.deref(),
-            // PanelSelector::HueAbs => &mut self.p2,
-            // PanelSelector::SatAbs => &mut self.p3,
-            // PanelSelector::LitAbs => &mut self.p4,
-            // PanelSelector::HueReli => &mut self.p5,
-            // PanelSelector::HueRelx => &mut self.p6,
-            // PanelSelector::SatLitRel => &mut self.p7,
-            // PanelSelector::HueOffsets => &mut self.p8,
-            // PanelSelector::Palette1 => &mut self.p9,
-            // PanelSelector::Palette2 => &mut self.p10,
-        };
-
+        let panel = self.panel_list.select_panel(self.active_panel);
         let (kw, cols, rows) = panel.paint(ui);
         self.paint_grid(ui, kw, cols, rows);
 
