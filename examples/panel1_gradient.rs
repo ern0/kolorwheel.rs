@@ -39,7 +39,7 @@ impl Panel for Gradient {
         });
 
         let mut kw = KolorWheel::new(self.color1, (self.cols * self.rows) as usize);
-        kw.color(self.color2);
+        kw.fade(FadeMode::Color(self.color2));
 
         return (kw, self.cols, self.rows);
     }

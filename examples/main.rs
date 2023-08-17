@@ -36,6 +36,7 @@ fn main() -> Result<(), eframe::Error> {
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
+        initial_window_pos: Some(egui::pos2(1500.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
     eframe::run_simple_native("KolorWheel.rs", eframe_options, move |ctx, _frame| {
@@ -49,8 +50,18 @@ fn main() -> Result<(), eframe::Error> {
 trait Panel {
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32);
 }
+#[derive(Copy, Clone, PartialEq)]
+enum PanelSelector {
+    Gradient, 
+    // HueAbs, SatAbs, LitAbs,
+    // HueReli, HueRelx,
+    // SatLitRel, HueOffsets,
+    // Palette1, Palette2,
+}
 
-struct PanelList {
+struct App {
+    window: Window,
+    active_panel: PanelSelector,   
     p1: panel1_gradient::Gradient,
     // p2: panel2_hue_abs::HueAbs,
     // p3: panel3_sat_abs::SatAbs,
@@ -61,56 +72,6 @@ struct PanelList {
     // p8: panel8_hue_offsets::HueOffsets,
     // p9: panel9_palette1::Palette1,
     // p10: panel10_palette2::Palette2,
-}
-
-#[derive(Copy, Clone, PartialEq)]
-enum PanelSelector {
-    Gradient, 
-    // HueAbs, SatAbs, LitAbs,
-    // HueReli, HueRelx,
-    // SatLitRel, HueOffsets,
-    // Palette1, Palette2,
-}
-
-impl PanelList {
-
-    pub fn new() -> Self {
-        Self {
-            p1: panel1_gradient::Gradient::new(), 
-            // p2: panel2_hue_abs::HueAbs::new(), 
-            // p3: panel3_sat_abs::SatAbs::new(), 
-            // p4: panel4_lit_abs::LitAbs::new(),
-            // p5: panel5_p6_hue_rel_univ::HueRelUniv::new(true),
-            // p6: panel5_p6_hue_rel_univ::HueRelUniv::new(false),
-            // p7: panel7_sat_lit_rel::SatLitRel::new(),
-            // p8: panel8_hue_offsets::HueOffsets::new(),
-            // p9: panel9_palette1::Palette1::new(),
-            // p10: panel10_palette2::Palette2::new(),
-        }
-    }
-
-    pub fn select_panel(self, active_panel: PanelSelector) -> &dyn Panel {
-
-        match active_panel {
-            PanelSelector::Gradient => &self.p1,
-            // PanelSelector::HueAbs => &mut self.p2,
-            // PanelSelector::SatAbs => &mut self.p3,
-            // PanelSelector::LitAbs => &mut self.p4,
-            // PanelSelector::HueReli => &mut self.p5,
-            // PanelSelector::HueRelx => &mut self.p6,
-            // PanelSelector::SatLitRel => &mut self.p7,
-            // PanelSelector::HueOffsets => &mut self.p8,
-            // PanelSelector::Palette1 => &mut self.p9,
-            // PanelSelector::Palette2 => &mut self.p10,
-        }
-    }
-
-}
-
-struct App {
-    window: Window,
-    active_panel: PanelSelector,   
-    panel_list: PanelList,
 }
 
 impl App {
@@ -127,7 +88,16 @@ impl App {
         Self { 
             window,
             active_panel: PanelSelector::Gradient,
-            panel_list: PanelList::new(),
+            p1: panel1_gradient::Gradient::new(), 
+            // p2: panel2_hue_abs::HueAbs::new(), 
+            // p3: panel3_sat_abs::SatAbs::new(), 
+            // p4: panel4_lit_abs::LitAbs::new(),
+            // p5: panel5_p6_hue_rel_univ::HueRelUniv::new(true),
+            // p6: panel5_p6_hue_rel_univ::HueRelUniv::new(false),
+            // p7: panel7_sat_lit_rel::SatLitRel::new(),
+            // p8: panel8_hue_offsets::HueOffsets::new(),
+            // p9: panel9_palette1::Palette1::new(),
+            // p10: panel10_palette2::Palette2::new(),
         }
     }
 
@@ -155,10 +125,69 @@ impl App {
 
         ui.separator();
 
-        let panel = self.panel_list.select_panel(self.active_panel);
-        let (kw, cols, rows) = panel.paint(ui);
-        self.paint_grid(ui, kw, cols, rows);
+         let panel = match self.active_panel {
+            PanelSelector::Gradient => &mut self.p1,
+            // PanelSelector::HueAbs => &mut self.p2,
+            // PanelSelector::SatAbs => &mut self.p3,
+            // PanelSelector::LitAbs => &mut self.p4,
+            // PanelSelector::HueReli => &mut self.p5,
+            // PanelSelector::HueRelx => &mut self.p6,
+            // PanelSelector::SatLitRel => &mut self.p7,
+            // PanelSelector::HueOffsets => &mut self.p8,
+            // PanelSelector::Palette1 => &mut self.p9,
+            // PanelSelector::Palette2 => &mut self.p10,
+        };
 
+        let (kw, cols, rows) = panel.paint(ui);
+
+        // Appended `self.paint_grid()` to this method because borrow issues:
+        // "cannot borrow `*self` as mutable more than once at a time"
+        // Also made `paint_box()` static method
+        //
+        // self.paint_grid(ui, kw, cols, rows);
+        // fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
+
+        self.window.actual_width = ui.available_width() as u32;
+        self.window.actual_height = ui.available_height() as u32;
+
+        let (_, painter) = ui.allocate_painter(
+            egui::Vec2::new(
+                self.window.actual_width as f32, 
+                self.window.actual_height as f32,
+            ),
+            egui::Sense::hover(),
+        );
+
+        let cell = Cell::new(&self.window, cols, rows);
+
+        let mut col = 0;
+        let mut x = self.window.left + cell.window_centering_horizontal;
+        let header_height = self.window.original_height - self.window.actual_height;
+        let mut y = self.window.top + header_height;
+
+        for fill in kw {
+
+            let rect = egui::Rect {
+                min: egui::Pos2{
+                    x: (x + cell.cell_padding) as f32,
+                    y: (y + cell.cell_padding) as f32,
+                },
+                max: egui::Pos2 { 
+                    x: (x + cell.cell_padding + cell.cell_padded_width) as f32,
+                    y: (y + cell.cell_padding + cell.cell_padded_height) as f32,
+                },
+            };
+
+            Self::paint_box(&painter, rect, fill, self.window.rounding);
+
+            col += 1;
+            x += cell.cell_width;
+            if col == cell.columns {
+                col = 0;
+                y += cell.cell_height;
+                x = self.window.left + cell.window_centering_horizontal;
+            }
+        }  
     }
 
     fn paint_hsl_sliders(ui: &mut egui::Ui, color: &mut HslColor) {
@@ -197,52 +226,7 @@ impl App {
 
     }
 
-    fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
-
-        self.window.actual_width = ui.available_width() as u32;
-        self.window.actual_height = ui.available_height() as u32;
-
-        let (_, painter) = ui.allocate_painter(
-            egui::Vec2::new(
-                self.window.actual_width as f32, 
-                self.window.actual_height as f32,
-            ),
-            egui::Sense::hover(),
-        );
-
-        let cell = Cell::new(&self.window, cols, rows);
-
-        let mut col = 0;
-        let mut x = self.window.left + cell.window_centering_horizontal;
-        let header_height = self.window.original_height - self.window.actual_height;
-        let mut y = self.window.top + header_height;
-
-        for fill in kw {
-
-            let rect = egui::Rect {
-                min: egui::Pos2{
-                    x: (x + cell.cell_padding) as f32,
-                    y: (y + cell.cell_padding) as f32,
-                },
-                max: egui::Pos2 { 
-                    x: (x + cell.cell_padding + cell.cell_padded_width) as f32,
-                    y: (y + cell.cell_padding + cell.cell_padded_height) as f32,
-                },
-            };
-
-            self.paint_box(&painter, rect, fill);
-
-            col += 1;
-            x += cell.cell_width;
-            if col == cell.columns {
-                col = 0;
-                y += cell.cell_height;
-                x = self.window.left + cell.window_centering_horizontal;
-            }
-        }        
-    }
-
-    fn paint_box(&self, painter: &egui::Painter, rect: egui::Rect, hsl_color: HslColor) {
+    fn paint_box(painter: &egui::Painter, rect: egui::Rect, hsl_color: HslColor, rounding: egui::Rounding) {
         
         let rgb_color: RgbColor = hsl_color.into();
         let fill = egui::Color32::from_rgb(rgb_color.r, rgb_color.g, rgb_color.b);
@@ -254,9 +238,9 @@ impl App {
 
         let rect_shape = egui::epaint::RectShape { 
             rect, 
-            rounding: self.window.rounding, 
+            rounding, 
             fill, 
-            stroke 
+            stroke,
         };
 
         let rectangle = egui::Shape::Rect(rect_shape);
