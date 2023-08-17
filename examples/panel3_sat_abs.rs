@@ -21,7 +21,7 @@ impl SatAbs {
         Self {
             cols: 4,
             rows: 4,
-            color: HslColor { h: 180, s: 30, l: 50 },
+            color: HslColor::new(180, 30, 50),
             sat: 0,
         }
     }
@@ -44,13 +44,10 @@ impl Panel for SatAbs {
             );
         });
 
-        let kw = KolorWheel::new()
-            .set_count(self.cols * self.rows)
-            .set_hsl(self.color.h, self.color.s, self.color.l)
-            .sat_abs((self.sat as u32).try_into().unwrap())
-        ;
+        let mut kw = KolorWheel::new(self.color, (self.cols * self.rows) as usize);
+        kw.with_saturation(SpinMode::Absolute(self.sat));
 
-        return (kw, self.cols, self.rows);
+        (kw, self.cols, self.rows)
     }
 
 }

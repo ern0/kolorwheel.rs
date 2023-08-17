@@ -23,7 +23,7 @@ impl HueRelUniv {
             include,
             cols: 3,
             rows: 2,
-            color: HslColor { h: 0, s: 100, l: 50 },
+            color: HslColor::new(0, 100, 50),
             hue: 360,
         }
     }
@@ -50,18 +50,15 @@ impl Panel for HueRelUniv {
 
         });
 
-        let mut kw = KolorWheel::new()
-            .set_count(self.cols * self.rows)
-            .set_hsl(self.color.h, self.color.s, self.color.l)
-        ;
+        let mut kw = KolorWheel::new(self.color, (self.cols * self.rows) as usize);
 
         if self.include {
-            kw = kw.hue_reli((self.hue as i32).try_into().unwrap());
+            kw.with_hue(SpinMode::RelativeIncl(self.hue));
         } else {
-            kw = kw.hue_relx((self.hue as i32).try_into().unwrap());
+            kw.with_hue(SpinMode::RelativeExcl(self.hue));
         }
 
-        return (kw, self.cols, self.rows);
+        (kw, self.cols, self.rows)
     }
 
 }

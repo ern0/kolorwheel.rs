@@ -21,7 +21,7 @@ impl Palette2 {
         Self {
             cols: 3,
             rows: 2,
-            color: HslColor { h: 240, s: 80, l: 70 },
+            color: HslColor::new(240, 80, 70),
             sat_offsets: [60, 0, 0, 70, 0, 0],
             lit_offsets: [-40, 0, 0],
         }
@@ -36,25 +36,23 @@ impl Panel for Palette2 {
 
             ui.label("Base hue:");
 
+            let mut h = self.color.h as i32;
             ui.add(
-                egui::Slider::new(&mut self.color.h, 0..=359)
+                egui::Slider::new(&mut h, 0..=359)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
                 .text("Hue")
                 .suffix("°")
             );
+            self.color.h = h as f32;
         });
 
-        let kw = KolorWheel::new()
-            .set_count(self.cols * self.rows)
-            .set_hsl(self.color.h, self.color.s, self.color.l)
-            .hue_reli(90)
-            .sat_reli(-20)
-            .sat_offs(&self.sat_offsets[0..6])
-            .lit_offs(&self.lit_offsets[0..3])
-        ;
+        let mut kw = KolorWheel::new(self.color, (self.cols * self.rows) as usize);
 
-        return (kw, self.cols, self.rows);
+        kw.with_saturation(SpinMode::Offset(&self.sat_offsets[0..6]));
+        kw.with_lightness(SpinMode::Offset(&self.lit_offsets[0..3]));
+
+        (kw, self.cols, self.rows)
     }
 
 }

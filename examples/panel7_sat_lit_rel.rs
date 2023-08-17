@@ -22,7 +22,7 @@ impl SatLitRel {
         Self {
             cols: 8,
             rows: 6,
-            color: HslColor { h: 60, s: 70, l: 50 },
+            color: HslColor::new(60, 70, 50),
             sat: -50,
             lit: -15,
         }
@@ -53,14 +53,11 @@ impl Panel for SatLitRel {
             );
         });
 
-        let kw = KolorWheel::new()
-            .set_count(self.cols * self.rows)
-            .set_hsl(self.color.h, self.color.s, self.color.l)
-            .sat_reli(self.sat)
-            .lit_reli(self.lit)
-        ;
+        let mut kw = KolorWheel::new(self.color, (self.cols * self.rows) as usize);
+        kw.with_saturation(SpinMode::RelativeIncl(self.sat));
+        kw.with_lightness(SpinMode::RelativeIncl(self.lit));
 
-        return (kw, self.cols, self.rows);
+        (kw, self.cols, self.rows)
     }
 
 }

@@ -21,7 +21,7 @@ impl HueAbs {
         Self {
             cols: 4,
             rows: 4,
-            color: HslColor { h: 0, s: 100, l: 50 },
+            color: HslColor::new(0, 100, 50),
             hue: 120,
         }
     }
@@ -36,7 +36,7 @@ impl Panel for HueAbs {
             App::paint_hsl_sliders(ui, &mut self.color);
             ui.label("  Change hue to absolute:");
             ui.add(
-                egui::Slider::new(&mut self.hue, 0..=359)
+                egui::Slider::new(&mut self.hue, -359..=719)
                 .orientation(egui::SliderOrientation::Vertical)
                 .trailing_fill(true)
                 .text("Hue")
@@ -44,13 +44,10 @@ impl Panel for HueAbs {
             );
         });
 
-        let kw = KolorWheel::new()
-            .set_count(self.cols * self.rows)
-            .set_hsl(self.color.h, self.color.s, self.color.l)
-            .hue_abs((self.hue as u32).try_into().unwrap())
-        ;
+        let mut kw = KolorWheel::new(self.color, (self.cols * self.rows) as usize);
+        kw.with_hue(SpinMode::Absolute(self.hue));
 
-        return (kw, self.cols, self.rows);
+        (kw, self.cols, self.rows)
     }
 
 }

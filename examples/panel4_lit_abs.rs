@@ -21,7 +21,7 @@ impl LitAbs {
         Self {
             cols: 4,
             rows: 4,
-            color: HslColor { h: 140, s: 70, l: 60 },
+            color: HslColor::new(140, 70, 60),
             lit: 40,
         }
     }
@@ -44,13 +44,10 @@ impl Panel for LitAbs {
             );
         });
 
-        let kw = KolorWheel::new()
-            .set_count(self.cols * self.rows)
-            .set_hsl(self.color.h, self.color.s, self.color.l)
-            .lit_abs((self.lit as u32).try_into().unwrap())
-        ;
+        let mut kw = KolorWheel::new(self.color, (self.cols * self.rows) as usize);
+        kw.with_lightness(SpinMode::Absolute(self.lit));
 
-        return (kw, self.cols, self.rows);
+        (kw, self.cols, self.rows)
     }
 
 }

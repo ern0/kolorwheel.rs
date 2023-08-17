@@ -22,8 +22,8 @@ impl HueOffsets {
         Self {
             cols: 8,
             rows: 6,
-            color1: HslColor { h: 270, s: 70, l: 70 },
-            color2: HslColor { h: 270, s: 80, l: 30 },
+            color1: HslColor::new(270, 70, 70),
+            color2: HslColor::new(270, 80, 30),
             count: 4,
             values: [ 0, -150, 120, -210, 95, -90, 325, -330 ],
         }
@@ -57,14 +57,12 @@ impl Panel for HueOffsets {
 
         });
 
-        let kw = KolorWheel::new()
-            .set_count(self.cols * self.rows)
-            .set_hsl(self.color1.h, self.color1.s, self.color1.l)
-            .hue_offs(&self.values[0 .. self.count])
-            .gradient(KolorWheel::new().set_hsl(self.color2.h, self.color2.s, self.color2.l))
-        ;
+        let mut kw = KolorWheel::new(self.color1, self.rows as usize);
+        kw.fade(FadeMode::Color(self.color2));
+        kw.fork(self.cols as usize);
+        kw.with_hue(SpinMode::Offset(&self.values[0 .. (self.cols as usize)]));
 
-        return (kw, self.cols, self.rows);
+        (kw, self.cols, self.rows)
     }
 
 }
