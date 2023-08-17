@@ -1,10 +1,8 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
 use kolorwheel::SpinMode;
-use kolorwheel::FadeMode;
 use kolorwheel::hsl_color::HslColor;
 
-use egui;
 use crate::Panel;
 
 pub struct Palette1 {
@@ -48,11 +46,10 @@ impl Panel for Palette1 {
         });
 
         let mut kw = KolorWheel::new(self.color, (self.cols * self.rows) as usize);
+        kw.with_hue(SpinMode::RelativeIncl(75));
         kw.with_hue(SpinMode::Offset(&self.hue_offsets[0..5]));
+        kw.with_lightness(SpinMode::RelativeIncl(30));
         kw.with_lightness(SpinMode::Offset(&self.lit_offsets[0..5]));
-
-        //.hue_reli(75)
-        //.lit_reli(30)
 
         (kw, self.cols, self.rows)
     }

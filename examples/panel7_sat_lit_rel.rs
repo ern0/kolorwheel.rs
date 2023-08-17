@@ -1,10 +1,8 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
 use kolorwheel::SpinMode;
-use kolorwheel::FadeMode;
 use kolorwheel::hsl_color::HslColor;
 
-use egui;
 use crate::App;
 use crate::Panel;
 

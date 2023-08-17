@@ -1,10 +1,8 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
-use kolorwheel::SpinMode;
-use kolorwheel::FadeMode;
+use kolorwheel::SpinMacro;
 use kolorwheel::hsl_color::HslColor;
 
-use egui;
 use crate::App;
 use crate::Panel;
 
@@ -39,8 +37,8 @@ impl Panel for Gradient {
         });
 
         let mut kw = KolorWheel::new(self.color1, (self.cols * self.rows) as usize);
-        kw.fade(FadeMode::Color(self.color2));
+        kw.with_macro(SpinMacro::GradientColor(self.color2));
 
-        return (kw, self.cols, self.rows);
+        (kw, self.cols, self.rows)
     }
 }

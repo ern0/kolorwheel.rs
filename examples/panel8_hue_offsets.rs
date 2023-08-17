@@ -1,10 +1,9 @@
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
 use kolorwheel::SpinMode;
-use kolorwheel::FadeMode;
+use kolorwheel::SpinMacro;
 use kolorwheel::hsl_color::HslColor;
 
-use egui;
 use crate::Panel;
 
 pub struct HueOffsets {
@@ -58,7 +57,7 @@ impl Panel for HueOffsets {
         });
 
         let mut kw = KolorWheel::new(self.color1, self.rows as usize);
-        kw.fade(FadeMode::Color(self.color2));
+        kw.with_macro(SpinMacro::GradientColor(self.color2));
         kw.fork(self.cols as usize);
         kw.with_hue(SpinMode::Offset(&self.values[0 .. (self.cols as usize)]));
 

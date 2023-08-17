@@ -25,11 +25,11 @@ pub enum SpinMode<'m> {
     Offset(&'m [i32]),
 }
 
-pub enum FadeMode {
-    Color(HslColor),
-    Gray(i32),
-    Black,
-    White,
+pub enum SpinMacro {
+    GradientColor(HslColor),
+    FadeToGray(i32),
+    FadeToBlack,
+    FadeToWhite,
 }
 
 impl<'i> Iterator for KolorWheel<'i> {
@@ -81,23 +81,23 @@ impl<'kw> KolorWheel<'kw> {
         self
     }
 
-    pub fn fade(&mut self, fade_mode: FadeMode) -> &mut Self {
+    pub fn with_macro(&mut self, spin_macro: SpinMacro) -> &mut Self {
 
-        match fade_mode {
-            FadeMode::Color(hsl_color) => {
+        match spin_macro {
+            SpinMacro::GradientColor(hsl_color) => {
                 self.with_hue(SpinMode::Absolute(hsl_color.h as i32));
                 self.with_saturation(SpinMode::Absolute(hsl_color.s as i32));
                 self.with_lightness(SpinMode::Absolute(hsl_color.l as i32));
             },
-            FadeMode::Gray(percent) => {
+            SpinMacro::FadeToGray(percent) => {
                 self.with_saturation(SpinMode::Absolute(0));
                 self.with_lightness(SpinMode::Absolute(percent));
             },
-            FadeMode::Black => {
+            SpinMacro::FadeToBlack => {
                 self.with_saturation(SpinMode::Absolute(0));
                 self.with_lightness(SpinMode::Absolute(0));
             },
-            FadeMode::White => {
+            SpinMacro::FadeToWhite => {
                 self.with_saturation(SpinMode::Absolute(0));
                 self.with_lightness(SpinMode::Absolute(100));
             },

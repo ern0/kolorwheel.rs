@@ -1,12 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![allow(unused)]
-
-use std::boxed::Box;
+//#![allow(unused)]
 
 extern crate kolorwheel;
 use kolorwheel::KolorWheel;
-use kolorwheel::SpinMode;
-use kolorwheel::FadeMode;
 use kolorwheel::hsl_color::HslColor;
 use kolorwheel::rgb_color::RgbColor;
 
@@ -138,7 +134,7 @@ impl App {
             PanelSelector::Palette2 => &mut self.p10,
         };
 
-        let (mut kw, cols, rows) = panel.paint(ui);
+        let (kw, cols, rows) = panel.paint(ui);
 
         // Appended `self.paint_grid()` to this method because borrow issues:
         // "cannot borrow `*self` as mutable more than once at a time"
