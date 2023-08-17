@@ -19,9 +19,9 @@ impl Palette1 {
         Self {
             cols: 5,
             rows: 1,
-            color: HslColor::new(20, 70, 50),
+            color: HslColor::new(20, 70, 60),
             hue_offsets: [0, 0, 0, 0, 120],
-            lit_offsets: [0, 0, 0, 0, -40],
+            lit_offsets: [0, 0, 0, 0, -60],
         }
     }
 }

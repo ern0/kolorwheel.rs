@@ -18,7 +18,7 @@ pub struct KolorWheel<'kw> {
 }
 
 pub enum SpinMode<'m> {
-    Unchanged,
+    Still,
     Absolute(i32),
     RelativeIncl(i32),
     RelativeExcl(i32),
@@ -252,7 +252,7 @@ mod tests {
     fn spin_vec_fade_to_black() {
         let base = HslColor::new(180, 100, 50);
         let result = KolorWheel::new(base, 5)
-            .fade(FadeMode::Black)
+            .with_macro(SpinMacro::FadeToBlack)
             .spin_vec::<HslColor>()
         ;
         assert!(result[3].s > 5.0);
@@ -265,7 +265,7 @@ mod tests {
     fn spin_vec_fade_to_white() {
         let base = HslColor::new(90, 80, 10);
         let result = KolorWheel::new(base, 5)
-            .fade(FadeMode::White)
+            .with_macro(SpinMacro::FadeToWhite)
             .spin_vec::<HslColor>()
         ;
         assert!(result[3].s > 5.0);
@@ -279,7 +279,7 @@ mod tests {
 
         let base = HslColor::new(90, 80, 10);
         let mut kw = KolorWheel::new(base, 5);
-        kw.fade(FadeMode::Gray(40));
+        kw.with_macro(SpinMacro::FadeToGray(40));
 
         let mut index = 0;
         for color in kw {

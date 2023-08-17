@@ -18,11 +18,11 @@ mod panel10_palette2;
 
 fn main() -> Result<(), eframe::Error> {
 
-    const WINDOW_WIDTH: f32 = 720.0;
-    const MIN_WIDTH: f32 = 320.0;
-    const WINDOW_HEIGHT: f32 = 512.0;
-    const MIN_HEIGHT: f32 = 256.0;
-    const CELL_PADDING: u32 = 30;
+    const WINDOW_WIDTH: f32 = 800.0;
+    const MIN_WIDTH: f32 = 480.0;
+    const WINDOW_HEIGHT: f32 = 600.0;
+    const MIN_HEIGHT: f32 = 320.0;
+    const CELL_PADDING: u32 = 24;
 
     let mut app = App::new(WINDOW_WIDTH, WINDOW_HEIGHT, CELL_PADDING);
 
