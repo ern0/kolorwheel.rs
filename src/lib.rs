@@ -1,5 +1,3 @@
-//#![allow(unused)]
-
 pub mod hsl_color;
 pub mod rgb_color;
 mod convert_hsl_to_rgb;
@@ -10,9 +8,9 @@ use std::vec::Vec;
 use hsl_color::HslColor;
 use crate::spinner::Spinner;
 
-pub struct KolorWheel<'kw> {
+pub struct KolorWheel {
     index: usize,
-    spinner_vec: Vec<Spinner<'kw>>,
+    spinner_vec: Vec<Spinner>,
     level: usize,
     top_level: usize,
 }
@@ -32,7 +30,7 @@ pub enum SpinMacro {
     FadeToWhite,
 }
 
-impl<'i> Iterator for KolorWheel<'i> {
+impl Iterator for KolorWheel {
     type Item = HslColor;
 
     fn next(&mut self) -> Option<HslColor> {
@@ -40,7 +38,7 @@ impl<'i> Iterator for KolorWheel<'i> {
     }
 }
 
-impl<'kw> KolorWheel<'kw> {
+impl KolorWheel {
 
     pub fn new<T>(color: T, count: usize) -> Self 
     where T: Into<HslColor> {
@@ -56,7 +54,7 @@ impl<'kw> KolorWheel<'kw> {
         }
     }
 
-    fn actual_spinner(&mut self) -> &mut Spinner<'kw> {
+    fn actual_spinner(&mut self) -> &mut Spinner {
         &mut self.spinner_vec[self.index]
     }
 
@@ -66,17 +64,17 @@ impl<'kw> KolorWheel<'kw> {
         self
     }
 
-    pub fn with_hue(&mut self, spin_mode: SpinMode<'kw>) -> &mut KolorWheel<'kw> {
+    pub fn with_hue(&mut self, spin_mode: SpinMode) -> &mut KolorWheel {
         self.actual_spinner().with_hue(spin_mode);
         self
     }
 
-    pub fn with_saturation(&mut self, spin_mode: SpinMode<'kw>) -> &mut KolorWheel<'kw> {
+    pub fn with_saturation(&mut self, spin_mode: SpinMode) -> &mut KolorWheel {
         self.actual_spinner().with_saturation(spin_mode);
         self
     }
 
-    pub fn with_lightness(&mut self, spin_mode: SpinMode<'kw>) -> &mut Self {
+    pub fn with_lightness(&mut self, spin_mode: SpinMode) -> &mut Self {
         self.actual_spinner().with_lightness(spin_mode);
         self
     }

@@ -32,7 +32,7 @@ fn main() -> Result<(), eframe::Error> {
         icon_data: None,
         follow_system_theme: true,
         vsync: true,
-        initial_window_pos: Some(egui::pos2(1500.0, 80.0)), //TODO: remove this line
+        //initial_window_pos: Some(egui::pos2(1500.0, 80.0)), //TODO: remove this line
         ..Default::default()
     };
     eframe::run_simple_native("KolorWheel.rs", eframe_options, move |ctx, _frame| {

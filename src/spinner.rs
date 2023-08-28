@@ -1,25 +1,19 @@
 use crate::hsl_color::HslColor;
 use crate::SpinMode;
 
-pub(crate) struct Spinner<'sr> {
+pub(crate) struct Spinner {
 
     color: HslColor,    
     count: usize,
     counter: usize,  
 
-    spin_mode_hue: SpinMode<'sr>,
-    spin_mode_saturation: SpinMode<'sr>,
-    spin_mode_lightness: SpinMode<'sr>,
-
-    recalc_request: bool,
-
     spin_calculated_hue: SpinCalculated,
     spin_calculated_saturation: SpinCalculated,
     spin_calculated_lightness: SpinCalculated,
 
-    spin_stored_hue: SpinStored<'sr>,
-    spin_stored_saturation: SpinStored<'sr>,
-    spin_stored_lightness: SpinStored<'sr>,
+    spin_stored_hue: SpinStored,
+    spin_stored_saturation: SpinStored,
+    spin_stored_lightness: SpinStored,
 
 }
 
@@ -28,12 +22,12 @@ enum SpinCalculated {
     Active(f32),
 }
 
-enum SpinStored<'sp> {
+enum SpinStored {
     Inactive,
-    Active(&'sp [i32]),
+    Active(Vec<i32>),
 }
 
-impl<'i> Spinner<'i> {
+impl<'sp> Spinner {
 
     pub(crate) fn new<T>(color: T, count: usize) -> Self 
     where T: Into<HslColor> {
@@ -42,12 +36,6 @@ impl<'i> Spinner<'i> {
             count,
             counter: 0,
 
-            spin_mode_hue: SpinMode::Still,
-            spin_mode_saturation: SpinMode::Still,
-            spin_mode_lightness: SpinMode::Still,
-
-            recalc_request: true,
-            
             spin_calculated_hue: SpinCalculated::Inactive,
             spin_calculated_saturation: SpinCalculated::Inactive,
             spin_calculated_lightness: SpinCalculated::Inactive,
@@ -67,89 +55,61 @@ impl<'i> Spinner<'i> {
         self
     }
 
-    pub(crate) fn with_color(&mut self, hsl: HslColor) { 
-        self.color = hsl;
-        self.recalc_request = true;      
+    pub(crate) fn with_color(&mut self, color: HslColor) -> &mut Self {
+        self.color = color;
+        self
     }
 
-    pub(crate) fn with_hue(&mut self, spin_mode: SpinMode<'i>) {
-
-        if let SpinMode::Offset(values) = spin_mode {
-            self.spin_stored_hue = SpinStored::Active(values);
-        } else {
-            self.spin_mode_hue = spin_mode;
-            self.recalc_request = true;      
-        }
-    }
-
-    pub(crate) fn with_saturation(&mut self, spin_mode: SpinMode<'i>) {
-
-        if let SpinMode::Offset(values) = spin_mode {
-            self.spin_stored_hue = SpinStored::Active(values);
-        } else {
-            self.spin_mode_saturation = spin_mode;
-            self.recalc_request = true;      
-        }
-    }
-
-    pub(crate) fn with_lightness(&mut self, spin_mode: SpinMode<'i>) {
-
-        if let SpinMode::Offset(values) = spin_mode {
-            self.spin_stored_lightness = SpinStored::Active(values);
-        } else {
-            self.spin_mode_lightness = spin_mode;
-            self.recalc_request = true;      
-        }
-    }
-
-    fn recalculate(&mut self) {
-        
-        self.recalc_request = false;
-
-        let calc = Self::recalculate_channel(
-            self.color.h, 
-            &self.spin_mode_hue,
-            self.count,
-        );
-        if let SpinCalculated::Active(_) = calc {
-            self.spin_calculated_hue = calc;
-        }
-
-        let calc = Self::recalculate_channel(
-            self.color.s, 
-            &self.spin_mode_saturation,
-            self.count,
-        );
-        if let SpinCalculated::Active(_) = calc {
-            self.spin_calculated_saturation = calc;
-        }
-
-        let calc = Self::recalculate_channel(
-            self.color.l, 
-            &self.spin_mode_lightness,
-            self.count,
-        );
-        if let SpinCalculated::Active(_) = calc {
-            self.spin_calculated_lightness = calc;
-        }
-
-    }
-    
-    fn recalculate_channel(base: f32, spin_mode: &SpinMode<'i>, count: usize) -> SpinCalculated {
+    pub(crate) fn with_hue(&mut self, spin_mode: SpinMode<'sp>) {
 
         match spin_mode {
-
-            SpinMode::Still => {
-                SpinCalculated::Inactive
-            },
-
+            SpinMode::Still => (),
             SpinMode::Offset(_) => {
-                SpinCalculated::Inactive
+                self.spin_stored_hue = Self::store_spin_values(spin_mode);
             },
+            _ => {
+                self.spin_calculated_hue = Self::calc_spin_value(spin_mode, self.color.h, self.count);
+            },
+        }        
+
+    }
+
+
+    pub(crate) fn with_saturation(&mut self, spin_mode: SpinMode<'sp>) {
+
+        match spin_mode {
+            SpinMode::Still => (),
+            SpinMode::Offset(_) => {
+                self.spin_stored_saturation = Self::store_spin_values(spin_mode);
+            },
+            _ => {
+                self.spin_calculated_saturation = Self::calc_spin_value(spin_mode, self.color.s, self.count);
+            },
+        }        
+
+    }
+
+    pub(crate) fn with_lightness(&mut self, spin_mode: SpinMode<'sp>) {
+        
+        match spin_mode {
+            SpinMode::Still => (),
+            SpinMode::Offset(_) => {
+                self.spin_stored_lightness = Self::store_spin_values(spin_mode);
+            },
+            _ => {
+                self.spin_calculated_lightness = Self::calc_spin_value(spin_mode, self.color.l, self.count);
+            },
+        }        
+
+    }
+
+    fn calc_spin_value(spin_mode: SpinMode<'sp>, base_value: f32, count: usize) -> SpinCalculated {
+
+        match spin_mode { 
 
             SpinMode::Absolute(abs_target) => {
-                let abs_target = *abs_target as f32;
-                let rel_target = abs_target - base;
+                let abs_target = abs_target as f32;
+                let rel_target = abs_target - base_value;
                 let step = (count - 1) as f32;
                 let inc = rel_target / step;
 
@@ -157,7 +117,7 @@ impl<'i> Spinner<'i> {
             },
 
             SpinMode::RelativeIncl(rel_target) => {
-                let rel_target = *rel_target as f32;
+                let rel_target = rel_target as f32;
                 let step = (count - 1) as f32;
                 let inc = rel_target / step;
 
@@ -165,13 +125,22 @@ impl<'i> Spinner<'i> {
             },
 
             SpinMode::RelativeExcl(rel_target) => {
-                let rel_target = *rel_target as f32;
+                let rel_target = rel_target as f32;
                 let step = count as f32;
                 let inc = rel_target / step;
 
                 SpinCalculated::Active(inc)
             },
 
+            _ => SpinCalculated::Inactive,
+        }
+    }
+
+    fn store_spin_values(spin_mode: SpinMode<'sp>) -> SpinStored {
+
+        match spin_mode { 
+            SpinMode::Offset(values) => SpinStored::Active(Vec::from(values)),
+            _ => SpinStored::Inactive,
         }
     }
 
@@ -180,8 +149,6 @@ impl<'i> Spinner<'i> {
     }
 
     pub(crate) fn spin_next(&mut self) ->  HslColor {
-
-        if self.recalc_request { self.recalculate(); }
 
         if self.counter > 0 {
             self.spin_calculated_hsl();
@@ -213,7 +180,7 @@ impl<'i> Spinner<'i> {
         let s = Self::spin_stored_channel(self.color.s, &self.spin_stored_saturation, self.counter);
         let l = Self::spin_stored_channel(self.color.l, &self.spin_stored_lightness, self.counter);
 
-        HslColor::from((h, s, l))
+        HslColor::from((h, s, l,))
     }
 
     fn spin_stored_channel(channel_value: f32, channel_spin: &SpinStored, counter: usize) -> f32 {
