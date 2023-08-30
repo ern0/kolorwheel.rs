@@ -35,6 +35,16 @@ impl Panel for HueOffsets {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
 
+            let mut hue: i32 = self.color1.h as i32;
+            ui.label("Hue:");
+            ui.add(
+                egui::Slider::new(&mut hue, 0..=359)
+                .orientation(egui::SliderOrientation::Vertical)
+                .trailing_fill(true)
+            );
+            self.color1.h = hue as f32;
+            self.color2.h = hue as f32;
+
             ui.label("Count:");
             ui.add(
                 egui::Slider::new(&mut self.count, 1..=8)
