@@ -14,7 +14,7 @@ pub struct Palette2 {
 }
 
 impl Palette2 {
-    
+
     pub fn new() -> Self {
         Self {
             cols: 3,
@@ -27,7 +27,11 @@ impl Palette2 {
 }
 
 impl Panel for Palette2 {
-    
+
+    fn get_source_script(&self) -> &str {
+        return file!();
+    }
+
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {

@@ -43,6 +43,7 @@ fn main() -> Result<(), eframe::Error> {
 
 trait Panel {
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32);
+    fn get_source_script(&self) -> &str;
 }
 #[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
@@ -97,11 +98,28 @@ impl App {
 
     fn show_panel(&mut self, ui: &mut egui::Ui) {
 
+        let panel: &mut dyn Panel = match self.active_panel {
+            PanelSelector::Gradient => &mut self.p1,
+            PanelSelector::HueAbs => &mut self.p2,
+            PanelSelector::SatAbs => &mut self.p3,
+            PanelSelector::LitAbs => &mut self.p4,
+            PanelSelector::HueReli => &mut self.p5,
+            PanelSelector::HueRelx => &mut self.p6,
+            PanelSelector::SatLitRel => &mut self.p7,
+            PanelSelector::HueOffsets => &mut self.p8,
+            PanelSelector::Palette1 => &mut self.p9,
+            PanelSelector::Palette2 => &mut self.p10,
+        };
+
         self.window.original_height = ui.available_height() as u32;
 
         ui.with_layout(egui::Layout::right_to_left(egui::Align::LEFT), |ui| {
             ui.label(" ");
-            ui.hyperlink("https://github.com/ern0/kolorwheel.rs");
+            ui.hyperlink(
+                "https://github.com/ern0/kolorwheel.rs/blob/master/".to_owned()
+                +
+                panel.get_source_script()
+            );
         });
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
@@ -118,19 +136,6 @@ impl App {
         });
 
         ui.separator();
-
-         let panel: &mut dyn Panel = match self.active_panel {
-            PanelSelector::Gradient => &mut self.p1,
-            PanelSelector::HueAbs => &mut self.p2,
-            PanelSelector::SatAbs => &mut self.p3,
-            PanelSelector::LitAbs => &mut self.p4,
-            PanelSelector::HueReli => &mut self.p5,
-            PanelSelector::HueRelx => &mut self.p6,
-            PanelSelector::SatLitRel => &mut self.p7,
-            PanelSelector::HueOffsets => &mut self.p8,
-            PanelSelector::Palette1 => &mut self.p9,
-            PanelSelector::Palette2 => &mut self.p10,
-        };
 
         let (kw, cols, rows) = panel.paint(ui);
 
@@ -184,6 +189,7 @@ impl App {
                 x = self.window.left + cell.window_centering_horizontal;
             }
         }  
+
     }
 
     fn paint_hsl_sliders(ui: &mut egui::Ui, color: &mut HslColor) {

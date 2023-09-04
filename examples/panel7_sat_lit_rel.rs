@@ -15,7 +15,7 @@ pub struct SatLitRel {
 }
 
 impl SatLitRel {
-    
+   
     pub fn new() -> Self {
         Self {
             cols: 8,
@@ -29,6 +29,10 @@ impl SatLitRel {
 
 impl Panel for SatLitRel {
     
+    fn get_source_script(&self) -> &str {
+        return file!();
+    }
+
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
