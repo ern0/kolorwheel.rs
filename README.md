@@ -1,4 +1,4 @@
-# kolorwheel.rs
+# KolorWheel.rs
 
 
 ## What is it?
@@ -9,6 +9,11 @@ to create palettes for GUI applications.
 
 > With a slightly different API, for a slightly different platform:
 [KolorWheel.js](https://github.com/ern0/kolorwheel.js/)
+
+The way to create a palette is 
+to specify a base colour 
+and some parameters 
+that tweak the H, S, L values.
 
 
 ## The HSL color model
@@ -47,4 +52,15 @@ but converting RGB to HSL is not,
 e.g. the *hue* value of
 `#000000` (black) can be anything.
 
-### The API
+
+## The flaws of the HSL color model
+
+The HSL model does not represent
+how human vision actually works.
+
+Linear changes in H, S, L values 
+may not perceived linearly 
+by the human eye.
+
+
+## The API
