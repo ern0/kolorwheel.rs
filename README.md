@@ -63,4 +63,58 @@ may not perceived linearly
 by the human eye.
 
 
-## The API
+## Quick API overview
+
+**Step 1**: create the `KolorWheel` object 
+with base color and number of steps:
+```
+let base_color = HslColor::new(0, 100, 40);
+let mut kw = KolorWheel::new(base_color, 10);
+
+```
+
+**Step 2**: define H/S/L absolute or relative changes:
+```
+kw.with_hue(SpinMode::Absolute(120));
+kw.with_saturation(SpinMode::RelativeIncl(-15));
+
+```
+
+**Step 3**: optionally,
+on top of absolute/relative changes,
+offset array slices can be specified:
+```
+kw.with_lightness(SpinMode::Offset(&[0, 15, 30]));
+```
+
+**Step 4**: optionally, 
+the result can be forked,
+so each result item produces a separate
+series of colors using item color as base color,
+only the size of sub-series should be specified:
+```
+kw.fork(5);
+kw.with_hue(SpinMode::RelativeIncl(45));
+```
+The number of overall items will be
+the product of original and forked counts
+(in this example: 10 * 5 = 50);
+
+**Step 5**: the result can be get via
+iterator, lambda or `vec`. The item type is
+`HslColor`, which can be transformed
+to `RgbColor`:
+```
+for hsl_color in kw {
+  let rgb_color: RgbColor = hsl_color.into();
+  //...
+}
+```
+
+## API details
+
+### Create `KolorWheel` object
+
+
+
+## Examples
