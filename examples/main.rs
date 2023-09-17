@@ -6,14 +6,12 @@ use kolorwheel::hsl_color::HslColor;
 use kolorwheel::rgb_color::RgbColor;
 
 mod panel1_gradient;
-mod panel2_hue_abs;
-mod panel3_sat_abs;
-mod panel4_lit_abs;
-mod panel5_p6_hue_rel_univ;
-mod panel7_sat_lit_rel;
-mod panel8_hue_offsets;
-mod panel9_palette1;
-mod panel10_palette2;
+mod panel2_lit_abs;
+mod panel3_p4_hue_rel_univ;
+mod panel5_sat_lit_rel;
+mod panel6_hue_offsets;
+mod panel7_palette1;
+mod panel8_palette2;
 
 fn main() -> Result<(), eframe::Error> {
 
@@ -48,7 +46,7 @@ trait Panel {
 #[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
     Gradient, 
-    HueAbs, SatAbs, LitAbs,
+    LitAbs,
     HueReli, HueRelx,
     SatLitRel, HueOffsets,
     Palette1, Palette2,
@@ -58,15 +56,13 @@ struct App {
     window: Window,
     active_panel: PanelSelector,   
     p1: panel1_gradient::Gradient,
-    p2: panel2_hue_abs::HueAbs,
-    p3: panel3_sat_abs::SatAbs,
-    p4: panel4_lit_abs::LitAbs,
-    p5: panel5_p6_hue_rel_univ::HueRelUniv,
-    p6: panel5_p6_hue_rel_univ::HueRelUniv,
-    p7: panel7_sat_lit_rel::SatLitRel,
-    p8: panel8_hue_offsets::HueOffsets,
-    p9: panel9_palette1::Palette1,
-    p10: panel10_palette2::Palette2,
+    p2: panel2_lit_abs::LitAbs,
+    p3: panel3_p4_hue_rel_univ::HueRelUniv,
+    p4: panel3_p4_hue_rel_univ::HueRelUniv,
+    p5: panel5_sat_lit_rel::SatLitRel,
+    p6: panel6_hue_offsets::HueOffsets,
+    p7: panel7_palette1::Palette1,
+    p8: panel8_palette2::Palette2,
 }
 
 impl App {
@@ -84,15 +80,13 @@ impl App {
             window,
             active_panel: PanelSelector::Gradient,
             p1: panel1_gradient::Gradient::new(), 
-            p2: panel2_hue_abs::HueAbs::new(), 
-            p3: panel3_sat_abs::SatAbs::new(), 
-            p4: panel4_lit_abs::LitAbs::new(),
-            p5: panel5_p6_hue_rel_univ::HueRelUniv::new(true),
-            p6: panel5_p6_hue_rel_univ::HueRelUniv::new(false),
-            p7: panel7_sat_lit_rel::SatLitRel::new(),
-            p8: panel8_hue_offsets::HueOffsets::new(),
-            p9: panel9_palette1::Palette1::new(),
-            p10: panel10_palette2::Palette2::new(),
+            p2: panel2_lit_abs::LitAbs::new(),
+            p3: panel3_p4_hue_rel_univ::HueRelUniv::new(true),
+            p4: panel3_p4_hue_rel_univ::HueRelUniv::new(false),
+            p5: panel5_sat_lit_rel::SatLitRel::new(),
+            p6: panel6_hue_offsets::HueOffsets::new(),
+            p7: panel7_palette1::Palette1::new(),
+            p8: panel8_palette2::Palette2::new(),
         }
     }
 
@@ -100,15 +94,13 @@ impl App {
 
         let panel: &mut dyn Panel = match self.active_panel {
             PanelSelector::Gradient => &mut self.p1,
-            PanelSelector::HueAbs => &mut self.p2,
-            PanelSelector::SatAbs => &mut self.p3,
-            PanelSelector::LitAbs => &mut self.p4,
-            PanelSelector::HueReli => &mut self.p5,
-            PanelSelector::HueRelx => &mut self.p6,
-            PanelSelector::SatLitRel => &mut self.p7,
-            PanelSelector::HueOffsets => &mut self.p8,
-            PanelSelector::Palette1 => &mut self.p9,
-            PanelSelector::Palette2 => &mut self.p10,
+            PanelSelector::LitAbs => &mut self.p2,
+            PanelSelector::HueReli => &mut self.p3,
+            PanelSelector::HueRelx => &mut self.p4,
+            PanelSelector::SatLitRel => &mut self.p5,
+            PanelSelector::HueOffsets => &mut self.p6,
+            PanelSelector::Palette1 => &mut self.p7,
+            PanelSelector::Palette2 => &mut self.p8,
         };
 
         self.window.original_height = ui.available_height() as u32;
@@ -124,8 +116,6 @@ impl App {
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
             ui.selectable_value(&mut self.active_panel, PanelSelector::Gradient, "Gradient");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::HueAbs, "Hue/abs");
-            ui.selectable_value(&mut self.active_panel, PanelSelector::SatAbs, "Sat/abs");
             ui.selectable_value(&mut self.active_panel, PanelSelector::LitAbs, "Lit/abs");
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueReli, "Hue/reli");
             ui.selectable_value(&mut self.active_panel, PanelSelector::HueRelx, "Hue/relx");
