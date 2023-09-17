@@ -90,6 +90,7 @@ impl App {
         }
     }
 
+    #[inline]
     fn show_panel(&mut self, ui: &mut egui::Ui) {
 
         let panel: &mut dyn Panel = match self.active_panel {
@@ -128,15 +129,11 @@ impl App {
         ui.separator();
 
         let (kw, cols, rows) = panel.paint(ui);
+        self.paint_grid(ui, kw, cols, rows);
+    }
 
-        // Appended `self.paint_grid()` to this method because borrow issues:
-        // "cannot borrow `*self` as mutable more than once at a time"
-        // Also made `paint_box()` static method
-        //
-        // this method's last line:
-        //     self.paint_grid(ui, kw, cols, rows);
-        // header for fn:
-        //     fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
+    #[inline]
+    fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
 
         self.window.actual_width = ui.available_width() as u32;
         self.window.actual_height = ui.available_height() as u32;
