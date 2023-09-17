@@ -58,18 +58,12 @@ impl KolorWheel {
         &mut self.spinner_vec[self.index]
     }
 
-    pub fn color<T>(&mut self, target: T) -> &mut Self 
-    where T: Into<HslColor> {       
-        self.actual_spinner().with_color(target.into());
-        self
-    }
-
-    pub fn with_hue(&mut self, spin_mode: SpinMode) -> &mut KolorWheel {
+    pub fn with_hue(&mut self, spin_mode: SpinMode) -> &mut Self {
         self.actual_spinner().with_hue(spin_mode);
         self
     }
 
-    pub fn with_saturation(&mut self, spin_mode: SpinMode) -> &mut KolorWheel {
+    pub fn with_saturation(&mut self, spin_mode: SpinMode) -> &mut Self {
         self.actual_spinner().with_saturation(spin_mode);
         self
     }
