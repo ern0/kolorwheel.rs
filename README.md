@@ -322,4 +322,4 @@ which implements `From<HslColor>` trait.
 
 
 ## Examples
-
+https://github.com/dyuri/pastel
