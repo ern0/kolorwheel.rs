@@ -226,11 +226,20 @@ impl App {
             color: fill,
         };
 
-        let rect_shape = egui::epaint::RectShape { 
+        let fill_texture_id = egui::TextureId::Managed(0);
+
+        let uv = egui::Rect{
+            min: egui::epaint::WHITE_UV,
+            max: egui::epaint::WHITE_UV,
+        };
+
+        let rect_shape = egui::epaint::RectShape {
             rect, 
             rounding, 
             fill, 
             stroke,
+            fill_texture_id,
+            uv
         };
 
         let rectangle = egui::Shape::Rect(rect_shape);

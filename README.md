@@ -322,4 +322,20 @@ which implements `From<HslColor>` trait.
 
 
 ## Examples
+
+
+
+### 1: Gradient
+
+### 2: Lit/abs
+
+### 3-4: Hue/reli, Hue/relx
+
+### 5: HueOffsets
+
+### 6: Palette1
+
+### 7: Palette2
+
+
 https://github.com/dyuri/pastel
