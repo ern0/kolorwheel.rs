@@ -228,7 +228,7 @@ impl App {
 
         let fill_texture_id = egui::TextureId::Managed(0);
 
-        let uv = egui::Rect{
+        let uv = egui::Rect {
             min: egui::epaint::WHITE_UV,
             max: egui::epaint::WHITE_UV,
         };

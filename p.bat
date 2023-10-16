@@ -1,5 +1,6 @@
 @echo off
 cls
 
-cargo build --example main
+cargo doc
+rem cargo build --example main
 rem cargo build

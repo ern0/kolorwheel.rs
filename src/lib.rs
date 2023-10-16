@@ -8,6 +8,8 @@ use std::vec::Vec;
 use hsl_color::HslColor;
 use crate::spinner::Spinner;
 
+/// The color wheel object, which emits 
+/// [`HslColor`](rgb_color::HslColor) color on spin
 pub struct KolorWheel {
     index: usize,
     spinner_vec: Vec<Spinner>,
