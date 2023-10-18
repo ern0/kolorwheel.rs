@@ -298,7 +298,7 @@ for hsl_color in kw {
 
 #### Callback
 
-The `spin()` method is calling the callback 
+The `spin()` \method is calling the callback 
 with each result value:
 ```
 KolorWheel::new( ... )
