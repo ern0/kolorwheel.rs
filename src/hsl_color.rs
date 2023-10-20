@@ -1,5 +1,6 @@
 use std::convert::From;
 
+/// HSL representation of a color
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct HslColor {
     pub h: f32, 
@@ -7,6 +8,7 @@ pub struct HslColor {
     pub l: f32,
 }
 
+/// Create black color by default
 impl Default for HslColor {
     fn default() -> HslColor {
         HslColor::new(0, 0, 0)

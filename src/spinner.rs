@@ -1,5 +1,5 @@
-use crate::hsl_color::HslColor;
 use crate::SpinMode;
+use crate::HslColor;
 
 pub(crate) struct Spinner {
 

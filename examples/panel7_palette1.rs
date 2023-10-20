@@ -1,7 +1,5 @@
 extern crate kolorwheel;
-use kolorwheel::KolorWheel;
-use kolorwheel::SpinMode;
-use kolorwheel::hsl_color::HslColor;
+use kolorwheel::{ KolorWheel, SpinMode, HslColor };
 
 use crate::Panel;
 

@@ -11,7 +11,7 @@ to create palettes for GUI applications.
 [KolorWheel.js](https://github.com/ern0/kolorwheel.js/)
 
 The way of creating a palette is 
-to specify a base colour 
+to specify a base color 
 and some parameters 
 that modifies the H, S, L values
 in the given *spin mode* and steps.

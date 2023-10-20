@@ -2,9 +2,7 @@
 #![windows_subsystem = "windows"]
 
 extern crate kolorwheel;
-use kolorwheel::KolorWheel;
-use kolorwheel::hsl_color::HslColor;
-use kolorwheel::rgb_color::RgbColor;
+use kolorwheel::{ KolorWheel, HslColor, RgbColor };
 
 mod panel1_gradient;
 mod panel2_lit_abs;

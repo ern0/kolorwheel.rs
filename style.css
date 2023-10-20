@@ -3,6 +3,7 @@ blockquote {
 	background-color: #eeeeee;
 	padding: 4px 4px 4px 8px;
 	font-style: italic;
+	border-left: 8px solid #cccccc;
 }
 
 </style>

@@ -1,33 +1,40 @@
-//! crate
-//! 
-//! ## What is it?
-//! 
-//! This crate is designed 
-//! to make it easy 
-//! to create palettes for GUI applications.
-//! 
-//! > With a slightly different API, for a slightly different platform:
-//! [KolorWheel.js](https://github.com/ern0/kolorwheel.js/)
-//! 
-//! The way of creating a palette is 
-//! to specify a base colour 
-//! and some parameters 
-//! that modifies the H, S, L values
-//! in the given *spin mode* and steps.
+/*! ## What is it?
 
+This crate is designed 
+to make it easy 
+to create palettes for GUI applications.
 
+> With a slightly different API, for a slightly different platform:
+[KolorWheel.js](https://github.com/ern0/kolorwheel.js/)
+
+The way of creating a palette is 
+to specify a base color 
+and some parameters 
+that modifies the H, S, L values
+in the given *spin mode* and steps.
+
+*Full documentation is available at the project's GitHub page:
+[KolorWheel.rs](https://github.com/ern0/kolorwheel.js/)*
+
+*/
+
+#[doc(hidden)]
 pub mod hsl_color;
+#[doc(hidden)]
 pub mod rgb_color;
+
 mod convert_hsl_to_rgb;
 mod convert_rgb_to_hsl;
 mod spinner;
 
+pub use hsl_color::HslColor;
+pub use rgb_color::RgbColor;
+
 use std::vec::Vec;
-use hsl_color::HslColor;
 use crate::spinner::Spinner;
 
-/// The color wheel object, which emits 
-/// [`HslColor`](hsl_color::HslColor) color on spin
+/// The color wheel object, which emits series of
+/// [`HslColor`](HslColor) colors upon spin
 pub struct KolorWheel {
     index: usize,
     spinner_vec: Vec<Spinner>,
