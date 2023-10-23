@@ -1,5 +1,4 @@
 use std::convert::{From, TryFrom};
-use thiserror::Error;
 
 #[derive(Clone, Copy, Default, PartialEq, Debug)]
 pub struct RgbColor {
@@ -44,11 +43,9 @@ impl From<&[f32; 3]> for RgbColor {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug)]
 pub enum ParseError {
-    #[error("invalid length: {0}")]
     InvalidLength(usize),
-    #[error("invalid digit: {0}")]
     InvalidDigit(u8),
 }
 
