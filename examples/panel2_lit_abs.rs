@@ -26,7 +26,7 @@ impl LitAbs {
 impl Panel for LitAbs {
     
     fn get_source_script(&self) -> &str {
-        return file!();
+        file!()
     }
 
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {

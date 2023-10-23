@@ -27,7 +27,7 @@ impl Palette1 {
 impl Panel for Palette1 {
     
     fn get_source_script(&self) -> &str {
-        return file!();
+        file!()
     }
 
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {

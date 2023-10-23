@@ -312,11 +312,12 @@ KolorWheel::new( ... )
 #### Vector
 
 Use `spin_vec()` to get the results in a `vec`.
+```
 let result = KolorWheel::new( ... )
     ...
     .spin_vec::<HslColor>()
 ;
-
+```
 The result stored in the `vec` can be any type,
 which implements `From<HslColor>` trait.
 

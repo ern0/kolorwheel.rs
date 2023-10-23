@@ -18,6 +18,8 @@ in the given *spin mode* and steps.
 
 */
 
+#![deny(rustdoc::broken_intra_doc_links)]
+
 #[doc(hidden)]
 pub mod hsl_color;
 #[doc(hidden)]
@@ -34,7 +36,7 @@ use std::vec::Vec;
 use crate::spinner::Spinner;
 
 /// The color wheel object, which emits series of
-/// [`HslColor`](HslColor) colors upon spin
+/// [`HslColor`](HslColor) color objects upon spin
 pub struct KolorWheel {
     index: usize,
     spinner_vec: Vec<Spinner>,
@@ -57,7 +59,24 @@ pub enum SpinMacro {
     FadeToWhite,
 }
 
+/**
+The iterator emits [`HslColor`](HslColor) objects:
+```
+let mut kw = KolorWheel::new( ... );
+(...)
+for hsl_color in kw {
+  let rgb_color: RgbColor = hsl_color.into();
+  (...)
+}
+``` 
+Result can also get via [callback](KolorWheel::spin) 
+or as [vector](KolorWheel::spin_vec).
+*/
+
 impl Iterator for KolorWheel {
+    ///The iterator emits [`HslColor`](HslColor) objects
+
+#[doc(hidden)]
     type Item = HslColor;
 
     fn next(&mut self) -> Option<HslColor> {
@@ -67,6 +86,8 @@ impl Iterator for KolorWheel {
 
 impl KolorWheel {
 
+    /// Create the object with specified color and 
+    /// number of spin steps.
     pub fn new<T>(color: T, count: usize) -> Self 
     where T: Into<HslColor> {
 
@@ -85,21 +106,25 @@ impl KolorWheel {
         &mut self.spinner_vec[self.index]
     }
 
+    /// Set spin mode for Hue channel
     pub fn with_hue(&mut self, spin_mode: SpinMode) -> &mut Self {
         self.actual_spinner().with_hue(spin_mode);
         self
     }
 
+    /// Set spin mode for Saturarion channel
     pub fn with_saturation(&mut self, spin_mode: SpinMode) -> &mut Self {
         self.actual_spinner().with_saturation(spin_mode);
         self
     }
 
+    /// Set spin mode for Lightness channel
     pub fn with_lightness(&mut self, spin_mode: SpinMode) -> &mut Self {
         self.actual_spinner().with_lightness(spin_mode);
         self
     }
 
+    /// Set spin mode with macro
     pub fn with_macro(&mut self, spin_macro: SpinMacro) -> &mut Self {
 
         match spin_macro {
@@ -125,6 +150,18 @@ impl KolorWheel {
         self
     }    
 
+    /**
+    Fork the actual state of KolorWheel,
+    produce a separate series of colors
+    using actual item as base color,
+    the size of sub-series should be specified:
+    ```
+    let mut kw = KolorWheel::new( ... );
+    (...)
+    kw.fork(5);
+    kw.with_hue(SpinMode::RelativeIncl(45));
+    ```
+    */
     pub fn fork(&mut self, count: usize) -> &mut Self {
 
         let color = self.actual_spinner().color();
@@ -137,7 +174,7 @@ impl KolorWheel {
         self
     }
 
-    pub fn spin_iter(&mut self) -> Option<HslColor> {
+    fn spin_iter(&mut self) -> Option<HslColor> {
 
         loop {
 
@@ -164,12 +201,33 @@ impl KolorWheel {
         }
 
     }
+
+    /**
+    Call the callback (practically: lambda)
+    with each result value:
+    ```
+    KolorWheel::new( ... )
+        (...)
+        .spin(&mut|hsl_color: HslColor| { 
+            (...)
+        })
+    ;
+    ```
+    */
     pub fn spin<T: From<HslColor>>(&mut self, callback: &mut dyn FnMut(T)) {
         for color in self { 
             callback(color.into()); 
         }
     }
 
+    /**
+    Provide the results in a `vec`.
+    ```
+    let result = KolorWheel::new( ... )
+        ...
+        .spin_vec::<HslColor>()
+    ;
+    */
     pub fn spin_vec<T: From<HslColor>>(&mut self) -> Vec<T> 
     where T: Into<HslColor> {
 

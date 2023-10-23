@@ -29,7 +29,7 @@ impl HueOffsets {
 impl Panel for HueOffsets {
     
     fn get_source_script(&self) -> &str {
-        return file!();
+        file!()
     }
 
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32) {
@@ -69,7 +69,7 @@ impl Panel for HueOffsets {
 
         let mut kw = KolorWheel::new(self.color1, self.rows as usize);
         kw.with_macro(SpinMacro::GradientColor(self.color2));
-        kw.fork(self.count as usize);
+        kw.fork(self.count);
         kw.with_hue(SpinMode::Offset(&self.values[0 .. (self.cols as usize)]));
 
         (kw, self.cols, self.rows)

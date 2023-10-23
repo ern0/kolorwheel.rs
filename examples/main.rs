@@ -42,6 +42,7 @@ trait Panel {
     fn paint(&mut self, ui: &mut egui::Ui) -> (KolorWheel, u32, u32);
     fn get_source_script(&self) -> &str;
 }
+
 #[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
     Gradient, 
