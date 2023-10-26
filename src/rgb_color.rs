@@ -1,10 +1,15 @@
 use std::convert::{From, TryFrom};
 
+/// RGB representation of a color, which
+/// can be implicitly converted (`From/Into`) to [`RgbColor`]
 #[derive(Clone, Copy, Default, PartialEq, Debug)]
 pub struct RgbColor {
-    pub r: u8, 
-    pub g: u8, 
-    pub b: u8,
+    /// Red channel (0..=255)
+    pub r: u8,  
+    /// Green channel (0..=255)
+    pub g: u8,  
+    /// Blue channel (0..=255)
+    pub b: u8,  
 }
 
 impl From<(u8, u8, u8)> for RgbColor {
@@ -44,11 +49,19 @@ impl From<&[f32; 3]> for RgbColor {
 }
 
 #[derive(Debug)]
+/// Possible errors when parsing [`HslColor`](`crate::HslColor`) from hex `&str`
 pub enum ParseError {
+    /// Only `RRGGBB` or `RGB` variants are accepted, with optional "`#`" prefix.
+    /// Reporting invalid length value
     InvalidLength(usize),
+    /// Only hexadecimal digits can be used, any case.
+    /// Reporting invalid character (first one)
     InvalidDigit(u8),
 }
 
+/// Create RGB color from hex `str`:
+/// - "`#`" prefix is optional
+/// - both `RGB` and `RRGGBB` format is accepted
 impl TryFrom<&str> for RgbColor {
     type Error = ParseError;
 
@@ -110,6 +123,9 @@ impl RgbColor {
 }
 
 impl RgbColor {
+    /// If possible, use [HslColor::new()](crate::HslColor::new()) instead,
+    /// because RGB colors can be ambigous 
+    /// (e.g. Hue value for black is n.a.)
     pub fn new(r: u8, g: u8, b: u8) -> Self {                
         Self { r, g, b }
     }

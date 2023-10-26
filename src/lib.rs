@@ -17,20 +17,19 @@ in the given *spin mode* and steps.
 [KolorWheel.rs](https://github.com/ern0/kolorwheel.js/)*
 
 */
-
 #![deny(rustdoc::broken_intra_doc_links)]
 
-#[doc(hidden)]
-pub mod hsl_color;
-#[doc(hidden)]
-pub mod rgb_color;
+mod hsl_color;
+pub use hsl_color::HslColor;
+
+mod rgb_color;
+pub use rgb_color::RgbColor;
+
+pub use rgb_color::ParseError;
 
 mod convert_hsl_to_rgb;
 mod convert_rgb_to_hsl;
 mod spinner;
-
-pub use hsl_color::HslColor;
-pub use rgb_color::RgbColor;
 
 use std::vec::Vec;
 use crate::spinner::Spinner;
