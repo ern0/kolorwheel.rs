@@ -43,18 +43,30 @@ pub struct KolorWheel {
     top_level: usize,
 }
 
+/// Change modes to be applied on H/S/L channels
 pub enum SpinMode<'m> {
+    /// Don't change the value (default)
     Still,
+    /// Set absolute goal value
     Absolute(i32),
+    /// Set relative goal value, the last step of the actual round
     RelativeIncl(i32),
+    /// Set relative goal value, the first step of the next round
     RelativeExcl(i32),
+    /// List (slice) of values which the result will be offseted with,
+    /// in round-robin fashion
     Offset(&'m [i32]),
 }
 
+/// Shortcuts for some HSL
 pub enum SpinMacro {
+    /// Set absolute HSL goal value
     GradientColor(HslColor),
+    /// Set gray goal value, defined by lightness
     FadeToGray(i32),
+    /// Set goal value to black
     FadeToBlack,
+    /// Set goal value to white
     FadeToWhite,
 }
 
