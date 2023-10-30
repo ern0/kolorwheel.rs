@@ -14,7 +14,7 @@ that modifies the H, S, L values
 in the given *spin mode* and steps.
 
 *Full documentation is available at the project's GitHub page:
-[KolorWheel.rs](https://github.com/ern0/kolorwheel.js/)*
+[KolorWheel.rs](https://github.com/ern0/kolorwheel.rs/)*
 
 */
 #![deny(rustdoc::broken_intra_doc_links)]

@@ -53,7 +53,7 @@ converting a HSL value to RGB is trivial,
 but converting RGB to HSL is not.
 For example, `#000000` (black) color has
 zero *lightness*, but
-*hue* and *saturation* can be amything.
+*hue* and *saturation* can be anything.
 
 
 ## The flaws of the HSL color model
@@ -150,13 +150,15 @@ operations.
 Valid ranges for *hue* is 0 to 360°,
 but upon overflow or underflow,
 it will be normalized,
-e.g. *365° -> 5* or *-10° -> 350°*.
+e.g. *365° -> 5°* or *-10° -> 350°*.
 
 The *saturation* and *lightness* 
 must be between 0 and 100%.
 Upon overflow or underflow, 
 they will be cut, 
 e.g. *99% + 5% -> 100%* or *10% - 25% = 0*.
+
+The API uses `i32` for degree and percent values.
 
 ```
 pub enum SpinMode<'m> {
@@ -169,7 +171,7 @@ pub enum SpinMode<'m> {
 ```
 
 - `Still`: defult value for no change, 
-   shouldn't be used.
+   may not be used in API calls.
 - `Absolute`: set absolute target value.
 - `RelativeIncl`: set relative target value.
    the target value will be included in the result.
@@ -197,7 +199,7 @@ It returns mutable reference for chaining.
 `with_macro(&mut self, spin_macro: SpinMacro) -> &mut Self`
 
 `SpinMacro` transformations are shourtcuts
-to common transformations,
+to common ones,
 they are implemented with `SpinMode` under the hood.
 
 ```
@@ -214,9 +216,7 @@ pub enum SpinMacro {
   setting absolute transformations for
   H, S and L.
   Target color should be `HslColor`,
-  or any type which implements `Into<HslColor>`,
-  they will be converted to `HslColor`
-  upon the method call.
+  or any type which implements `Into<HslColor>`.
 - `FadeToGray`: shorthand for
   transforming *saturation* to zero,
   and *lightness* to the specified value,
@@ -298,7 +298,7 @@ for hsl_color in kw {
 
 #### Callback
 
-The `spin()` \method is calling the callback 
+The `spin()` method is calling the callback 
 with each result value:
 ```
 KolorWheel::new( ... )
@@ -311,14 +311,14 @@ KolorWheel::new( ... )
 
 #### Vector
 
-Use `spin_vec()` to get the results in a `vec`.
+Use `spin_vec()` to get the results in a `vec<T>`.
 ```
 let result = KolorWheel::new( ... )
     ...
     .spin_vec::<HslColor>()
 ;
 ```
-The result stored in the `vec` can be any type,
+The result stored in the `vec<T>` can be any `T` type,
 which implements `From<HslColor>` trait.
 
 
