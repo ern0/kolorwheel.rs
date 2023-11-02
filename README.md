@@ -330,8 +330,15 @@ which implements `From<HslColor>` trait.
 
 ## Examples
 
+The `examples/` directory contains 
+a small GUI app (using *egui*)
+with some example panels,
+which demonstrate the main functions of the library.
 
-
+How to build and run the example app:
+```
+cargo run --example main
+```
 
 ### 1: Gradient
 
