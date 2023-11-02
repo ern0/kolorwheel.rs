@@ -2,5 +2,5 @@
 cls
 
 rem cargo build
-cargo rustdoc -- --html-in-header style.css
+cargo rustdoc -- --html-in-header doc/style.css
 rem cargo build --example main

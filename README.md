@@ -328,6 +328,12 @@ which implements `From<HslColor>` trait.
 
 ### 1: Gradient
 
+above text
+
+[Gradient](doc/panel1.png)
+
+below text
+
 ### 2: Lit/abs
 
 ### 3-4: Hue/reli, Hue/relx
