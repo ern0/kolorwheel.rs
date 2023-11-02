@@ -66,6 +66,12 @@ may not perceived linearly
 by the human eye.
 
 
+## See also
+
+- [Pastel](https://github.com/sharkdp/pastel): a nice command-line tool to generate, analyze, convert and manipulate colors
+- [Kolorwheel.js documentation](http://linkbroker.hu/stuff/kolorwheel.js/): some docs and ideas
+
+
 ## Quick API overview
 
 **Step 1**: create the `KolorWheel` object 
@@ -330,19 +336,37 @@ which implements `From<HslColor>` trait.
 
 above text
 
-[Gradient](doc/panel1.png)
+![gradient](doc/panel1.png)
 
 below text
 
+
 ### 2: Lit/abs
+
+![lit_abs](doc/panel2.png)
+
 
 ### 3-4: Hue/reli, Hue/relx
 
+Include:
+![hue_reli](doc/panel3.png)
+
+Exclude:
+![hue_relx](doc/panel4.png)
+
+
 ### 5: HueOffsets
+
+![hue_offsets](doc/panel5.png)
+
 
 ### 6: Palette1
 
+![palette1](doc/panel6.png)
+
+
 ### 7: Palette2
 
+![palette1](doc/panel7.png)
 
-https://github.com/dyuri/pastel
+
