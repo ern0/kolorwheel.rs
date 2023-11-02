@@ -108,11 +108,10 @@ impl App {
 
         ui.with_layout(egui::Layout::right_to_left(egui::Align::LEFT), |ui| {
             ui.label(" ");
-            ui.hyperlink(
-                "https://github.com/ern0/kolorwheel.rs/blob/master/".to_owned()
-                +
-                panel.get_source_script()
-            );
+            const VERSION: &str = env!("CARGO_PKG_VERSION");
+            let url = format!("https://github.com/ern0/kolorwheel.rs/blob/{}/", VERSION);
+            let path = panel.get_source_script().replace("\\","/");
+            ui.hyperlink(url + &path.to_owned());
         });
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
