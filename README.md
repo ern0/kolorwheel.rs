@@ -332,41 +332,155 @@ which implements `From<HslColor>` trait.
 
 
 
+
 ### 1: Gradient
 
-above text
+The transition between two colors 
+lacks imagination and creativity, 
+but there's a macro for it, obviously.
 
 ![gradient](doc/panel1.png)
 
-below text
+```
+let mut kw = KolorWheel::new(self.color1, 5*5);
+kw.with_macro(SpinMacro::GradientColor(self.color2));
+```
+
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/master/examples/panel1_gradient.rs) for details.*
 
 
 ### 2: Lit/abs
 
+It's common to 
+simply darken or lighten a color by
+specifying a target lightness value.
+
 ![lit_abs](doc/panel2.png)
+
+```
+let mut kw = KolorWheel::new(self.color, 4*4);
+kw.with_lightness(SpinMode::Absolute(self.lit));
+```
+
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/master/examples/panel2_lit_abs.rs) for details.*
 
 
 ### 3-4: Hue/reli, Hue/relx
 
-Include:
-![hue_reli](doc/panel3.png)
+For a relative value, it is important 
+whether the last step is included in the result,
+especially in case of hue transformation.
 
-Exclude:
+If you only display the generated palette once,
+the last value should be the specified one.
+
+![hue_reli](doc/panel3.png)
+```
+let mut kw = KolorWheel::new(self.color, 3*2);
+kw.with_hue(SpinMode::RelativeIncl(self.hue));
+```
+
+If you display the generated palette more than once,
+endless or circular fashion,
+the last item will match the next round's first one,
+so it should be omitted.
+
 ![hue_relx](doc/panel4.png)
 
+```
+let mut kw = KolorWheel::new(self.color, 3*2);
+kw.with_hue(SpinMode::RelativeExcl(self.hue));
+```
 
-### 5: HueOffsets
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/master/examples/panel3_p4_hue_rel_univ.rs) for details.*
+
+### 5: Sat+Lit/rel
+
+One of the most common transformations is
+altering saturation and lightness together
+while keeping the hue unchanged.
 
 ![hue_offsets](doc/panel5.png)
 
+```
+let mut kw = KolorWheel::new(self.color, 8*6);
+kw.with_saturation(SpinMode::RelativeIncl(self.sat));
+kw.with_lightness(SpinMode::RelativeIncl(self.lit));
+```
 
-### 6: Palette1
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/master/examples/panel5_sat_lit_rel.rs) for details.*
+
+
+### 6: HueOffsets
+
+On top of the calculated transformations,
+an array (slice) of offsets can be applied
+on any channel. 
+In this example, 
+on each item of the outer gradient,
+an inner transformation is applied,
+which is simply a series of hue offsets.
+You can see the outer transformation 
+on the original hue
+in the first and fifth row.
 
 ![palette1](doc/panel6.png)
 
+```
+let mut kw = KolorWheel::new(self.color1, self.rows);
+kw.with_macro(SpinMacro::GradientColor(self.color2));
+kw.fork(self.count);
+kw.with_hue(SpinMode::Offset(&self.values[0 .. self.cols]));
+```
 
-### 7: Palette2
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/master/examples/panel6_.rs) for details.*
+
+
+### 7: Palette1
+
+If the values are chosen carefully,
+calculated transformations and offseting
+can be used on the same channel.
 
 ![palette1](doc/panel7.png)
 
+```
+color: HslColor::new(20, 70, 60),
+hue_offsets: [0, 0, 0, 0, 120],
+lit_offsets: [0, 0, 0, 0, -60],
+  (...)
+let mut kw = KolorWheel::new(self.color, 5);
+kw.with_hue(SpinMode::RelativeIncl(75));
+kw.with_hue(SpinMode::Offset(&self.hue_offsets[0..5]));
+kw.with_lightness(SpinMode::RelativeIncl(30));
+kw.with_lightness(SpinMode::Offset(&self.lit_offsets[0..5]));
+```
+
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/master/examples/panel7_palette1.rs) for details.*
+
+
+### 8: Palette2
+
+While calculated transformations 
+describe a base palette,
+offset values can be used to
+give specific items a function,
+e.g. a darker color can be used as
+font color.
+
+![palette1](doc/panel8.png)
+
+```
+color: HslColor::new(240, 80, 70),
+sat_offsets: [60, 0, 0, 70, 0, 0],
+lit_offsets: [-40, 0, 0],
+  (...)
+let mut kw = KolorWheel::new(self.color, 3*2);
+kw.with_hue(SpinMode::RelativeIncl(90));
+kw.with_saturation(SpinMode::RelativeIncl(-20));
+kw.with_saturation(SpinMode::Offset(&self.sat_offsets[0..6]));
+kw.with_lightness(SpinMode::Offset(&self.lit_offsets[0..3]));
+```
+
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/master/examples/panel8_palette2.rs) for details.*
 

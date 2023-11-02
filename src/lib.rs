@@ -58,7 +58,7 @@ pub enum SpinMode<'m> {
     Offset(&'m [i32]),
 }
 
-/// Shortcuts for some HSL
+/// Shortcuts for some common transformations
 pub enum SpinMacro {
     /// Set absolute HSL goal value
     GradientColor(HslColor),

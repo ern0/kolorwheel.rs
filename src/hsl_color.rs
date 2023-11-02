@@ -1,13 +1,13 @@
 use std::convert::From;
 
 /// HSL representation of a color
-/// - `h`: hue - degrees, 0..360, but it's okay to overflow/underflow
-/// - `s`: saturation - 0..=100
-/// - `l`: lightness - 0..=100
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct HslColor {   
+    /// - `h`: hue - degrees, 0..360, but it's okay to overflow/underflow
     pub h: f32, 
+    /// - `s`: saturation - percent, 0..=100
     pub s: f32, 
+    /// - `l`: lightness - percent, 0..=100
     pub l: f32,
 }
 
@@ -44,7 +44,7 @@ impl From<&[i32; 3]> for HslColor {
 
 impl HslColor {
 
-    /// Using integers for simpler interface
+    /// Constructor with integer values, for simplicity
     pub fn new(h: i32, s: i32, l: i32) -> Self {                
         Self {
             h: h as f32, 
