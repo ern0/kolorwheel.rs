@@ -369,7 +369,7 @@ let mut kw = KolorWheel::new(self.color, 4*4);
 kw.with_lightness(SpinMode::Absolute(self.lit));
 ```
 
-*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.0.0/examples/panel2_lit_abs.rs) for details.*
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.1.0/examples/panel2_lit_abs.rs) for details.*
 
 
 ### 3-4: Hue/reli, Hue/relx
@@ -399,7 +399,7 @@ let mut kw = KolorWheel::new(self.color, 3*2);
 kw.with_hue(SpinMode::RelativeExcl(self.hue));
 ```
 
-*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.0.0/examples/panel3_p4_hue_rel_univ.rs) for details.*
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.1.0/examples/panel3_p4_hue_rel_univ.rs) for details.*
 
 ### 5: Sat+Lit/rel
 
@@ -415,7 +415,7 @@ kw.with_saturation(SpinMode::RelativeIncl(self.sat));
 kw.with_lightness(SpinMode::RelativeIncl(self.lit));
 ```
 
-*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.0.0/examples/panel5_sat_lit_rel.rs) for details.*
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.1.0/examples/panel5_sat_lit_rel.rs) for details.*
 
 
 ### 6: HueOffsets
@@ -440,7 +440,7 @@ kw.fork(self.count);
 kw.with_hue(SpinMode::Offset(&self.values[0 .. self.cols]));
 ```
 
-*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.0.0/examples/panel6_.rs) for details.*
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.1.0/examples/panel6_.rs) for details.*
 
 
 ### 7: Palette1
@@ -463,7 +463,7 @@ kw.with_lightness(SpinMode::RelativeIncl(30));
 kw.with_lightness(SpinMode::Offset(&self.lit_offsets[0..5]));
 ```
 
-*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.0.0/examples/panel7_palette1.rs) for details.*
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.1.0/examples/panel7_palette1.rs) for details.*
 
 
 ### 8: Palette2
@@ -489,5 +489,4 @@ kw.with_saturation(SpinMode::Offset(&self.sat_offsets[0..6]));
 kw.with_lightness(SpinMode::Offset(&self.lit_offsets[0..3]));
 ```
 
-*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.0.0/examples/panel8_palette2.rs) for details.*
-
+*See [full example](https://github.com/ern0/kolorwheel.rs/blob/1.1.0/examples/panel8_palette2.rs) for details.*
