@@ -16,6 +16,9 @@ and some parameters
 that modifies the H, S, L values
 in the given *spin mode* and steps.
 
+*Thanks to [H2CO3](https://h2co3.github.io/) 
+for review and support!*
+
 
 ## The HSL color model
 
@@ -109,10 +112,9 @@ The number of overall items will be
 the product of original and forked counts
 (in this example: 10 * 5 = 50);
 
-**Step 5**: the result can be get via
-iterator, lambda or `vec`. The item type is
-`HslColor`, which can be transformed
-to `RgbColor`:
+**Step 5**: the result can be get via iterator.
+The item type is `HslColor`, 
+which can be transformed to `RgbColor`:
 ```
 for hsl_color in kw {
     let rgb_color: RgbColor = hsl_color.into();
@@ -272,26 +274,7 @@ The total number of results will be *4 * 10 = 40*.
 
 ### Result
 
-There are three way of getting the result:
-- iterator,
-- vector,
-- callback.
-
-The result item is always `HslColor`,
-which can be converted to `RgbColor`
-using `From` and `Into` traits:
-```
-pub struct RgbColor {
-    pub r: u8, 
-    pub g: u8, 
-    pub b: u8,
-}
-```
-
-#### Iterator
-
-The most convenient way to get through the result
-is using `KolorWheel` as iterator:
+The result can be get via iterator:
 
 ```
 let mut kw = KolorWheel::new( ... );
@@ -302,31 +285,16 @@ for hsl_color in kw {
 }
 ```
 
-#### Callback
-
-The `spin()` method is calling the callback 
-with each result value:
+The result type is `HslColor`,
+which can be converted to `RgbColor`
+using `From` and `Into` traits:
 ```
-KolorWheel::new( ... )
-    ...
-    .spin(&mut|hsl_color: HslColor| { 
-        ...
-    })
-;
+pub struct RgbColor {
+    pub r: u8, 
+    pub g: u8, 
+    pub b: u8,
+}
 ```
-
-#### Vector
-
-Use `spin_vec()` to get the results in a `vec<T>`.
-```
-let result = KolorWheel::new( ... )
-    ...
-    .spin_vec::<HslColor>()
-;
-```
-The result stored in the `vec<T>` can be any `T` type,
-which implements `From<HslColor>` trait.
-
 
 ## Examples
 

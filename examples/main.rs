@@ -135,13 +135,13 @@ impl App {
     #[inline]
     fn paint_grid(&mut self, ui: &mut egui::Ui, kw: KolorWheel, cols: u32, rows: u32) {
 
-        self.window.actual_width = ui.available_width() as u32;
-        self.window.actual_height = ui.available_height() as u32;
+        self.window.current_width = ui.available_width() as u32;
+        self.window.current_height = ui.available_height() as u32;
 
         let (_, painter) = ui.allocate_painter(
             egui::Vec2::new(
-                self.window.actual_width as f32, 
-                self.window.actual_height as f32,
+                self.window.current_width as f32, 
+                self.window.current_height as f32,
             ),
             egui::Sense::hover(),
         );
@@ -150,7 +150,7 @@ impl App {
 
         let mut col = 0;
         let mut x = self.window.left + cell.window_centering_horizontal;
-        let header_height = self.window.original_height - self.window.actual_height;
+        let header_height = self.window.original_height - self.window.current_height;
         let mut y = self.window.top + header_height;
 
         for fill in kw {
@@ -249,8 +249,8 @@ impl App {
 
 struct Window {
     original_height: u32,
-    actual_width: u32,
-    actual_height: u32,
+    current_width: u32,
+    current_height: u32,
     cell_padding_percent: u32,
     rounding: egui::Rounding,
     left: u32,
@@ -270,8 +270,8 @@ impl Window {
 
         Window { 
             original_height: height as u32, 
-            actual_width: width as u32, 
-            actual_height: height as u32, 
+            current_width: width as u32, 
+            current_height: height as u32, 
             cell_padding_percent, 
             rounding: egui_rounding,
             left: 6,  // magic value
@@ -298,15 +298,15 @@ impl Cell {
 
     pub fn new(window: &Window, columns: u32, rows: u32) -> Cell {
 
-        let cell_width = window.actual_width / columns;
+        let cell_width = window.current_width / columns;
         let window_corrected_width = cell_width * columns;
-        let window_padding_horizontal = (window.actual_width - window_corrected_width) / 2;
+        let window_padding_horizontal = (window.current_width - window_corrected_width) / 2;
         let mut padding_horizontal = (cell_width * window.cell_padding_percent) / 200;
         if padding_horizontal < 2 { 
             padding_horizontal = 2;
         }
 
-        let cell_height = window.actual_height / rows;
+        let cell_height = window.current_height / rows;
         let window_corrected_height = cell_height * rows;
         let mut padding_vertical = (cell_height * window.cell_padding_percent) / 200;
         if padding_vertical < 2 {

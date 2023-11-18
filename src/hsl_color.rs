@@ -1,7 +1,7 @@
 use std::convert::From;
 
 /// HSL representation of a color
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug, Default)]
 pub struct HslColor {   
     /// - `h`: hue - degrees, 0..360, but it's okay to overflow/underflow
     pub h: f32, 
@@ -9,13 +9,6 @@ pub struct HslColor {
     pub s: f32, 
     /// - `l`: lightness - percent, 0..=100
     pub l: f32,
-}
-
-/// Create black color by default
-impl Default for HslColor {
-    fn default() -> HslColor {
-        HslColor::new(0, 0, 0)
-    }
 }
 
 impl From<(f32, f32, f32)> for HslColor {
