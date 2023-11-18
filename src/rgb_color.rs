@@ -1,8 +1,9 @@
-use std::convert::{From, TryFrom};
+use std::convert::From;
+use std::str::FromStr;
 
 /// RGB representation of a color, which
 /// can be implicitly converted (`From/Into`) to [`RgbColor`]
-#[derive(Clone, Copy, Default, PartialEq, Debug)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, Hash, Debug)]
 pub struct RgbColor {
     /// Red channel (0..=255)
     pub r: u8,  
@@ -14,19 +15,19 @@ pub struct RgbColor {
 
 impl From<(u8, u8, u8)> for RgbColor {
     fn from((r, g, b): (u8, u8, u8)) -> RgbColor {
-        RgbColor::new(r, g, b)
+        RgbColor { r, g, b }
     }
 }
 
 impl From<[u8; 3]> for RgbColor {
     fn from(rgb: [u8; 3]) -> RgbColor {
-        RgbColor::new(rgb[0], rgb[1], rgb[2])
+        RgbColor { r: rgb[0], g: rgb[1], b: rgb[2] }
     }
 }
 
 impl From<&[u8; 3]> for RgbColor {
     fn from(rgb: &[u8; 3]) -> RgbColor {
-        RgbColor::new(rgb[0], rgb[1], rgb[2])
+        RgbColor { r: rgb[0], g: rgb[1], b: rgb[2] }
     }
 }
 
@@ -62,10 +63,10 @@ pub enum ParseError {
 /// Create RGB color from hex `str`:
 /// - "`#`" prefix is optional
 /// - both `RGB` and `RRGGBB` format is accepted
-impl TryFrom<&str> for RgbColor {
-    type Error = ParseError;
+impl FromStr for RgbColor {
+    type Err = ParseError;
 
-    fn try_from(hex: &str) -> Result<RgbColor, Self::Error> {
+    fn from_str(hex: &str) -> Result<RgbColor, Self::Err> {
         Self::try_parse_hex_auto(hex)
     }
 }
@@ -103,7 +104,7 @@ impl RgbColor {
         let g = (g_hi << 4) + g_lo;
         let b = (b_hi << 4) + b_lo;
 
-        Ok(RgbColor::new(r, g, b))
+        Ok(RgbColor { r, g, b })
     }
 
     fn parse_hex_digit(digit: u8) -> Result<u8, ParseError> {
@@ -122,22 +123,13 @@ impl RgbColor {
     }
 }
 
-impl RgbColor {
-    /// If possible, use [HslColor::new()](crate::HslColor::new()) instead,
-    /// because RGB colors can be ambigous 
-    /// (e.g. Hue value for black is n.a.)
-    pub fn new(r: u8, g: u8, b: u8) -> Self {                
-        Self { r, g, b }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn rgb_hex_long_unprefixed() {
-        let rgb_result = RgbColor::try_from("1af9cC");
+        let rgb_result = RgbColor::from_str("1af9cC");
         assert!(matches!(rgb_result, Ok(_)));
         let rgb = rgb_result.unwrap();
         assert_eq!(rgb.r, 0x1A);
@@ -147,7 +139,7 @@ mod tests {
 
     #[test]
     fn rgb_hex_long_prefixed() {
-        let rgb_result = RgbColor::try_from("#d498ea");
+        let rgb_result = RgbColor::from_str("#d498ea");
         assert!(matches!(rgb_result, Ok(_)));
         let rgb = rgb_result.unwrap();
         assert_eq!(rgb.r, 0xD4);
@@ -157,7 +149,7 @@ mod tests {
 
     #[test]
     fn rgb_hex_short() {
-        let rgb_result = RgbColor::try_from("#C34");
+        let rgb_result = RgbColor::from_str("#C34");
         assert!(matches!(rgb_result, Ok(_)));
         let rgb = rgb_result.unwrap();
         assert_eq!(rgb.r, 0xCC);
@@ -167,19 +159,19 @@ mod tests {
 
     #[test]
     fn rgb_hex_invalid_length() {
-        let rgb_result = RgbColor::try_from("#21");
+        let rgb_result = RgbColor::from_str("#21");
         assert!(matches!(rgb_result, Err(ParseError::InvalidLength(2))));
     }
 
     #[test]
     fn rgb_hex_invalid_digit() {
-        let rgb_result = RgbColor::try_from("12345G");
+        let rgb_result = RgbColor::from_str("12345G");
         assert!(matches!(rgb_result, Err(ParseError::InvalidDigit(b'G'))));
     }
 
     #[test]
     fn rgb_hex_invalid_empty() {
-        let rgb_result = RgbColor::try_from("");
+        let rgb_result = RgbColor::from_str("");
         assert!(matches!(rgb_result, Err(ParseError::InvalidLength(0))));
     }
 }

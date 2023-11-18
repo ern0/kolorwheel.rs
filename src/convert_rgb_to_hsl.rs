@@ -42,7 +42,7 @@ mod tests {
 
     #[test]
     fn rgb_to_hsl_white() {
-        let rgb = RgbColor::new(255, 255, 255);
+        let rgb = RgbColor { r: 255, g: 255, b: 255 };
         let hsl = HslColor::from(rgb);
         assert_f32_near!(hsl.s, 0.0);
         assert_f32_near!(hsl.l, 100.0);
@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn rgb_to_hsl_gray_127() {
-        let rgb = RgbColor::new(127, 127, 127);
+        let rgb = RgbColor { r: 127, g: 127, b: 127 };
         let hsl = HslColor::from(rgb);
         assert_f32_near!(hsl.s, 0.0);
         assert_f32_near!(hsl.l, 50.0, 99999);
@@ -59,7 +59,7 @@ mod tests {
 
     #[test]
     fn rgb_to_hsl_gray_128() {
-        let rgb = RgbColor::new(128, 128, 128);
+        let rgb = RgbColor { r: 128, g: 128, b: 128 };
         let hsl = HslColor::from(rgb);
         assert_f32_near!(hsl.s, 0.0);
         assert_f32_near!(hsl.l, 50.0, 99999);
@@ -67,7 +67,7 @@ mod tests {
 
     #[test]
     fn rgb_to_hsl_light_red() {
-        let rgb = RgbColor::new(255, 127, 127);
+        let rgb = RgbColor { r: 255, g: 127, b: 127 };
         let hsl = HslColor::from(rgb);
         assert_f32_near!(hsl.h, 0.0, 99999);
         assert_f32_near!(hsl.s, 100.0, 99999);
@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn rgb_to_hsl_deep_purple() {
-        let rgb = RgbColor::new(80, 0, 120);
+        let rgb = RgbColor { r: 80, g: 0, b: 120 };
         let hsl = HslColor::from(rgb);
         assert_f32_near!(hsl.h, 280.0, 99999);
         assert_f32_near!(hsl.s, 100.0, 99999);
@@ -85,7 +85,7 @@ mod tests {
 
     #[test]
     fn rgb_to_hsl_deep_blue() {
-        let rgb = RgbColor::new(0, 0, 31);
+        let rgb = RgbColor { r: 0, g: 0, b: 31 };
         let hsl = HslColor::from(rgb);
         assert_f32_near!(hsl.h, 240.0, 99999);
         assert_f32_near!(hsl.s, 100.0, 99999);

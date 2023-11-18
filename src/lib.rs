@@ -16,6 +16,9 @@ in the given *spin mode* and steps.
 *Full documentation is available at the project's GitHub page:
 [KolorWheel.rs](https://github.com/ern0/kolorwheel.rs/)*
 
+*Thanks to [H2CO3](https://h2co3.github.io/) 
+for review and support!*
+
 */
 #![deny(rustdoc::broken_intra_doc_links)]
 
@@ -49,7 +52,7 @@ pub enum SpinMode<'m> {
     Still,
     /// Set absolute goal value
     Absolute(i32),
-    /// Set relative goal value, the last step of the actual round
+    /// Set relative goal value, the last step of the current round
     RelativeIncl(i32),
     /// Set relative goal value, the first step of the next round
     RelativeExcl(i32),
@@ -80,8 +83,6 @@ for hsl_color in kw {
   (...)
 }
 ``` 
-Result can also get via [callback](KolorWheel::spin) 
-or as [vector](KolorWheel::spin_vec).
 */
 
 impl Iterator for KolorWheel {
@@ -113,25 +114,25 @@ impl KolorWheel {
         }
     }
 
-    fn actual_spinner(&mut self) -> &mut Spinner {
+    fn current_spinner(&mut self) -> &mut Spinner {
         &mut self.spinner_vec[self.index]
     }
 
     /// Set spin mode for Hue channel
     pub fn with_hue(&mut self, spin_mode: SpinMode) -> &mut Self {
-        self.actual_spinner().with_hue(spin_mode);
+        self.current_spinner().with_hue(spin_mode);
         self
     }
 
     /// Set spin mode for Saturarion channel
     pub fn with_saturation(&mut self, spin_mode: SpinMode) -> &mut Self {
-        self.actual_spinner().with_saturation(spin_mode);
+        self.current_spinner().with_saturation(spin_mode);
         self
     }
 
     /// Set spin mode for Lightness channel
     pub fn with_lightness(&mut self, spin_mode: SpinMode) -> &mut Self {
-        self.actual_spinner().with_lightness(spin_mode);
+        self.current_spinner().with_lightness(spin_mode);
         self
     }
 
@@ -162,9 +163,9 @@ impl KolorWheel {
     }    
 
     /**
-    Fork the actual state of KolorWheel,
+    Fork the  state of KolorWheel,
     produce a separate series of colors
-    using actual item as base color,
+    using current item as base color,
     the size of sub-series should be specified:
     ```
     let mut kw = KolorWheel::new( ... );
@@ -175,7 +176,7 @@ impl KolorWheel {
     */
     pub fn fork(&mut self, count: usize) -> &mut Self {
 
-        let color = self.actual_spinner().color();
+        let color = self.current_spinner().color();
 
         let spinner = Spinner::new(color, count);
         self.spinner_vec.push(spinner);
@@ -210,44 +211,6 @@ impl KolorWheel {
             child.rewind().with_color(color);            
 
         }
-
-    }
-
-    /**
-    Call the callback (practically: lambda)
-    with each result value:
-    ```
-    KolorWheel::new( ... )
-        (...)
-        .spin(&mut|hsl_color: HslColor| { 
-            (...)
-        })
-    ;
-    ```
-    */
-    pub fn spin<T: From<HslColor>>(&mut self, callback: &mut dyn FnMut(T)) {
-        for color in self { 
-            callback(color.into()); 
-        }
-    }
-
-    /**
-    Provide the results in a `vec`.
-    ```
-    let result = KolorWheel::new( ... )
-        ...
-        .spin_vec::<HslColor>()
-    ;
-    */
-    pub fn spin_vec<T: From<HslColor>>(&mut self) -> Vec<T> 
-    where T: Into<HslColor> {
-
-        let mut result = Vec::<T>::new();
-        for color in self {
-            result.push(color.into());
-        }
-
-        result
     }
         
 }
@@ -262,7 +225,7 @@ mod tests {
         let mut count = 0;
         KolorWheel::new(HslColor::new(0, 0, 0), 4)
             .fork(3)
-            .spin(&mut|_color: HslColor| { count += 1 })
+            .for_each(&mut|_color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 12);
     }
@@ -272,7 +235,7 @@ mod tests {
         let mut count = 0;
         KolorWheel::new(HslColor::new(0, 0, 0), 1)
             .fork(5)
-            .spin(&mut|_color: HslColor| { count += 1 })
+            .for_each(&mut|_color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 5);
     }
@@ -282,7 +245,7 @@ mod tests {
         let mut count = 0;
         KolorWheel::new(HslColor::new(0, 0, 0), 6)
             .fork(1)
-            .spin(&mut|_color: HslColor| { count += 1 })
+            .for_each(&mut|_color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 6);
     }
@@ -292,7 +255,7 @@ mod tests {
         let mut count = 0;
         KolorWheel::new(HslColor::new(0, 0, 0), 1)
             .fork(1)
-            .spin(&mut|_color: HslColor| { count += 1 })
+            .for_each(&mut|_color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 1);
     }
@@ -304,7 +267,7 @@ mod tests {
             .fork(3)
             .fork(4)
             .fork(5)
-            .spin(&mut|_color: HslColor| { count += 1 })
+            .for_each(&mut|_color: HslColor| { count += 1 })
         ;
         assert_eq!(count, 120);
     }
@@ -315,7 +278,7 @@ mod tests {
         let base = HslColor::new(0, 100, 50);
         KolorWheel::new(base, 3)
             .with_hue(SpinMode::Absolute(10))
-            .spin(&mut|color: HslColor| { 
+            .for_each(&mut|color: HslColor| { 
                 result.push(color); 
             })
         ;
@@ -327,9 +290,9 @@ mod tests {
     #[test]
     fn spin_vec_hue_abs_negative() {
         let base = HslColor::new(120, 100, 50);
-        let result = KolorWheel::new(base, 3)
+        let result: Vec<HslColor> = KolorWheel::new(base, 3)
             .with_hue(SpinMode::Absolute(100))
-            .spin_vec::<HslColor>()
+            .collect()
         ;
         assert_f32_near!(result[0].h, 120.0, 99999);
         assert_f32_near!(result[1].h, 110.0, 99999);
@@ -339,9 +302,9 @@ mod tests {
     #[test]
     fn spin_vec_fade_to_black() {
         let base = HslColor::new(180, 100, 50);
-        let result = KolorWheel::new(base, 5)
+        let result: Vec<HslColor> = KolorWheel::new(base, 5)
             .with_macro(SpinMacro::FadeToBlack)
-            .spin_vec::<HslColor>()
+            .collect()
         ;
         assert!(result[3].s > 5.0);
         assert!(result[3].l > 2.5);
@@ -352,9 +315,9 @@ mod tests {
     #[test]
     fn spin_vec_fade_to_white() {
         let base = HslColor::new(90, 80, 10);
-        let result = KolorWheel::new(base, 5)
+        let result: Vec<HslColor> = KolorWheel::new(base, 5)
             .with_macro(SpinMacro::FadeToWhite)
-            .spin_vec::<HslColor>()
+            .collect()
         ;
         assert!(result[3].s > 5.0);
         assert!(result[3].l < 98.3);

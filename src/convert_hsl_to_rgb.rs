@@ -18,7 +18,7 @@ impl HslColor {
 
         if s < 0.001 {
             let gray = (l * 255.0) as u8;
-            return RgbColor::new(gray, gray, gray);
+            return RgbColor { r: gray, g: gray, b: gray };
         }
 
         let q = if l < 0.5 { 
@@ -40,7 +40,7 @@ impl HslColor {
         let g = (g * 255.0) as u8;
         let b = (b * 255.0) as u8;
         
-        RgbColor::new(r, g, b)
+        RgbColor { r, g, b }
     } 
 
     fn hue_to_rgb_component(p: f32, q: f32, mut t: f32) -> f32 {
@@ -73,14 +73,14 @@ mod tests {
     fn hsl_to_rgb_black() {
         let hsl = HslColor::new(0, 0, 0);
         let rgb: RgbColor = hsl.into();
-        assert_eq!(rgb, RgbColor::new(0, 0, 0));
+        assert_eq!(rgb, RgbColor { r: 0, g: 0, b: 0 });
     }
 
     #[test]
     fn hsl_to_rgb_white() {
         let hsl = HslColor::new(0, 100, 100);
         let rgb: RgbColor = hsl.into();
-        assert_eq!(rgb, RgbColor::new(255, 255, 255));
+        assert_eq!(rgb, RgbColor { r: 255, g: 255, b: 255 });
     }
 
     #[test]
@@ -96,35 +96,35 @@ mod tests {
     fn hsl_to_rgb_red() {
         let hsl = HslColor::new(0, 100, 50);
         let rgb: RgbColor = hsl.into();
-        assert_eq!(rgb, RgbColor::new(255, 0, 0));
+        assert_eq!(rgb, RgbColor { r: 255, g: 0, b: 0 });
     }
 
     #[test]
     fn hsl_to_rgb_green() {
         let hsl = HslColor::new(120, 100, 50);
         let rgb: RgbColor = hsl.into();
-        assert_eq!(rgb, RgbColor::new(0, 255, 0));
+        assert_eq!(rgb, RgbColor { r: 0, g: 255, b: 0});
     }
 
     #[test]
     fn hsl_to_rgb_cyan() {
         let hsl = HslColor::new(180, 100, 50);
         let rgb: RgbColor = hsl.into();
-        assert_eq!(rgb, RgbColor::new(0, 255, 255));
+        assert_eq!(rgb, RgbColor { r: 0, g: 255, b: 255});
     }
 
     #[test]
     fn hsl_to_rgb_overflow_cyan() {
         let hsl = HslColor::new(360 + 180, 100, 50);
         let rgb: RgbColor = hsl.into();
-        assert_eq!(rgb, RgbColor::new(0, 255, 255));
+        assert_eq!(rgb, RgbColor { r: 0, g: 255, b: 255});
     }
 
     #[test]
     fn hsl_to_rgb_blue() {
         let hsl = HslColor::new(240, 100, 50);
         let rgb: RgbColor = hsl.into();
-        assert_eq!(rgb, RgbColor::new(0, 0, 255));
+        assert_eq!(rgb, RgbColor { r: 0, g: 0, b: 255});
     }
 
     #[test]
