@@ -1,7 +1,7 @@
 FROM ubuntu
 
 RUN apt update -y
-RUN apt install -y wget vim
+RUN apt install -y wget vim gcc
 
 # Rest of file is from:
 #   https://github.com/rust-lang/docker-rust/blob/master/1.75.0/bookworm/Dockerfile

@@ -1,5 +1,4 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![windows_subsystem = "windows"]
 
 extern crate kolorwheel;
 use kolorwheel::{ KolorWheel, HslColor, RgbColor };
@@ -45,7 +44,7 @@ trait Panel {
 
 #[derive(Copy, Clone, PartialEq)]
 enum PanelSelector {
-    Gradient, 
+    Gradient,
     LitAbs,
     HueReli, HueRelx,
     SatLitRel, HueOffsets,
@@ -54,7 +53,7 @@ enum PanelSelector {
 
 struct App {
     window: Window,
-    active_panel: PanelSelector,   
+    active_panel: PanelSelector,
     p1: panel1_gradient::Gradient,
     p2: panel2_lit_abs::LitAbs,
     p3: panel3_p4_hue_rel_univ::HueRelUniv,
@@ -70,16 +69,16 @@ impl App {
     pub fn new(window_width: f32, window_height: f32, cell_padding: u32) -> Self {
 
         let window = Window::new(
-            window_width, 
-            window_height, 
-            cell_padding, 
+            window_width,
+            window_height,
+            cell_padding,
             window_width / 100.0
         );
 
-        Self { 
+        Self {
             window,
             active_panel: PanelSelector::Gradient,
-            p1: panel1_gradient::Gradient::new(), 
+            p1: panel1_gradient::Gradient::new(),
             p2: panel2_lit_abs::LitAbs::new(),
             p3: panel3_p4_hue_rel_univ::HueRelUniv::new(true),
             p4: panel3_p4_hue_rel_univ::HueRelUniv::new(false),
@@ -140,7 +139,7 @@ impl App {
 
         let (_, painter) = ui.allocate_painter(
             egui::Vec2::new(
-                self.window.current_width as f32, 
+                self.window.current_width as f32,
                 self.window.current_height as f32,
             ),
             egui::Sense::hover(),
@@ -160,7 +159,7 @@ impl App {
                     x: (x + cell.cell_padding) as f32,
                     y: (y + cell.cell_padding) as f32,
                 },
-                max: egui::Pos2 { 
+                max: egui::Pos2 {
                     x: (x + cell.cell_padding + cell.cell_padded_width) as f32,
                     y: (y + cell.cell_padding + cell.cell_padded_height) as f32,
                 },
@@ -175,7 +174,7 @@ impl App {
                 y += cell.cell_height;
                 x = self.window.left + cell.window_centering_horizontal;
             }
-        }  
+        }
 
     }
 
@@ -216,7 +215,7 @@ impl App {
     }
 
     fn paint_box(painter: &egui::Painter, rect: egui::Rect, hsl_color: HslColor, rounding: egui::Rounding) {
-        
+
         let rgb_color: RgbColor = hsl_color.into();
         let fill = egui::Color32::from_rgb(rgb_color.r, rgb_color.g, rgb_color.b);
 
@@ -233,9 +232,9 @@ impl App {
         };
 
         let rect_shape = egui::epaint::RectShape {
-            rect, 
-            rounding, 
-            fill, 
+            rect,
+            rounding,
+            fill,
             stroke,
             fill_texture_id,
             uv
@@ -262,22 +261,22 @@ impl Window {
     pub fn new(width: f32, height: f32, cell_padding_percent: u32, rounding: f32) -> Window {
 
         let egui_rounding = egui::Rounding {
-            nw: rounding, 
+            nw: rounding,
             ne: rounding,
-            sw: rounding, 
+            sw: rounding,
             se: rounding,
         };
 
-        Window { 
-            original_height: height as u32, 
-            current_width: width as u32, 
-            current_height: height as u32, 
-            cell_padding_percent, 
+        Window {
+            original_height: height as u32,
+            current_width: width as u32,
+            current_height: height as u32,
+            cell_padding_percent,
             rounding: egui_rounding,
             left: 6,  // magic value
             top: 9,   // magic value
         }
-    }  
+    }
 
 }
 
@@ -302,7 +301,7 @@ impl Cell {
         let window_corrected_width = cell_width * columns;
         let window_padding_horizontal = (window.current_width - window_corrected_width) / 2;
         let mut padding_horizontal = (cell_width * window.cell_padding_percent) / 200;
-        if padding_horizontal < 2 { 
+        if padding_horizontal < 2 {
             padding_horizontal = 2;
         }
 
@@ -326,7 +325,7 @@ impl Cell {
         Cell {
             columns,
             _rows: rows,
-            _window_corrected_width: window_corrected_width, 
+            _window_corrected_width: window_corrected_width,
             window_centering_horizontal: window_padding_horizontal,
             _window_corrected_height: window_corrected_height,
             cell_width,
@@ -342,7 +341,7 @@ impl Cell {
 mod tests {
     use super::*;
 
-    #[test]    
+    #[test]
     fn test_window_corrected_width_exact() {
 
         let window = Window::new(320.0, 200.0, 0, 0.0);
@@ -374,7 +373,7 @@ mod tests {
         assert_eq!(cell.cell_width, sum);
     }
 
-    #[test]    
+    #[test]
     fn test_window_corrected_height_exact() {
 
         let window = Window::new(320.0, 200.0, 0, 0.0);
