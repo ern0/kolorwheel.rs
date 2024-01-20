@@ -124,7 +124,6 @@ for hsl_color in kw {
 
 ## API details
 
-
 ### Create `KolorWheel` object
 
 #### `KolorWheel::new<T>(color: T, count: usize) -> Self`
@@ -322,7 +321,6 @@ kw.with_macro(SpinMacro::GradientColor(self.color2));
 ```
 
 *See [full example](https://github.com/ern0/kolorwheel.rs/blob/master/examples/panel1_gradient.rs) for details.*
-
 
 ### 2: Lit/abs
 
