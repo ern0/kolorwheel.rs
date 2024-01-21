@@ -1,10 +1,12 @@
 #!/bin/bash
 
-TMP=/tmp/build-tmp
-mkdir -p $TMP
+# create a Docker volume (faster than bind volume):
+#   $ docker volume create cargo-home
+# create image:
+#   $ docker build -f Dockerfile -t rustdev .
 
 docker run --init -it \
 	-v `pwd`:/prj \
-	-v $TMP:/cargo-home \
+	--mount source=cargo-home,target=/cargo-home \
 	--rm rustdev \
 	bash -c "cd /prj ; CARGO_HOME=/cargo-home cargo build --release --example main"
